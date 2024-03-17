@@ -1,0 +1,42 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools", "setuptools-scm"]
+
+[project]
+name = "ingredient_slicer"
+authors = [
+  {name = "Angus Watters", email = "anguswatters@gmail.com"},
+]
+version = "0.0.1"
+description = "Parse quantities, units, and (sometimes) foods from recipe ingredients into structured data"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: Unix",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Utilities",
+]
+keywords = ["ingredient", "parser", "recipe", "text processing", "food", "cooking", "grocery", "shopping"]
+license = {text = "MIT License"}
+dependencies = []
+requires-python = ">=3.7"
+readme = "README.md"
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "pip-tools"
+]
+dev = ["black"]
+
+[tool.setuptools]
+packages = ["ingredient_slicer"]
+
+[tool.setuptools.dynamic]
+version = {attr = "ingredient_slicer.__version__"}
