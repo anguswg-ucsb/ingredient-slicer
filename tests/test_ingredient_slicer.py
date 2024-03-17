@@ -33,12 +33,23 @@ def test_standard_formatted_ingredients():
     assert parsed_ingredient['unit'] == 'cups'
     assert parsed_ingredient['is_required'] == True
 
-def test_quantity_and_unit():
+def test_quantity_and_unit_1():
     parse = IngredientSlicer("3 pounds of beef")
     parse.parse()
     parsed_ingredient = parse.to_json()
     assert parsed_ingredient['quantity'] == "3"
     assert parsed_ingredient['unit'] == 'pounds'
+    assert parsed_ingredient['is_required'] == True
+
+def test_quantity_and_unit_2():
+    parse = IngredientSlicer("14 lbs of lettuce")
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    assert parsed_ingredient['quantity'] == "14"
+    assert parsed_ingredient['unit'] == 'lbs'
+    assert parsed_ingredient['standardized_unit'] == 'pound'
+    assert parsed_ingredient['is_required'] == True
+
     assert parsed_ingredient['is_required'] == True
 
 # -------------------------------------------------------------------------------
@@ -136,7 +147,7 @@ def test_multiple_multinumber_ranges_3():
     assert parsed_ingredient["standardized_ingredient"] == '3.25  cups of sugar (optional)'
     assert parsed_ingredient['quantity'] == "3.25"
     assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['standard_unit'] == 'cup'
+    assert parsed_ingredient['standardized_unit'] == 'cup'
     assert parsed_ingredient['is_required'] == False
 
 # parse = IngredientSlicer('1.5 0.25 cups of sugar')
@@ -321,7 +332,7 @@ def test_unicode_fraction_range_2():
     assert parsed_ingredient['is_required'] == True
 
 def test_unicode_fraction_range_3():
-    parse = IngredientSlicer("1½-2½cup of sugar", debug=True)
+    parse = IngredientSlicer("1½-2½cup of sugar", debug=False)
     parse.parse()
     parsed_ingredient = parse.to_json()
 
@@ -379,7 +390,7 @@ def test_optional_ingredient_1():
     assert parsed_ingredient['is_required'] == False
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert len(parsed_ingredient["parenthesis_notes"]) == 0
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
 
 def test_optional_ingredient_2():
     parse = IngredientSlicer("1/3 cup sugar, opt")
@@ -391,7 +402,7 @@ def test_optional_ingredient_2():
     assert parsed_ingredient['is_required'] == False
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert len(parsed_ingredient["parenthesis_notes"]) == 0
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
 
 # -------------------------------------------------------------------------------
 # ---- Optional ingredient (with parenthesis) tests ----
@@ -406,7 +417,7 @@ def test_optional_parenthesis_1():
     assert parsed_ingredient['is_required'] == False
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 def test_optional_parenthesis_2():
     parse = IngredientSlicer("1/3 cup sugar (opt)")
@@ -418,7 +429,7 @@ def test_optional_parenthesis_2():
     assert parsed_ingredient['is_required'] == False
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 # -------------------------------------------------------------------------------
 # ---- Parenthesis (quantity only) tests ----
@@ -433,7 +444,7 @@ def test_quantity_only_parenthesis_1():
     assert parsed_ingredient['is_required'] == True
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 def test_quantity_only_parenthesis_2():
     parse = IngredientSlicer("salmon steaks (2) (optional)")
@@ -445,7 +456,7 @@ def test_quantity_only_parenthesis_2():
     assert parsed_ingredient['is_required'] == False
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert len(parsed_ingredient["parenthesis_notes"]) == 6
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 6
 
 def test_quantity_only_parenthesis_3():
     parse = IngredientSlicer("chicken breasts (4)")
@@ -454,14 +465,14 @@ def test_quantity_only_parenthesis_3():
 
     assert parsed_ingredient['quantity'] == "4"
     assert parsed_ingredient['unit'] == "breasts"
-    assert parsed_ingredient["standard_unit"] == "breast"
+    assert parsed_ingredient["standardized_unit"] == "breast"
     
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient['standard_secondary_unit'] == None
+    assert parsed_ingredient['standardized_secondary_unit'] == None
 
     assert parsed_ingredient['is_required'] == True
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 def test_quantity_only_parenthesis_4():
     parse = IngredientSlicer("3 chicken breasts (4) (optional)")
@@ -470,14 +481,14 @@ def test_quantity_only_parenthesis_4():
 
     assert parsed_ingredient['quantity'] == "12.0"
     assert parsed_ingredient['unit'] == "breasts"
-    assert parsed_ingredient["standard_unit"] == "breast"
+    assert parsed_ingredient["standardized_unit"] == "breast"
     
     assert parsed_ingredient['secondary_quantity'] == '3'
     assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient['standard_secondary_unit'] == None
+    assert parsed_ingredient['standardized_secondary_unit'] == None
 
     assert parsed_ingredient['is_required'] == False
-    assert len(parsed_ingredient["parenthesis_notes"]) == 6
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 6
 
 def test_quantity_only_parenthesis_5():
     parse = IngredientSlicer("3 1/2 chicken breasts (4)")
@@ -486,14 +497,14 @@ def test_quantity_only_parenthesis_5():
 
     assert parsed_ingredient['quantity'] == "14.0"
     assert parsed_ingredient['unit'] == "breasts"
-    assert parsed_ingredient["standard_unit"] == "breast"
+    assert parsed_ingredient["standardized_unit"] == "breast"
     
     assert parsed_ingredient['secondary_quantity'] == "3.5"
     assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient['standard_secondary_unit'] == None
+    assert parsed_ingredient['standardized_secondary_unit'] == None
 
     assert parsed_ingredient['is_required'] == True
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 # -------------------------------------------------------------------------------
 # ---- Parenthesis (quantity unit only) tests ----
@@ -506,14 +517,14 @@ def test_quantity_and_unit_parenthesis_1():
 
     assert parsed_ingredient['quantity'] == "32.0"
     assert parsed_ingredient['unit'] == "oz"
-    assert parsed_ingredient["standard_unit"] == "ounce"
+    assert parsed_ingredient["standardized_unit"] == "ounce"
     
     assert parsed_ingredient['secondary_quantity'] == "4"
     assert parsed_ingredient['secondary_unit'] == "wings"
-    assert parsed_ingredient['standard_secondary_unit'] == "wing"
+    assert parsed_ingredient['standardized_secondary_unit'] == "wing"
 
     assert parsed_ingredient['is_required'] == True
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 def test_quantity_and_unit_parenthesis_2():
     parse = IngredientSlicer(" chicken breast (12 ounces)")
@@ -522,14 +533,14 @@ def test_quantity_and_unit_parenthesis_2():
 
     assert parsed_ingredient['quantity'] == "12"
     assert parsed_ingredient['unit'] == "ounces"
-    assert parsed_ingredient["standard_unit"] == "ounce"
+    assert parsed_ingredient["standardized_unit"] == "ounce"
 
     assert parsed_ingredient['secondary_quantity'] == None  # TODO: maybe this case should get a quantity of 1, but for now it's None
     assert parsed_ingredient['secondary_unit'] == "breast"
-    assert parsed_ingredient['standard_secondary_unit'] == "breast"
+    assert parsed_ingredient['standardized_secondary_unit'] == "breast"
 
     assert parsed_ingredient['is_required'] == True
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 
 def test_quantity_and_unit_parenthesis_3():
@@ -539,15 +550,15 @@ def test_quantity_and_unit_parenthesis_3():
 
     assert parsed_ingredient['quantity'] == "8"
     assert parsed_ingredient['unit'] == "ounces"
-    assert parsed_ingredient["standard_unit"] == "ounce"
+    assert parsed_ingredient["standardized_unit"] == "ounce"
     
     assert parsed_ingredient['secondary_quantity'] == "0.5"
     assert parsed_ingredient['secondary_unit'] == "cup"
-    assert parsed_ingredient['standard_secondary_unit'] == "cup"
+    assert parsed_ingredient['standardized_secondary_unit'] == "cup"
 
     assert parsed_ingredient['is_required'] == True
     
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
 
 
@@ -575,7 +586,7 @@ def test_wild_ingredients():
     assert parsed_ingredient['is_required'] == True
     assert parsed_ingredient['secondary_quantity'] == "1"
     assert parsed_ingredient['secondary_unit'] == "container"
-    assert len(parsed_ingredient["parenthesis_notes"]) == 3
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
 
     parse = IngredientSlicer("salt to taste", debug= True)
     parse.parse()
@@ -585,7 +596,7 @@ def test_wild_ingredients():
     assert parsed_ingredient['is_required'] == True
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient["parenthesis_notes"] == []
+    # assert parsed_ingredient["parenthesis_notes"] == []
 
     parse = IngredientSlicer("1/2 cup freshly grated Parmesan cheese, plus more for serving")
     parse.parse()
@@ -596,7 +607,7 @@ def test_wild_ingredients():
     assert parsed_ingredient['is_required'] == True
     assert parsed_ingredient['secondary_quantity'] == None
     assert parsed_ingredient['secondary_unit'] == None
-    assert len(parsed_ingredient["parenthesis_notes"]) == 0
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
 
 ################################################################################################
 ### Old code for manual testing

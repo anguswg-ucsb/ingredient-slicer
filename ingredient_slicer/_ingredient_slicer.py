@@ -37,8 +37,8 @@ class IngredientSlicer:
         self.secondary_unit     = None
 
         # "standard units" are the commonplace names for the found units (i.e. the standard unit of "oz" is "ounce")
-        self.standard_unit           = None 
-        self.standard_secondary_unit = None
+        self.standardized_unit           = None 
+        self.standardized_secondary_unit = None
 
         # stash the best quantity and unit for testing/debugging
         self.stashed_quantity    = None 
@@ -1367,14 +1367,14 @@ class IngredientSlicer:
         Add standard units to the parsed ingredient if they are present in the
         constants units to standard units map.
         If the "unit"/"secondary_unit" exists and it is present in the unit to standard unit map, 
-        then get the standard unit name for the unit and set the "standard_unit" and "standard_secondary_unit" member variables.
+        then get the standard unit name for the unit and set the "standardized_unit" and "standardized_secondary_unit" member variables.
         """
 
         if self.unit and self.unit in IngredientSlicer.regex.constants["UNIT_TO_STANDARD_UNIT"]:
-            self.standard_unit = IngredientSlicer.regex.constants["UNIT_TO_STANDARD_UNIT"][self.unit]
+            self.standardized_unit = IngredientSlicer.regex.constants["UNIT_TO_STANDARD_UNIT"][self.unit]
         
         if self.secondary_unit and self.secondary_unit in IngredientSlicer.regex.constants["UNIT_TO_STANDARD_UNIT"]:
-            self.standard_secondary_unit = IngredientSlicer.regex.constants["UNIT_TO_STANDARD_UNIT"][self.secondary_unit]
+            self.standardized_secondary_unit = IngredientSlicer.regex.constants["UNIT_TO_STANDARD_UNIT"][self.secondary_unit]
 
         return 
     
@@ -1400,7 +1400,7 @@ class IngredientSlicer:
             # switch the units and quantities with the secondary units and quantities
             self.quantity, self.secondary_quantity = self.secondary_quantity, self.quantity
             self.unit, self.secondary_unit = self.secondary_unit,  self.unit
-            self.standard_unit, self.standard_secondary_unit = self.standard_secondary_unit, self.standard_unit
+            self.standardized_unit, self.standardized_secondary_unit = self.standardized_secondary_unit, self.standardized_unit
 
         return 
     
@@ -1551,26 +1551,27 @@ class IngredientSlicer:
             dict: A dictionary containing the IngredientSlicer object's member variables.
         """
         return {
-            "ingredient": self.ingredient,
-            "standardized_ingredient": self.standard_ingredient,
-            # "reduced_ingredient": self.reduced_ingredient,
+            "ingredient": self.ingredient,                                # "2 1/2 cups of sugar (about 40 tbsp of sugar)"
+            "standardized_ingredient": self.standard_ingredient,          # "2.5 cups of sugar"
+        
+            "food" : self.food,                                           # "sugar"
 
-            "food" : self.food,
-            "quantity": self.quantity,
-            "unit": self.unit,
-            "standard_unit": self.standard_unit,
+            "quantity": self.quantity,                                    # "2.5"
+            "unit": self.unit,                                            # "cups"
+            "standardized_unit": self.standardized_unit,                      # "cup"
 
-            "secondary_quantity": self.secondary_quantity,
-            "secondary_unit": self.secondary_unit,
-            "standard_secondary_unit": self.standard_secondary_unit,
+            "secondary_quantity": self.secondary_quantity,                # "40"
+            "secondary_unit": self.secondary_unit,                        # "tbsp"
+            "standardized_secondary_unit": self.standardized_secondary_unit,  # "tablespoon"
 
-            "is_required": self.is_required,
+            "is_required": self.is_required,                              # True
 
             # NOTE: drop these at some point
-            "parenthesis_content": self.parenthesis_content,
-            "parenthesis_notes": self.parenthesis_notes,
-            "stashed_quantity" : self.stashed_quantity,
-            "stashed_unit" : self.stashed_unit
+            "parenthesis_content": self.parenthesis_content               # ["(about 40 tbsp of sugar)"]
+            # "parenthesis_notes": self.parenthesis_notes,
+            # "stashed_quantity" : self.stashed_quantity,
+            # "stashed_unit" : self.stashed_unit
+            # "reduced_ingredient": self.reduced_ingredient, 
         }
 
 
