@@ -30,8 +30,162 @@ NUMBER_WORDS = {
     'hundred': 100
 }
 
-# Fractions represented as words
+NUMBER_PREFIX_WORDS = {
+    'twenty': 20,
+    'thirty': 30,
+    'forty': 40,
+    'fifty': 50,
+    'sixty': 60,
+    'seventy': 70,
+    'eighty': 80,
+    'ninety': 90,
+    'hundred': 100,
+    'thousand': 1000,
+}
+
+# Fractions represented as multiple words (or numbers) and words
 FRACTION_WORDS = {
+    # amount with fraction words
+    "one half": "1/2",
+    "1 half": "1/2",
+    "two halves": "1",
+
+    "one quarter": "1/4",
+    "1 quarter": "1/4",
+    "two quarters": "1/2",
+    "three quarters": "3/4",
+    "3 quarters": "3/4",
+    "three quarter": "3/4",
+    "3 quarter": "3/4",
+
+    "one fourth": "1/4",
+    "1 fourth": "1/4",
+    "two fourths": "1/2",
+    "three fourths": "3/4",
+    "3 fourths": "3/4",
+
+    "one third": "1/3",
+    "1 third": "1/3",
+    "two thirds": "2/3",
+    "two thirds": "2/3",
+    "2 thirds": "2/3",
+    "2 third": "2/3",
+
+    "one fifth": "1/5",
+    "1 fifth": "1/5",
+    "two fifths": "2/5",
+    "2 fifths": "2/5",
+    "three fifths": "3/5",
+    "3 fifths": "3/5",
+    "four fifths": "4/5",
+    "4 fifths": "4/5",
+
+    "one sixth": "1/6",
+    "1 sixth": "1/6",
+    "two sixths": "1/3",
+    "three sixths": "1/2",
+    "4 sixths": "2/3",
+    "four sixths": "2/3",
+    "five sixths": "5/6",
+    "5 sixths": "5/6",
+
+    "one seventh": "1/7",
+    "1 seventh": "1/7",
+    "two sevenths": "2/7",
+    "2 sevenths": "2/7",
+    "three sevenths": "3/7",
+    "3 sevenths": "3/7",
+    "four sevenths": "4/7",
+    "4 sevenths": "4/7",
+    "five sevenths": "5/7",
+    "5 sevenths": "5/7",
+    "six sevenths": "6/7",
+    "6 sevenths": "6/7",
+
+    "one eighth": "1/8",
+    "1 eighth": "1/8",
+    "two eighths": "1/4",
+    "2 eighths": "1/4",
+    "three eighths": "3/8",
+    "3 eighths": "3/8",
+    "four eighths": "1/2",
+    "five eighths": "5/8",
+    "six eighths": "3/4",
+    "seven eighths": "7/8",
+
+    "one ninth": "1/9",
+    "two ninths": "2/9",
+    "one tenth": "1/10",
+    "two tenths": "1/5",
+
+    "one eleventh": "1/11",
+    "two elevenths": "2/11",
+
+    "one twelfth": "1/12",
+    "two twelfths": "1/6",
+    "eleven twelfths": "11/12",
+
+
+    "two thirds": "2/3",
+    "two fourths": "1/2",
+    "two fifths": "2/5",
+    "two sixths": "1/3",
+    "two sevenths": "2/7",
+    "two eighths": "1/4",
+    "two ninths": "2/9",
+    "two tenths": "1/5",
+    "two elevenths": "2/11",
+    "two twelfths": "1/6",
+
+    "three fourths": "3/4",
+    "three fifths": "3/5",
+    "three sixths": "1/2",
+    "three sevenths": "3/7",
+    "three eighths": "3/8",
+    "three ninths": "1/3",
+    "three tenths": "3/10",
+    "three elevenths": "3/11",
+    "three twelfths": "1/4",
+    "four fifths": "4/5",
+    "four sixths": "2/3",
+    "four sevenths": "4/7",
+    "four eighths": "1/2",
+    "four ninths": "4/9",
+    "four tenths": "2/5",
+    "four elevenths": "4/11",
+    "four twelfths": "1/3",
+    "five sixths": "5/6",
+    "five sevenths": "5/7",
+    "five eighths": "5/8",
+    "five ninths": "5/9",
+    "five tenths": "1/2",
+    "five elevenths": "5/11",
+    "five twelfths": "5/12",
+    "six sevenths": "6/7",
+    "six eighths": "3/4",
+    "six ninths": "2/3",
+    "six tenths": "3/5",
+    "six elevenths": "6/11",
+    "six twelfths": "1/2",
+    "seven eighths": "7/8",
+    "seven ninths": "7/9",
+    "seven tenths": "7/10",
+    "seven elevenths": "7/11",
+    "seven twelfths": "7/12",
+    "eight ninths": "8/9",
+    "eight tenths": "4/5",
+    "eight elevenths": "8/11",
+    "eight twelfths": "2/3",
+    "nine tenths": "9/10",
+    "nine elevenths": "9/11",
+    "nine twelfths": "3/4",
+    "ten elevenths": "10/11",
+    "ten twelfths": "5/6",
+    "eleven twelfths": "11/12"
+}
+
+# Fractions words representing a single fraction (i.e. a quarter is equal to 1/4)
+SINGLE_FRACTION_WORDS = {
     # singular versions
     "half": "1/2",
     "quarter": "1/4",
@@ -58,62 +212,45 @@ FRACTION_WORDS = {
     "ninths": "1/9",
     "tenths": "1/10",
     "elevenths": "1/11",
-    "twelfths": "1/12",
+    "twelfths": "1/12"
+}
 
-    # amount with fraction words
-    "one half": "1/2",
-    "1 half": "1/2",
-    "two halves": "1",
-    "one quarter": "1/4",
-    "1 quarter": "1/4",
-    "two quarters": "1/2",
-    "three quarters": "3/4",
-    "3 quarters": "3/4",
-    "one third": "1/3",
-    "1 third": "1/3",
-    "two thirds": "2/3",
-    "2 thirds": "2/3",
-    "one fourth": "1/4",
-    "1 fourth": "1/4",
-    "two fourths": "1/2",
-    "three fourths": "3/4",
-    "3 fourths": "3/4",
-    "one fifth": "1/5",
-    "1 fifth": "1/5",
-    "two fifths": "2/5",
-    "2 fifths": "2/5",
-    "three fifths": "3/5",
-    "3 fifths": "3/5",
-    "four fifths": "4/5",
-    "4 fifths": "4/5",
-    "one sixth": "1/6",
-    "1 sixth": "1/6",
-    "two sixths": "1/3",
-    "three sixths": "1/2",
-    "four sixths": "2/3",
-    "five sixths": "5/6",
-    "5 sixths": "5/6",
-    "one seventh": "1/7",
-    "two sevenths": "2/7",
-    "one eighth": "1/8",
-    "1 eighth": "1/8",
-    "two eighths": "1/4",
-    "2 eighths": "1/4",
-    "three eighths": "3/8",
-    "3 eighths": "3/8",
-    "four eighths": "1/2",
-    "five eighths": "5/8",
-    "six eighths": "3/4",
-    "seven eighths": "7/8",
-    "one ninth": "1/9",
-    "two ninths": "2/9",
-    "one tenth": "1/10",
-    "two tenths": "1/5",
-    "one eleventh": "1/11",
-    "two elevenths": "2/11",
-    "one twelfth": "1/12",
-    "two twelfths": "1/6",
-    "eleven twelfths": "11/12"
+# Fractions words representing the denominator of a fraction
+DENOMINATOR_WORDS = {
+    "half": "/2",
+    "halves": "/2",
+
+    "quarter": "/4",
+    "quarters": "/4",
+    "fourth": "/4",
+    "fourths": "/4",
+
+    "third": "/3",
+    "thirds": "/3",
+
+    "fifth": "/5",
+    "fifths": "/5",
+
+    "sixth": "/6",
+    "sixths": "/6",
+
+    "seventh": "/7",
+    "sevenths": "/7",
+
+    "eighth": "/8",
+    "eighths": "/8",
+
+    "ninth": "/9",
+    "ninths": "/9",
+
+    "tenth": "/10",
+    "tenths": "/10",
+
+    "eleventh": "/11",
+    "elevenths": "/11",
+
+    "twelfth": "/12",
+    "twelfths": "/12"
 }
 
 UNICODE_FRACTIONS = {
@@ -159,8 +296,8 @@ UNICODE_FRACTIONS = {
 }
 
 TEMPERATURE_UNITS = {
-    "degree celsius": ["degree celsius", "degrees celsius", "°C"],
-    "degree fahrenheit": ["degree fahrenheit", "degrees fahrenheit", "°F"]
+    "celsius": ["celsius", "degree celsius", "degrees celsius", "°C"],
+    "fahrenheit": ["fahrenheit", "degree fahrenheit", "degrees fahrenheit", "°F"]
 }
 
 UNITS = {
@@ -347,10 +484,30 @@ DIMENSION_UNITS = {
     'millimeter': ['millimeter', 'millimeters', 'mm', 'mms']
 }
 
+DIMENSION_UNITS_SET = set()
+for key, pattern in DIMENSION_UNITS.items():
+    DIMENSION_UNITS_SET.add(key)
+    for val in pattern:
+        DIMENSION_UNITS_SET.add(val)
+
 # terms used to describe vague quantities
 CASUAL_QUANTITIES = {
-    'a' : 1,
-    'an': 1,
+    # 'a' : 1,
+    # 'an': 1,
+
+    'couple': 2,
+    'few': 3,
+    'bit': 1,
+    'tiny bit': 1,
+    'handful': 5,
+    'pinch': 1,
+    'dash': 1,
+    'dallop': 1,
+    'drop': 1,
+    "tad": 1,
+    "smidgen": 1,
+    "touch": 1,
+
     'a couple': 2,
     'a few': 3,
     'a bit': 1,
@@ -474,7 +631,8 @@ QUANTITY_PER_UNIT_STRINGS = set([
 
 # generic list of stop words that are not useful for parsing and should be removed from the string
 STOP_WORDS = set([
-    "0o", "0s", "3a", "3b", "3d", "6b", "6o", "a", "a1", "a2", "a3", "a4", "ab", "able", "about", "above", "abst", 
+    "0o", "0s", "3a", "3b", "3d", "6b", "6o",
+    "a", "a1", "a2", "a3", "a4", "ab", "able", "about", "above", "abst", 
     "ac", "accordance", "according", "accordingly", "across", "act", "actually", "ad", "added", "adj", "ae", "af", 
     "affected", "affecting", "affects", "after", "afterwards", "ag", "again", "against", "ah", "ain", "ain't", "aj", 
     "al", "all", "allow", "allows", "almost", "alone", "along", "already", "also", "although", "always", "am", "among", 
@@ -482,10 +640,12 @@ STOP_WORDS = set([
     "anyone", "anything", "anyway", "anyways", "anywhere", "ao", "ap", "apart", "apparently", "appear", "appreciate", 
     "appropriate", "approximately", "ar", "are", "aren", "arent", "aren't", "arise", "around", "as", "a's", "aside", 
     "ask", "asking", "associated", "at", "au", "auth", "av", "available", "aw", "away", "awfully", "ax", "ay", "az", 
+    
     "b", "b1", "b2", "b3", "ba", "back", "bc", "bd", "be", "became", "because", "become", "becomes", "becoming", 
     "been", "before", "beforehand", "begin", "beginning", "beginnings", "begins", "behind", "being", "believe", 
     "below", "beside", "besides", "best", "better", "between", "beyond", "bi", "bill", "biol", "bj", "bk", "bl", 
     "bn", "both", "bottom", "bp", "br", "brief", "briefly", "bs", "bt", "bu", "but", "bx", "by", 
+    "bitesized", "bitesize", "bite-sized", "bite-size",
     # "c",  "cm",
     "c1", "c2", 
     "c3", "ca", "call", "came", "can", "cannot", "cant", "can't", "cause", "causes", "cc", "cd", "ce", "certain", 

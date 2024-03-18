@@ -53,6 +53,71 @@ def test_quantity_and_unit_2():
     assert parsed_ingredient['is_required'] == True
 
 # -------------------------------------------------------------------------------
+# ---- Words-to-numbers tests ----
+# -------------------------------------------------------------------------------
+
+def test_number_words_1():
+    parse = IngredientSlicer("two cups of flour")
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    assert parsed_ingredient['quantity'] == "2"
+    assert parsed_ingredient['unit'] == 'cups'
+    assert parsed_ingredient['standardized_unit'] == "cup"
+    assert parsed_ingredient['is_required'] == True
+
+def test_number_words_2():
+    parse = IngredientSlicer("two cups of flour and three cups of sugar")
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    assert parsed_ingredient['quantity'] == "2"
+    assert parsed_ingredient['unit'] == 'cups'
+    assert parsed_ingredient['standardized_unit'] == "cup"
+    assert parsed_ingredient['is_required'] == True
+
+    parse = IngredientSlicer("two thirds a cups of flour")
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    assert parsed_ingredient['quantity'] == "2"
+    assert parsed_ingredient['unit'] == 'cups'
+    assert parsed_ingredient['standardized_unit'] == "cup"
+    assert parsed_ingredient['is_required'] == True
+    
+# -------------------------------------------------------------------------------
+# ---- Words-to-numbers (with prefixed word numbers) tests ----
+# -------------------------------------------------------------------------------
+
+def test_prefixed_number_words_1():
+    parse = IngredientSlicer("twenty seven cups of flour")
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    
+    assert parsed_ingredient['quantity'] == "27"
+    assert parsed_ingredient['unit'] == 'cups'
+    assert parsed_ingredient['standardized_unit'] == "cup"
+    assert parsed_ingredient['is_required'] == True
+
+def test_prefixed_number_words_2():
+    parse = IngredientSlicer("hundred twenty cups of flour")
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    
+    assert parsed_ingredient['quantity'] == "120"
+    assert parsed_ingredient['unit'] == 'cups'
+    assert parsed_ingredient['standardized_unit'] == "cup"
+    assert parsed_ingredient['is_required'] == True
+
+def test_prefixed_number_words_3():
+    parse = IngredientSlicer("a twenty-two lb bag of sugar", debug = True)
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    
+
+    assert parsed_ingredient['quantity'] == "22"
+    assert parsed_ingredient['unit'] == 'lb'
+    assert parsed_ingredient['standardized_unit'] == "pound"
+    assert parsed_ingredient['is_required'] == True
+
+# -------------------------------------------------------------------------------
 # ---- Multinumber (space separated) tests ----
 # -------------------------------------------------------------------------------
 
@@ -109,7 +174,7 @@ def test_multiple_multinumber_3():
     assert parsed_ingredient['unit'] == 'cups'
     assert parsed_ingredient['is_required'] == True
 
-def test_multiple_multinumber_3():
+def test_multiple_multinumber_4():
     parse = IngredientSlicer("3 12 cups of sugar (optional)")
     parse.parse()
     parsed_ingredient = parse.to_json()
@@ -565,7 +630,7 @@ def test_quantity_and_unit_parenthesis_3():
 # -------------------------------------------------------------------------------
 # ---- Assortment of different ingredients seen in the "wild" tests ----
 # -------------------------------------------------------------------------------
-def test_wild_ingredients():
+def test_wild_ingredients_1():
 
     parse = IngredientSlicer("1 (10 ounce) package frozen chopped spinach, thawed, drained and squeezed dry")
     parse.parse()
@@ -609,6 +674,46 @@ def test_wild_ingredients():
     assert parsed_ingredient['secondary_unit'] == None
     # assert len(parsed_ingredient["parenthesis_notes"]) == 0
 
+
+def test_wild_ingredients_2():
+
+    ingredient = "4 large skinless, boneless chicken thighs, cut into bite-sized pieces"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+    
+    assert parsed_ingredient['quantity'] == "4"
+    assert parsed_ingredient['unit'] == 'thighs'
+    assert parsed_ingredient['standardized_unit'] == 'thigh'
+    assert parsed_ingredient['is_required'] == True
+    assert parsed_ingredient['secondary_quantity'] == None
+    assert parsed_ingredient['secondary_unit'] == None
+    assert parsed_ingredient['standardized_secondary_unit'] == None
+    # assert parsed_ingredient['food'] == 'large skinless boneless chicken cut bitesized' # TODO: this needs to be trimmed down heavily
+
+
+def test_wild_ingredients_3():
+    ingredient = "1 (6 ounce) can tomato paste"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+
+    assert parsed_ingredient['quantity'] == "6.0"
+    assert parsed_ingredient['unit'] == 'ounce'
+    assert parsed_ingredient['is_required'] == True
+    assert parsed_ingredient['secondary_quantity'] == "1"
+    assert parsed_ingredient['secondary_unit'] == "can"
+    assert parsed_ingredient['standardized_secondary_unit'] == "can"
+
+    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
+# "1 (14 ounce) can coconut milk"
+# "1 (6 ounce) can tomato paste"
+# "2 (15-ounce) cans chickpeas, rinsed and drained"
+# "1/2 medium fresh jalapeño chile pepper, finely chopped*"
+# "1 (9.25ounce) bag corn chips, such as Fritos® Scoops!®"
+# "1/4 cup (1/2 stick) butter, divided"
+# "Graham cracker crumbs or powdered sugar for topping"
+# "1 large egg, lightly beaten"
 ################################################################################################
 ### Old code for manual testing
 ################################################################################################

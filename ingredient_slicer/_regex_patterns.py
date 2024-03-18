@@ -6,28 +6,45 @@ from typing import Dict, List, Tuple, Union
 
 # # import constants from _constants module
 from . import _constants 
-# from . import _constants as constants
 
-# # # import for for local development
+# # import for for local development
 # from ingredient_slicer import _constants
 
 # -----------------------------------------------------------------------------
 # --------------------------- Conversion patterns -----------------------------
 # Patterns for converting: 
-# - Number words to numerical values
-# - Fractions represented as words to fraction strings
-# - Unicode fractions to decimals
+# - Fraction phrases/words to fraction strings (e.g. "one half" to "1/2")
+# - Number words to numerical values (e.g. "one" to "1")
+# - Unicode fractions to decimals (e.g. "½" to "0.5")
 # -----------------------------------------------------------------------------
 
-# Create a map of number words to their numerical values
-NUMBER_WORDS_REGEX_MAP = {}
+FRACTION_WORDS_MAP = {}
+for phrase, fraction in _constants.FRACTION_WORDS.items():
+    FRACTION_WORDS_MAP[phrase] = [fraction, re.compile(r'\b' + phrase + r'\b', re.IGNORECASE)]
+
+NUMBER_WORDS_MAP = {}
 for word, value in _constants.NUMBER_WORDS.items():
-    # print(f"Word: {word} \nValue: {value}")
-    NUMBER_WORDS_REGEX_MAP[word] = [str(value), re.compile(r'\b' + word + r'\b', re.IGNORECASE)]
-    # print(f"\n")
+    NUMBER_WORDS_MAP[word] = [str(value), re.compile(r'\b' + word + r'\b', re.IGNORECASE)]
 
 # Matches unicode fractions in the string
 UNICODE_FRACTIONS_PATTERN = re.compile( r'\b(?:' + '|'.join(re.escape(word) for word in _constants.UNICODE_FRACTIONS.keys()) + r')\b', re.IGNORECASE)
+
+# standard_ingredient = "two third of a cups of flour, 1 half n half pint"
+
+# # print("Parsing fraction words")
+# for word, regex_data in FRACTION_WORDS_MAP.items():
+#     fraction_str, pattern = regex_data
+#     # print(f"Word: '{word}'\n > Fraction string: '{fraction_str}'\n > Pattern: {pattern}")
+#     if pattern.search(standard_ingredient):
+#         print(f"Word: '{word}'\n > Fraction string: '{fraction_str}'\n > Pattern: {pattern}")
+#         print(f"Found {word} in ingredient. Replacing with {fraction_str}")
+#     print(f"----" * 5)
+#     print()
+#     # pattern = regex_data[1]
+#     # print statement if word is found in ingredient and replaced
+#     if pattern.search(self.standard_ingredient):
+#         print(f"- Found {word} in ingredient. Replacing with {regex_data[0]}") if self.debug else None
+#     self.standard_ingredient = pattern.sub(regex_data[0], self.standard_ingredient)
 
 # -----------------------------------------------------------------------------
 # --------------------------- Alternation patterns -----------------------------
@@ -68,6 +85,20 @@ PREP_WORD_ALT = '|'.join([re.escape(prep_word) for prep_word in list(_constants.
 STOP_WORDS_ALT = '|'.join(sorted([re.escape(stop_word) for stop_word in _constants.STOP_WORDS], key=len, reverse=True))
 # STOP_WORDS_ALT = '|'.join([re.escape(stop_word) for stop_word in list(_constants.STOP_WORDS)])
 
+# sort the denominator words by their length to make sure longer words get matched before shorter ones
+#  to make sure we don't match a shorter word that is part of a longer word
+DENOMINATOR_WORDS_ALT = '|'.join(sorted([re.escape(word) for word in _constants.DENOMINATOR_WORDS], key=len, reverse=True))
+# DENOMINATOR_WORDS_ALT = '|'.join([re.escape(word) for word in _constants.DENOMINATOR_WORDS])
+
+# Alternations for creating patterns that match prefix number words followed by number words (e.g "twenty five", "thirty three")
+NUMBER_WORDS_ALT = '|'.join([re.escape(word) for word in _constants.NUMBER_WORDS])
+NUMBER_PREFIX_WORD_ALT = '|'.join([re.escape(word) for word in _constants.NUMBER_PREFIX_WORDS])
+
+DIMENSION_UNITS_ALT = '|'.join([re.escape(unit) for unit in _constants.DIMENSION_UNITS_SET])
+UNIT_MODIFIERS_ALT = '|'.join([re.escape(unit_modifier) for unit_modifier in _constants.UNIT_MODIFIERS])
+CASUAL_QUANTITIES_ALT = '|'.join([re.escape(casual_quantity) for casual_quantity in _constants.CASUAL_QUANTITIES])
+APPROXIMATE_STRINGS_ALT = '|'.join([re.escape(approximate_string) for approximate_string in _constants.APPROXIMATE_STRINGS])
+
 # -----------------------------------------------------------------------------
 # --------------------------- Units patterns -----------------------------
 # ---> NOTE: uses the above Alternation patterns to create the following basic regular expression patterns
@@ -100,7 +131,23 @@ PREP_WORDS_PATTERN = re.compile(r'\b(?:' + PREP_WORD_ALT + r')\b', re.IGNORECASE
 # general stop words pattern for matching stop words in a string
 STOP_WORDS_PATTERN = re.compile(r'\b(?:' + STOP_WORDS_ALT + r')\b', re.IGNORECASE)
 
+DIMENSION_UNITS_PATTERN = re.compile(r'\b(?:' + DIMENSION_UNITS_ALT + r')\b', re.IGNORECASE)
+
+UNIT_MODIFIERS_PATTERN = re.compile(r'\b(?:' + UNIT_MODIFIERS_ALT + r')\b', re.IGNORECASE)
+CASUAL_QUANTITIES_PATTERN = re.compile(r'\b(?:' + CASUAL_QUANTITIES_ALT + r')\b', re.IGNORECASE)
+
 # -----------------------------------------------------------------------------
+# --------------------------- Prefix number words with number words patterns -----------------------------
+# Patterns for matching:
+# - prefix number words followed by number words (e.g "twenty five", "thirty three")
+# -----------------------------------------------------------------------------
+
+# regular expression pattern to match prefix number words followed by number words
+PREFIXED_NUMBER_WORDS = re.compile(r'\b(?:' + NUMBER_PREFIX_WORD_ALT + r')(?:\s*[-\s]*\s*)(?:' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE)
+# PREFIXED_NUMBER_WORDS = re.compile(r'\b(?:' + NUMBER_PREFIX_WORD_ALT + r')(?:\s*|\s*-*\s*)(?:' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE)
+
+PREFIXED_NUMBER_WORDS_GROUPS = re.compile(r'\b(' + NUMBER_PREFIX_WORD_ALT + r')(?:\s*[-\s]*\s*)(' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE)
+
 # --------------------------- Unit/Number or Number/Unit patterns -----------------------------
 # Patterns for matching:
 # - a number followed by a unit
@@ -147,6 +194,10 @@ ANY_NUMBER = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
 
 # Match ALL numbers in a string regardless of padding
 ALL_NUMBERS = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)')
+
+# matches any number/decimals/fractions followed by 1+ spaces then a denominator word
+NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + DENOMINATOR_WORDS_ALT + r')\b')
+# NUMBER_WITH_DENOMINATOR.findall("1 quarter cup of milk")
 
 ### (DEPRACTED version of SPACE_SEP_NUMBERS)
 # # Match any number/decimal/fraction followed by a space and then another number/decimal/fraction
@@ -312,15 +363,12 @@ REPEAT_UNIT_RANGES = re.compile(r'(\d+(?:\.\d+|/\d+)?)\s*([a-zA-Z]+)\s*-\s*(\d+(
 # REPEAT_UNIT_RANGES = re.compile(r'(\d+)\s*([a-zA-Z]+)\s*-\s*(\d+)\s*([a-zA-Z]+)')
 
 # -----------------------------------------------------------------------------
-# --------------------------- Misc. patterns -----------------------------
+# --------------------------- Parenthesis patterns -----------------------------
 # Patterns for converting: 
-# - Pattern for finding consecutive letters and digits in a string so whitespace can be added
 # - Pattern for matching strings wrapped in parentheses
 # - Pattern for matching parentheses containing only a whole number, decimal, or fraction
 # - Pattern for matching parentheses containing a number followed by a unit
 # -----------------------------------------------------------------------------
-# Regular expression to match consecutive letters and digits in a string
-CONSECUTIVE_LETTERS_DIGITS = re.compile(r'([a-zA-Z]+)(\d+)|(\d+)([a-zA-Z]+)')
 
 # Regular expression to match strings wrapped in parentheses, including the parentheses
 PARENTHESIS_VALUES = re.compile(r'\((.*?)\)')
@@ -345,11 +393,20 @@ PARENTHESIS_WITH_NUMBER_UNIT = re.compile(r'\(\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\
 # is met and any number of whitespaces can pad the left and right of the string within the parenthesis
 PARENTHESIS_WITH_NUMBER_ANYTHING_UNIT = re.compile(r'\(\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*.*?\s*(?:' + ANY_UNIT_ALT + r')\s*\)') # this is best now
 
-# 'x' or 'X' after numbers pattern
-# Match any number/decimal/fraction followed by 'x' or 'X' and then another number/decimal/fraction. An "x" or "X" is used to indicate multiplication (how many of a unit to use)
-# (e.g "1 x 5", "1X1.5", "2.5x20")
-# TODO: Implement this pattern
-X_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[xX]\s*)(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
+# -----------------------------------------------------------------------------
+# --------------------------- Misc. patterns -----------------------------
+# Patterns for converting: 
+# - Pattern for finding consecutive letters and digits in a string so whitespace can be added
+# - pattern for matching "x" or "X" after numbers
+# - pattern for matching "x" or "X" after numbers and not followed by another character
+# - pattern for matching a quantity followed by "x" or "X" and then another quantity
+# - pattern for matching optional strings (e.g. "option" or "optional")
+# - pattern for matching required strings (e.g. "required" or "requirement")
+# - pattern for matching words ending in "ly" (e.g. "firmly", "lightly", "rapidly")
+# -----------------------------------------------------------------------------
+
+# Regular expression to match consecutive letters and digits in a string
+CONSECUTIVE_LETTERS_DIGITS = re.compile(r'([a-zA-Z]+)(\d+)|(\d+)([a-zA-Z]+)')
 
 # Match any number/decimal/fraction followed by 'x' or 'X' and 
 # is NOT followed by another character after the x (removes possiblity of accidently matching a word that starts with X after a number)
@@ -360,6 +417,12 @@ X_AFTER_NUMBER = re.compile(r'(?:\d*\.\d+|\d+\s*\/\s*\d+|\d+)+\s*[xX](?![a-zA-Z]
 # Matches any nubmer/decimal/fraction, followed by 0+ spaces, then an "x" or "X", then 0+ spaces, then another number/decimal/fraction
 # (e.g. "1 x 5", "1X1.5", "2.5x20")
 QUANTITY_X_QUANTITY = re.compile(r'(?:\d*\.\d+|\d+\s*\/\s*\d+|\d+)+\s*[xX](?![a-zA-Z])\s*(?:\d*\.\d+|\d+\s*\/\s*\d+|\d+)')
+
+# 'x' or 'X' after numbers pattern
+# Match any number/decimal/fraction followed by 'x' or 'X' and then another number/decimal/fraction. An "x" or "X" is used to indicate multiplication (how many of a unit to use)
+# (e.g "1 x 5", "1X1.5", "2.5x20")
+# TODO: Deprecated, probably delete this pattern
+X_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[xX]\s*)(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
 
 # Regular expression to match optional strings (e.g. "option" or "optional")
 OPTIONAL_STRING = re.compile(r'\b(?:option|options|optional|opt.|opts.|opt|opts|unrequired)\b')
@@ -390,7 +453,10 @@ class IngredientRegexPatterns:
 
             # regex hashmaps
             "NUMBER_WORDS": _constants.NUMBER_WORDS,
+            "NUMBER_PREFIX_WORDS": _constants.NUMBER_PREFIX_WORDS,
             "FRACTION_WORDS": _constants.FRACTION_WORDS,
+            "SINGLE_FRACTION_WORDS": _constants.SINGLE_FRACTION_WORDS,
+            "DENOMINATOR_WORDS": _constants.DENOMINATOR_WORDS,
             "UNICODE_FRACTIONS": _constants.UNICODE_FRACTIONS,
             
             # unit hashmaps
@@ -418,7 +484,10 @@ class IngredientRegexPatterns:
 
         # Define regex patterns
         # string numbers to number map
-        self.NUMBER_WORDS_REGEX_MAP = NUMBER_WORDS_REGEX_MAP
+        self.NUMBER_WORDS_MAP = NUMBER_WORDS_MAP
+        self.PREFIXED_NUMBER_WORDS = PREFIXED_NUMBER_WORDS
+        self.PREFIXED_NUMBER_WORDS_GROUPS = PREFIXED_NUMBER_WORDS_GROUPS
+        self.FRACTION_WORDS_MAP = FRACTION_WORDS_MAP
 
         # unicode fractions
         self.UNICODE_FRACTIONS_PATTERN = UNICODE_FRACTIONS_PATTERN
@@ -545,12 +614,13 @@ class IngredientRegexPatterns:
         Get the description of a specific regex pattern.
         Returns the description of the pattern if found, otherwise returns an empty string.
         """
-
+        
         # Define descriptions for each pattern
         descriptions = {
             ### Constants and lookup tables
             "NUMBER_WORDS": "Dictionary of number words to numerical values.",
-            "FRACTION_WORDS": "Dictionary of fraction words to numerical values.",
+            "FRACTION_WORDS": "Dictionary of fraction phrases (i.e. 'two thirds' or '1 half') to their fractional string value",
+            "SINGLE_FRACTION_WORDS": "Dictionary of single fraction words that represent a singular fraction (i.e. a quarter is equal to 1/4).",
             "UNICODE_FRACTIONS": "Dictionary of unicode fractions to numerical values.",
 
             # dictionaries of units
@@ -570,7 +640,7 @@ class IngredientRegexPatterns:
             "PREP_WORDS": "Set of preparation words for lookups in recipe parser.",
             "APPROXIMATE_STRINGS": "Set of strings that indicate an approximate quantity in the recipe parser.",
             "QUANTITY_PER_UNIT_STRINGS": "Set of strings that indicate a quantity per unit in the recipe parser.",
-            "NUMBER_WORDS_REGEX_MAP": "Dictionary of regex patterns to match number words in a string (i.e. 'one' : '1', 'two' : '2').",
+            "NUMBER_WORDS_MAP": "Dictionary of regex patterns to match number words in a string (i.e. 'one' : '1', 'two' : '2').",
             
             ### Regex patterns
             # Unicode fractions

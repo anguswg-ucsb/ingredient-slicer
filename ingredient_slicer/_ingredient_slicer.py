@@ -8,6 +8,7 @@ import warnings
 
 from ._regex_patterns import IngredientRegexPatterns
 # from . import IngredientRegexPatterns
+
 # # local
 # from ingredient_slicer import IngredientRegexPatterns
 
@@ -88,13 +89,72 @@ class IngredientSlicer:
         self.standard_ingredient = self.standard_ingredient.replace("—", "-").replace("–", "-").replace("~", "-")
         return
     
-    def _parse_number_words(self):
+    # def _parse_fraction_words(self) -> None:
+    #     """
+    #     Replace fraction words with their corresponding numerical values in the parsed ingredient.
+    #     """
+
+    #     # print("Parsing fraction words")
+    #     for word, regex_data in IngredientSlicer.regex.FRACTION_WORDS_MAP.items():
+    #         # print(f"Word: {word}, Regex Data: {regex_data}")
+    #         pattern = regex_data[1]
+    #         # print statement if word is found in ingredient and replaced
+    #         if pattern.search(self.standard_ingredient):
+    #             print(f"- Found {word} in ingredient. Replacing with {regex_data[0]}") if self.debug else None
+    #         self.standard_ingredient = pattern.sub(regex_data[0], self.standard_ingredient)
+
+    def _parse_prefixed_number_words(self) -> None:
+        """ Replace prefixed number words with their corresponding numerical values in the parsed ingredient 
+        Strings like "twenty five" are replaced with "25", or "thirty-two" is replaced with "32"
+
+        """
+        number_words_iter = IngredientSlicer.regex.PREFIXED_NUMBER_WORDS_GROUPS.finditer(self.standard_ingredient)
+
+        offset = 0
+        replacement_index = 0
+
+        for match in number_words_iter:
+            
+            if match:
+                start, end = match.start(), match.end()
+
+                match_string = match.group()
+                prefix_word = match.group(1)
+                number_word = match.group(2)
+                
+                prefix_value = IngredientSlicer.regex.constants["NUMBER_PREFIX_WORDS"].get(prefix_word, 0)
+                number_value = IngredientSlicer.regex.constants["NUMBER_WORDS"].get(number_word, 0)
+
+                combined_value = prefix_value + number_value
+
+                # Calculate the start and end positions in the modified string
+                modified_start = start + offset
+                modified_end = end + offset
+
+                # Construct the modified string with the replacement applied
+                self.standard_ingredient = self.standard_ingredient[:modified_start] + str(combined_value) + self.standard_ingredient[modified_end:]
+                # ingredient = ingredient[:modified_start] + str(combined_value) + ingredient[modified_end:]
+
+                # Update the offset for subsequent replacements
+                offset += len(str(combined_value)) - (end - start)
+
+                # print(f"""
+                # Match string: {match_string}
+                # - Prefix word: {prefix_word}
+                # - Number word: {number_word}
+                # Prefix value ({prefix_value}) + Number value ({number_value}) = Combined value ({combined_value})
+                # > {prefix_value} + {number_value} = {combined_value}
+                # -> Match: {match_string} at positions {start}-{end}
+                # --> Modified start/end match positions: {modified_start}-{modified_end}
+                # ---> Modified ingredient: {self.standard_ingredient}""") if self.debug else None
+                
+    def _parse_number_words(self) -> None:
         """
         Replace number words with their corresponding numerical values in the parsed ingredient.
         """
 
         # print("Parsing number words")
-        for word, regex_data in IngredientSlicer.regex.NUMBER_WORDS_REGEX_MAP.items():
+        for word, regex_data in IngredientSlicer.regex.NUMBER_WORDS_MAP.items():
             pattern = regex_data[1]
             # print statement if word is found in ingredient and replaced
             if pattern.search(self.standard_ingredient):
@@ -655,6 +715,7 @@ class IngredientSlicer:
         # define a list containing the class methods that should be called in order on the input ingredient string
         methods = [
             self._drop_special_dashes,
+            self._parse_prefixed_number_words, # NOTE: testing this out
             self._parse_number_words,
             self._clean_html_and_unicode,
             self._replace_unicode_fraction_slashes,
@@ -1417,6 +1478,33 @@ class IngredientSlicer:
         for parenthesis in paranethesis_to_remove:
             ingredient = ingredient.replace(parenthesis, "")
 
+        # # ingredient = '2.5 cups of sugar, lightly chopped (about 8 oz)'
+        # stop_words_to_remove = IngredientSlicer.regex.STOP_WORDS_PATTERN.findall(ingredient)
+
+        # print(f" > Removing stop words: {stop_words_to_remove}") if self.debug else None
+
+        # # remove any stop words
+        # for stop_word in stop_words_to_remove:
+        #     ingredient = ingredient.replace(stop_word, "")
+
+        print(f" > Removing units, quantites, prep words, and adverbs ending in 'ly'") if self.debug else None
+
+        unit_matches        = IngredientSlicer.regex.UNITS_PATTERN.findall(ingredient)
+        quantity_matches    = IngredientSlicer.regex.ALL_NUMBERS.findall(ingredient)
+        prep_words_matches  = IngredientSlicer.regex.PREP_WORDS_PATTERN.findall(ingredient)
+        ly_words_matches    = IngredientSlicer.regex.WORDS_ENDING_IN_LY.findall(ingredient)
+
+        # TODO: Add these to removal process
+        # CASUAL_QUANTITIES
+        # DIMENSION_UNITS
+        # SOMETIMES_UNITS_SET
+        # APPROXIMATE_STRINGS
+        # make a single list of the strings to remove (IMPORATNT that parenthesis content is removed first)
+        strings_to_remove = unit_matches + quantity_matches + prep_words_matches + ly_words_matches
+
+        for match in strings_to_remove:
+            ingredient = ingredient.replace(match, "")
+
         # ingredient = '2.5 cups of sugar, lightly chopped (about 8 oz)'
         stop_words_to_remove = IngredientSlicer.regex.STOP_WORDS_PATTERN.findall(ingredient)
 
@@ -1426,19 +1514,6 @@ class IngredientSlicer:
         for stop_word in stop_words_to_remove:
             ingredient = ingredient.replace(stop_word, "")
 
-        print(f" > Removing units, quantites, prep words, and adverbs ending in 'ly'") if self.debug else None
-
-        unit_matches        = IngredientSlicer.regex.UNITS_PATTERN.findall(ingredient)
-        quantity_matches    = IngredientSlicer.regex.ALL_NUMBERS.findall(ingredient)
-        prep_words_matches  = IngredientSlicer.regex.PREP_WORDS_PATTERN.findall(ingredient)
-        ly_words_matches    = IngredientSlicer.regex.WORDS_ENDING_IN_LY.findall(ingredient)
-
-        # make a single list of the strings to remove (IMPORATNT that parenthesis content is removed first)
-        strings_to_remove = unit_matches + quantity_matches + prep_words_matches + ly_words_matches
-
-        for match in strings_to_remove:
-            ingredient = ingredient.replace(match, "")
-        
         print(f" > Removing any remaining special characters") if self.debug else None
 
         # remove any special characters
