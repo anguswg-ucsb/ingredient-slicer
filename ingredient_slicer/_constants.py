@@ -12,6 +12,10 @@ NUMBER_WORDS = {
     'ten': 10,
     'eleven': 11,
     'twelve': 12,
+    'dozen': 12,  # 12
+    'dozens': 12,  # 12
+    'baker\'s dozen': 13,  # 13
+    'bakers dozen': 13,  # 13
     'thirteen': 13,
     'fourteen': 14,
     'fifteen': 15,
@@ -478,8 +482,8 @@ for key, pattern in WEIGHT_UNITS.items():
 DIMENSION_UNITS = {
     'centimeter': ['centimeter', 'centimeters', 'cm', 'cms'],
     'foot': ['foot', 'feet', 'ft', 'fts'],
-    # 'inch': ['inch', 'inches', 'in', 'ins'],
-    'inch': ['inch', 'inches', 'ins'], # TODO: Removing unit "in" for now, unit "in" needs to be dealt with separately somehow, "in" is used for both the unit "inch" and the standard usage of the word "in" (i.e. "I am in a house")
+    'inch': ['inch', 'inches', 'in', 'ins'],
+    # 'inch': ['inch', 'inches', 'ins'], # TODO: Removing unit "in" for now, unit "in" needs to be dealt with separately somehow, "in" is used for both the unit "inch" and the standard usage of the word "in" (i.e. "I am in a house")
     'meter': ['meter', 'meters', 'm', 'ms'],
     'millimeter': ['millimeter', 'millimeters', 'mm', 'mms']
 }
@@ -494,33 +498,70 @@ for key, pattern in DIMENSION_UNITS.items():
 CASUAL_QUANTITIES = {
     # 'a' : 1,
     # 'an': 1,
-
     'couple': 2,
     'few': 3,
-    'bit': 1,
-    'tiny bit': 1,
-    'handful': 5,
-    'pinch': 1,
-    'dash': 1,
-    'dallop': 1,
-    'drop': 1,
-    "tad": 1,
-    "smidgen": 1,
-    "touch": 1,
-
     'a couple': 2,
     'a few': 3,
-    'a bit': 1,
-    'a tiny bit': 1,
-    'a handful': 5,
-    'a pinch': 1,
-    'a dash': 1,
-    'a dallop': 1,
-    'a drop': 1, 
-    "tad": 1,
-    "smidgen": 1,
-    "touch": 1,
 }
+
+CASUAL_QUANTITIES_SET = set()
+for key, pattern in CASUAL_QUANTITIES.items():
+    CASUAL_QUANTITIES_SET.add(key)
+
+
+# # terms used to describe vague quantities
+# CASUAL_QUANTITIES = {
+#     # 'a' : 1,
+#     # 'an': 1,
+
+#     'couple': 2,
+#     'few': 3,
+#     'bit': 1,
+#     'tiny bit': 1,
+#     'handful': 5,
+#     'pinch': 1,
+#     'dash': 1,
+#     'dallop': 1,
+#     'drop': 1,
+#     "tad": 1,
+#     "smidgen": 1,
+#     "touch": 1,
+#     "to taste": 1,
+
+#     'a couple': 2,
+#     'a few': 3,
+#     'a bit': 1,
+#     'a tiny bit': 1,
+#     'a handful': 5,
+#     'a pinch': 1,
+#     'a dash': 1,
+#     'a dallop': 1,
+#     'a drop': 1
+# }
+
+# terms that are sometimes used as units (i.e. "a pinch of salt")
+CASUAL_UNITS = {
+    "bit" : ["bit", "bits"],
+    "pinch" : ["pinch", "pinches", "pinchful", "pinchfuls", "pinchfull", "pinchfulls", "a pinch"],
+    "dash" : ["dash", "dashes", "a dash"],
+    "dallop" : ["dallop", "dallops", "dollop", "dollops", "a dallop", "a dollop"],
+    "dusting" : ["dusting", "dustings"],
+    "drop" : ["drop", "drops", "a drop"],
+    "droplet" : ["droplet", "droplets", "a droplet"],
+    "handful" : ["handful", "handfuls", "handfull", "handfulls", "a handful"],
+    "tad" : ["tad", "tads", "a tad"],
+    "smidgen" : ["smidgen", "smidgens", "a smidgen"],
+    "touch" : ["touch", "touches", "a touch"],
+    "sprinkle" : ["sprinkle", "sprinkles", "springkling", "sprinklings", "a sprinkle", "a sprinkling"],
+    "to taste" : ["to taste"],
+    "a taste" : ["a taste"]
+}
+
+CASUAL_UNITS_SET = set()
+for key, pattern in CASUAL_UNITS.items():
+    CASUAL_UNITS_SET.add(key)
+    for val in pattern:
+        CASUAL_UNITS_SET.add(val)
 
 # specific words that are used to describe something about a unit (i.e. "packed cup", "level tablespoon")
 UNIT_MODIFIERS = set([
@@ -559,6 +600,7 @@ UNIT_MODIFIERS = set([
 # (i.e. "2 small carrots" -> "quantity: 2, unit: small, ingredient: carrots")
 # (i.e. "medium carrot" -> "quantity: 1, unit: medium, ingredient: carrot")
 SOMETIMES_UNITS_SET = set([
+    "tiny",
     "extra small",
     "extra-small",
     "small",
@@ -571,33 +613,72 @@ SOMETIMES_UNITS_SET = set([
     "extra-large",
     "big", 
     "tiny",
-    "modest"
+    "modest",
+    "huge",
+    "giant",
+    "gigantic"
     ])
 
-PREP_WORDS = set([
-    "chopped",
-    "diced",
-    "minced",
-    "sliced",
-    "slivered",
-    "julienned",
-    "emulsified",
-    "grated",
-    "crushed",
-    "mashed",
-    "peeled",
-    "seeded",
-    "cored",
-    "trimmed",
-    "halved",
-    "quartered",
-    "squeezed",
-    "zested",
-    "juiced",
-    "cubed",
-    "shredded",
-    "pitted",
-])
+PREP_WORDS = {
+    'baked',
+    'beaten',
+    'boil',
+    'boiled',
+    'broil',
+    'broiled',
+    'chopped',
+    'chopping',
+    'cored',
+    'crumbled',
+    'crushed',
+    'cubed',
+    'cut',
+    'cutting',
+    'crisped',
+    'diced',
+    'divided',
+    'drained',
+    'drenched',
+    'dressed',
+    'emulsified',
+    'flaked',
+    'fried',
+    'grated',
+    'grilled',
+    'halved',
+    'hardened',
+    'julienned',
+    'juiced',
+    'mashed',
+    'melted',
+    'minced',
+    'peeled',
+    'pitted',
+    'poached',
+    'quartered',
+    'rinsed',
+    'roasted',
+    'scramble',
+    'scrambled',
+    'scrambling',
+    'scrambles',
+    'seeded',
+    'shredded',
+    'sliced',
+    'slivered',
+    'softened',
+    'squeezed',
+    'squeeze',
+    'squished',
+    'steamed',
+    'stewed',
+    'stirred',
+    'stirring',
+    'stir',
+    'toasted',
+    'trimmed',
+    'zested'
+}
 
 # specific words that are used to describe something about a unit (i.e. "packed cup", "level tablespoon")
 APPROXIMATE_STRINGS = set([
@@ -722,7 +803,7 @@ STOP_WORDS = set([
     "theyd", "they'd", "they'll", "theyre", "they're", "they've", "thickv", "thin", "think", "third", "this", 
     "thorough", "thoroughly", "those", "thou", "though", "thoughh", "thousand", "three", "throug", "through", 
     "throughout", "thru", "thus", "ti", "til", "tip", "tj", "tl", "tm", "tn", "to", "together", "too", "took", 
-    "top", "toward", "towards", "tp", "tq", "tr", "tried", "tries", "truly", "try", "trying", 
+    "top", "topping", "toward", "towards", "tp", "tq", "tr", "tried", "tries", "truly", "try", "trying", 
     # "ts",
     "t's", "tt", "tv", "twelve", "twenty", "twice", "two", "tx", 
     "u", "u201d", "ue", "ui", "uj", "uk", "um", "un", "under", "unfortunately", "unless", 
@@ -745,8 +826,6 @@ STOP_WORDS = set([
     "you'll", "your", "youre", "you're", "yours", "yourself", "yourselves", "you've", "yr", "ys", "yt", 
     "z", "zero", "zi", "zz"
 ])
-
-# TEST_CONJUNCTIONS = set(["won",  "wont", "won't"])
 
 
 # STOP_WORDS = set([

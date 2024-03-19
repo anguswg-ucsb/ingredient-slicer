@@ -94,10 +94,15 @@ DENOMINATOR_WORDS_ALT = '|'.join(sorted([re.escape(word) for word in _constants.
 NUMBER_WORDS_ALT = '|'.join([re.escape(word) for word in _constants.NUMBER_WORDS])
 NUMBER_PREFIX_WORD_ALT = '|'.join([re.escape(word) for word in _constants.NUMBER_PREFIX_WORDS])
 
-DIMENSION_UNITS_ALT = '|'.join([re.escape(unit) for unit in _constants.DIMENSION_UNITS_SET])
-UNIT_MODIFIERS_ALT = '|'.join([re.escape(unit_modifier) for unit_modifier in _constants.UNIT_MODIFIERS])
-CASUAL_QUANTITIES_ALT = '|'.join([re.escape(casual_quantity) for casual_quantity in _constants.CASUAL_QUANTITIES])
+# Alternations for patterns like "a pinch of" or "a handful" or "a sprinkle"
+CASUAL_UNITS_ALT        = '|'.join([re.escape(casual_unit) for casual_unit in _constants.CASUAL_UNITS_SET])
+CASUAL_QUANTITIES_ALT   = '|'.join([re.escape(casual_quantity) for casual_quantity in _constants.CASUAL_QUANTITIES_SET])
+
+# alternations for remvoing useless words from the string when trying to find the food item
+DIMENSION_UNITS_ALT     = '|'.join([re.escape(unit) for unit in _constants.DIMENSION_UNITS_SET])
+UNIT_MODIFIERS_ALT      = '|'.join([re.escape(unit_modifier) for unit_modifier in _constants.UNIT_MODIFIERS])
 APPROXIMATE_STRINGS_ALT = '|'.join([re.escape(approximate_string) for approximate_string in _constants.APPROXIMATE_STRINGS])
+
 
 # -----------------------------------------------------------------------------
 # --------------------------- Units patterns -----------------------------
@@ -131,10 +136,14 @@ PREP_WORDS_PATTERN = re.compile(r'\b(?:' + PREP_WORD_ALT + r')\b', re.IGNORECASE
 # general stop words pattern for matching stop words in a string
 STOP_WORDS_PATTERN = re.compile(r'\b(?:' + STOP_WORDS_ALT + r')\b', re.IGNORECASE)
 
-DIMENSION_UNITS_PATTERN = re.compile(r'\b(?:' + DIMENSION_UNITS_ALT + r')\b', re.IGNORECASE)
+# patterns for things like "a pinch of" or "a handful" or "a sprinkle"
+CASUAL_UNITS_PATTERN       = re.compile(r'\b(?:' + CASUAL_UNITS_ALT + r')\b', re.IGNORECASE) # e.g. "bunch", "sprig", "stalk", "stick", "piece", "slice", "strip", "strip", "segment", "wedge", "chunk", "hunk", "slab", "sliver", "shred", "shard", "scrap", "scrape", "scraping", "scrapings
+CASUAL_QUANTITIES_PATTERN   = re.compile(r'\b(?:' + CASUAL_QUANTITIES_ALT + r')\b', re.IGNORECASE) # e.g. "a few", "a couple", "a handful", "a pinch", "a sprinkle", "a dash", "a smidgen", "a touch", "a bit"
 
-UNIT_MODIFIERS_PATTERN = re.compile(r'\b(?:' + UNIT_MODIFIERS_ALT + r')\b', re.IGNORECASE)
-CASUAL_QUANTITIES_PATTERN = re.compile(r'\b(?:' + CASUAL_QUANTITIES_ALT + r')\b', re.IGNORECASE)
+# Miscellaneous patterns used for trimmin the string down to get the food item 
+DIMENSION_UNITS_PATTERN     = re.compile(r'\b(?:' + DIMENSION_UNITS_ALT + r')\b', re.IGNORECASE) # e.g. "inch", "inches", "cm", "mm", "millimeter", "millimeters", "centimeter", "centimeters"
+UNIT_MODIFIERS_PATTERN      = re.compile(r'\b(?:' + UNIT_MODIFIERS_ALT + r')\b', re.IGNORECASE) # e.g. "large", "small", "medium
+APPROXIMATE_STRINGS_PATTERN = re.compile(r'\b(?:' + APPROXIMATE_STRINGS_ALT + r')\b', re.IGNORECASE) # e.g. "about", "approximately", "around", "roughly", "nearly", "almost
 
 # -----------------------------------------------------------------------------
 # --------------------------- Prefix number words with number words patterns -----------------------------
@@ -386,8 +395,6 @@ PARENTHESIS_WITH_UNITS = re.compile(r'\((\d*(?:\.\d+|\s*/\s*\d+|\d+)\s*[-\s]*' +
 # Captures parenthesis with just a number and a unit in parenthesis
 PARENTHESIS_WITH_NUMBER_UNIT = re.compile(r'\(\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + ANY_UNIT_ALT + r')\s*\)')
 # PARENTHESIS_WITH_NUMBER_UNIT = re.compile(r'\((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + ANY_UNIT_ALT + r')\)')
-# PARENTHESIS_WITH_NUMBER_UNIT = re.compile(r'\(\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + ANY_UNIT_ALT + r')\s*\)')
-# PARENTHESIS_WITH_NUMBER_UNIT2 = re.compile(r'\(\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + ANY_UNIT_ALT + r'\s*\)')
 
 # captures text in parenthesis where the number then unit pattern 
 # is met and any number of whitespaces can pad the left and right of the string within the parenthesis
@@ -464,6 +471,8 @@ class IngredientRegexPatterns:
             "BASIC_UNITS": _constants.BASIC_UNITS,
             "VOLUME_UNITS": _constants.VOLUME_UNITS,
             "WEIGHT_UNITS": _constants.WEIGHT_UNITS,
+            "DIMENSION_UNITS": _constants.DIMENSION_UNITS,
+            "CASUAL_UNITS": _constants.CASUAL_UNITS,
 
             # unit hashsets
             "UNITS_SET": _constants.UNITS_SET,
@@ -471,7 +480,10 @@ class IngredientRegexPatterns:
             "NON_BASIC_UNITS_SET": _constants.NON_BASIC_UNITS_SET, 
             "VOLUME_UNITS_SET": _constants.VOLUME_UNITS_SET,
             "WEIGHT_UNITS_SET": _constants.WEIGHT_UNITS_SET,
+            "DIMENSION_UNITS_SET": _constants.DIMENSION_UNITS_SET,
             "SOMETIMES_UNITS_SET": _constants.SOMETIMES_UNITS_SET,
+            "CASUAL_UNITS_SET": _constants.CASUAL_UNITS_SET,
+            "CASUAL_QUANTITIES_SET": _constants.CASUAL_QUANTITIES_SET,
 
             "CASUAL_QUANTITIES": _constants.CASUAL_QUANTITIES,
             "UNIT_MODIFIERS": _constants.UNIT_MODIFIERS,
@@ -500,6 +512,12 @@ class IngredientRegexPatterns:
         self.SOMETIMES_UNITS_PATTERN = SOMETIMES_UNITS_PATTERN
         self.PREP_WORDS_PATTERN = PREP_WORDS_PATTERN
         self.STOP_WORDS_PATTERN = STOP_WORDS_PATTERN
+        self.CASUAL_QUANTITIES_PATTERN = CASUAL_QUANTITIES_PATTERN
+        self.CASUAL_UNITS_PATTERN = CASUAL_UNITS_PATTERN
+        self.DIMENSION_UNITS_PATTERN = DIMENSION_UNITS_PATTERN
+        self.UNIT_MODIFIERS_PATTERN = UNIT_MODIFIERS_PATTERN
+        self.APPROXIMATE_STRINGS_PATTERN = APPROXIMATE_STRINGS_PATTERN
+
 
         # unit/number or number/unit matching patterns
         self.ANY_NUMBER_THEN_UNIT = ANY_NUMBER_THEN_UNIT
@@ -627,6 +645,9 @@ class IngredientRegexPatterns:
             "UNITS": "Dictionary of units used in the recipe parser (All units, including basic, volume, and specific units).",
             "BASIC_UNITS": "Dictionary of basic units used in the recipe parser (The most common units).",
             "VOLUME_UNITS": "Dictionary of volume units used in the recipe parser (Units used for measuring volume).",
+            "WEIGHT_UNITS": "Dictionary of weight units used in the recipe parser (Units used for measuring weight).",
+            "DIMENSION_UNITS": "Dictionary of dimension units used in the recipe parser (Units used for measuring dimensions).",
+            "CASUAL_UNITS": "Dictionary of casual units used in the recipe parser (Units that are not standard units).",
 
             # sets of all unit words
             "UNITS_SET": "Set of units used in the recipe parser (All units, including basic, volume, and specific units).",
@@ -634,6 +655,10 @@ class IngredientRegexPatterns:
             "NON_BASIC_UNITS_SET": "Set of non-basic units used in the recipe parser (Units that are not in the BASIC_UNITS dictionary).",
             "SOMETIMES_UNITS_SET": "Set of units that are sometimes used in the recipe parser (Set of words that MIGHT be units if no other units are around).",
             "VOLUME_UNITS_SET": "Set of volume units used in the recipe parser (Units used for measuring volume).",
+            "WEIGHT_UNITS_SET": "Set of weight units used in the recipe parser (Units used for measuring weight).",
+            "DIMENSION_UNITS_SET": "Set of dimension units used in the recipe parser (Units used for measuring dimensions).",
+            "CASUAL_UNITS_SET": "Set of casual units used in the recipe parser (Units that are not standard units).",
+            "CASUAL_QUANTITIES_SET": "Set of casual quantities used in the recipe parser (Quantities that are not standard quantities).",
 
             "CASUAL_QUANTITIES": "Dictionary of casual quantities used in the recipe parser.",
             "UNIT_MODIFIERS": "Set of unit modifier words for lookups in recipe parser.",
@@ -654,7 +679,12 @@ class IngredientRegexPatterns:
             "SOMETIMES_UNITS_PATTERN": "Matches sometimes units in a string.",
             "PREP_WORDS_PATTERN": "Matches preparation words in a string.",
             "STOP_WORDS_PATTERN": "Matches stop words in a string.",
-            
+            "CASUAL_QUANTITIES_PATTERN": "Matches casual quantities in a string (i.e. 'couple' = 2).",
+            "CASUAL_UNITS_PATTERN": "Matches casual units in a string (i.e. 'dash', 'pinch').",
+            "DIMENSION_UNITS_PATTERN": "Matches dimension units in a string (i.e. 'inches', 'cm').",
+            "UNIT_MODIFIERS_PATTERN": "Matches unit modifiers in a string (i.e. 'large', 'small').",
+            "APPROXIMATE_STRINGS_PATTERN": "Matches approximate strings in a string (i.e. 'about', 'approximately').",
+
             # Quantities followed by units
             "ANY_NUMBER_THEN_UNIT": "Matches a number followed by a unit.",
             "ANY_NUMBER_THEN_ANYTHING_THEN_UNIT": "Matches a number followed by any text and then a unit.",

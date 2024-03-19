@@ -53,7 +53,7 @@ class IngredientSlicer:
         self.parenthesis_notes   = []
 
         self.debug = debug
-        # self.regex = regex
+        # self.extract_version = extract_version
 
         self.found_units         = None    # where units will get stored after being parsed (temporarily)
     
@@ -84,6 +84,31 @@ class IngredientSlicer:
 
         return matched_units
     
+    def _find_and_replace_casual_quantities(self):
+        """
+        Find and replace matches of CASUAL_QUANTITIES_PATTERN with the key from the CASUAL_QUANTITIES dictionary
+        """
+
+        offset = 0
+        pattern_iter = IngredientSlicer.regex.CASUAL_QUANTITIES_PATTERN.finditer(self.standard_ingredient)
+
+        for match in pattern_iter:
+            match_string    = match.group()
+
+            # Get the start and end of the match and the modified start and end positions given the offset
+            start, end = match.start(), match.end()
+            modified_start = start + offset
+            modified_end = end + offset
+
+            replacement_str = IngredientSlicer.regex.constants["CASUAL_QUANTITIES"][match_string] 
+
+            # Construct the modified string with the replacement applied
+            self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
+            # input_ingredient = input_ingredient[:modified_start] + str(replacement_str) + input_ingredient[modified_end:]
+            
+            # Update the offset for subsequent removals 
+            offset += len(str(replacement_str)) - (end - start)
+    
     def _drop_special_dashes(self) -> None:
         # print("Dropping special dashes")
         self.standard_ingredient = self.standard_ingredient.replace("—", "-").replace("–", "-").replace("~", "-")
@@ -111,7 +136,6 @@ class IngredientSlicer:
         number_words_iter = IngredientSlicer.regex.PREFIXED_NUMBER_WORDS_GROUPS.finditer(self.standard_ingredient)
 
         offset = 0
-        replacement_index = 0
 
         for match in number_words_iter:
             
@@ -715,6 +739,7 @@ class IngredientSlicer:
         # define a list containing the class methods that should be called in order on the input ingredient string
         methods = [
             self._drop_special_dashes,
+            # self._find_and_replace_casual_quantities, # NOTE: testing this out
             self._parse_prefixed_number_words, # NOTE: testing this out
             self._parse_number_words,
             self._clean_html_and_unicode,
@@ -1465,13 +1490,102 @@ class IngredientSlicer:
 
         return 
     
+    def _find_and_remove(self, string: str, pattern: re.Pattern) -> str:
+        """Find and remove all matches of a pattern from a string.
+        Args:
+            string (str): The string to search for matches in
+            pattern (re.Pattern): The pattern to search for in the string
+        Returns:
+            str: The modified string with all matches removed
+        """
+
+        pattern_iter = pattern.finditer(string)
+
+        offset = 0
+
+        for match in pattern_iter:
+            match_string    = match.group()
+            replacement_str = ""
+
+            # Get the start and end of the match and the modified start and end positions given the offset
+            start, end = match.start(), match.end()
+            modified_start = start + offset
+            modified_end = end + offset
+
+            # Construct the modified string with the replacement applied
+            string = string[:modified_start] + str(replacement_str) + string[modified_end:]
+            # self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
+
+            # Update the offset for subsequent removals # TODO: this is always 0 because we're removing the match, probably just remove...
+            offset += len(str(replacement_str)) - (end - start)
+            # print(f"""
+            # Match string: {match_string}
+            # -> Match: {match_string} at positions {start}-{end}
+            # --> Modified start/end match positions: {modified_start}-{modified_end}
+            # ---> Modified string: {string}""")
+
+        return string
+    
+    def _extract_foods2(self, ingredient: str) -> str:
+        """Does a best effort attempt to extract foods from the ingredient by 
+        removing all extraneous details, words, characters and hope we get left with the food.
+        """
+
+        # # ingredient = "roughly 2.5 cups of sugar, lightly chopped (about 8 oz), to cut into 1/2 inch pieces, large or medium, and a pinch too"
+        # ingredient = parsed['standardized_ingredient']
+        # regex = IngredientRegexPatterns()
+
+        print(f"Best effort extraction of food words from: {ingredient}")
+        # print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
+
+        # regular expressions to find and remove from the ingredient
+        # NOTE: important to remove "parenthesis" first and "stop words" last to.
+        # Parenthesis can contain other patterns and they need to be dealt with first (i.e. "(about 8 oz)" contains a number and a unit)
+        patterns_map = {
+            "parenthesis" : IngredientSlicer.regex.SPLIT_BY_PARENTHESIS,
+            "units" : IngredientSlicer.regex.UNITS_PATTERN,
+            "numbers" : IngredientSlicer.regex.ALL_NUMBERS,
+            "prep words" : IngredientSlicer.regex.PREP_WORDS_PATTERN,
+            "ly-words" : IngredientSlicer.regex.WORDS_ENDING_IN_LY,
+            "unit modifiers" : IngredientSlicer.regex.UNIT_MODIFIERS_PATTERN,
+            "dimension units" : IngredientSlicer.regex.DIMENSION_UNITS_PATTERN,
+            "approximate strings" : IngredientSlicer.regex.APPROXIMATE_STRINGS_PATTERN,
+            "sometimes units" : IngredientSlicer.regex.SOMETIMES_UNITS_PATTERN,
+            "casual quantities" : IngredientSlicer.regex.CASUAL_QUANTITIES_PATTERN,
+            "stop words" : IngredientSlicer.regex.STOP_WORDS_PATTERN
+        }
+
+        for key, pattern in patterns_map.items():
+            print(f" > Removing '{key}' from the ingredient")
+            # print(f" > Removing '{key}' from the ingredient") if self.debug else None
+
+            # print(f"Starting ingredient:\n > '{ingredient}'")
+            ingredient = self._find_and_remove(ingredient, pattern)
+            # print(f"Ending ingredient:\n > '{ingredient}'")
+            print()
+
+        print(f" > Removing any remaining special characters from the ingredient")
+        # print(f" > Removing any remaining special characters") if self.debug else None
+        
+        ingredient = re.sub(r'[^\w\s]', '', ingredient) # remove any special characters
+
+        print(f" > Removing any extra whitespaces")
+        # print(f" > Removing any extra whitespaces") if self.debug else None
+
+        ingredient = re.sub(r'\s+', ' ', ingredient).strip() # remove any extra whitespace
+
+        return ingredient
+    
     def _extract_foods(self, ingredient: str) -> str:
         """Does a best effort attempt to extract foods from the ingredient by 
         removing all extraneous details, words, characters and hope we get left with the food.
         """
-        print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
 
+        # ingredient = "roughly 2.5 cups of sugar, lightly chopped (about 8 oz), to cut into 1/2 inch pieces, large or medium, and a pinch too"
+
+        print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
         paranethesis_to_remove = IngredientSlicer.regex.SPLIT_BY_PARENTHESIS.findall(ingredient)
+        # paranethesis_to_remove = regex.SPLIT_BY_PARENTHESIS.findall(ingredient)
 
         print(f" > Removing paranethesis: {paranethesis_to_remove}") if self.debug else None
 
@@ -1494,6 +1608,32 @@ class IngredientSlicer:
         prep_words_matches  = IngredientSlicer.regex.PREP_WORDS_PATTERN.findall(ingredient)
         ly_words_matches    = IngredientSlicer.regex.WORDS_ENDING_IN_LY.findall(ingredient)
 
+        # unit_modifiers_matches = IngredientSlicer.regex.UNIT_MODIFIERS_PATTERN.findall(ingredient)
+        # dim_unit_matches       = IngredientSlicer.regex.DIMENSION_UNITS_PATTERN.findall(ingredient)
+        # approx_str_matches     = IngredientSlicer.regex.APPROXIMATE_STRINGS_PATTERN.findall(ingredient)
+        # sometimes_unit_matches = IngredientSlicer.regex.SOMETIMES_UNITS_PATTERN.findall(ingredient)
+        # casual_quantity_matches = IngredientSlicer.regex.CASUAL_QUANTITIES_PATTERN.findall(ingredient)
+
+        # unit_matches            = regex.UNITS_PATTERN.findall(ingredient)
+        # quantity_matches        = regex.ALL_NUMBERS.findall(ingredient)
+        # prep_words_matches      = regex.PREP_WORDS_PATTERN.findall(ingredient)
+        # ly_words_matches        = regex.WORDS_ENDING_IN_LY.findall(ingredient)
+        # unit_modifiers_matches  = regex.UNIT_MODIFIERS_PATTERN.findall(ingredient)
+        # dim_unit_matches        = regex.DIMENSION_UNITS_PATTERN.findall(ingredient)
+        # approx_str_matches      = regex.APPROXIMATE_STRINGS_PATTERN.findall(ingredient)
+        # sometimes_unit_matches  = regex.SOMETIMES_UNITS_PATTERN.findall(ingredient)
+        # casual_quantity_matches = regex.CASUAL_QUANTITIES_PATTERN.findall(ingredient)
+
+        # print(f"""Unit matches: {unit_matches}
+        # Quantity matches: {quantity_matches}
+        # Prep words matches: {prep_words_matches}
+        # Ly words matches: {ly_words_matches}
+        # Unit modifier matches: {unit_modifiers_matches}
+        # Dimension unit matches: {dim_unit_matches}
+        # Approximate string matches: {approx_str_matches}
+        # Sometimes unit matches: {sometimes_unit_matches}
+        # Casual quantity matches: {casual_quantity_matches}""") 
+
         # TODO: Add these to removal process
         # CASUAL_QUANTITIES
         # DIMENSION_UNITS
@@ -1502,12 +1642,25 @@ class IngredientSlicer:
         # make a single list of the strings to remove (IMPORATNT that parenthesis content is removed first)
         strings_to_remove = unit_matches + quantity_matches + prep_words_matches + ly_words_matches
 
-        for match in strings_to_remove:
-            ingredient = ingredient.replace(match, "")
+        # strings_to_remove = unit_matches + quantity_matches + prep_words_matches + ly_words_matches + \
+        # unit_modifiers_matches + dim_unit_matches + approx_str_matches + sometimes_unit_matches + casual_quantity_matches
+
+        # for match in strings_to_remove:
+        #     print(f"Removing: {match}")
+        #     print(f"START ingredient: {ingredient}\n")
+        #     ingredient = ingredient.replace(match, "")
+        #     print(f"END ingredient: {ingredient}\n")
 
         # ingredient = '2.5 cups of sugar, lightly chopped (about 8 oz)'
         stop_words_to_remove = IngredientSlicer.regex.STOP_WORDS_PATTERN.findall(ingredient)
+        # stop_words_to_remove = regex.STOP_WORDS_PATTERN.finditer(ingredient)
 
+        # for stop_word in stop_words_to_remove:
+        #     print(f"Removing: {stop_word}")
+            # print(f"START ingredient: {ingredient}\n")
+            # ingredient = ingredient.replace(stop_word, "")
+            # print(f"END ingredient: {ingredient}\n")
+        
         print(f" > Removing stop words: {stop_words_to_remove}") if self.debug else None
 
         # remove any stop words
@@ -1616,8 +1769,18 @@ class IngredientSlicer:
         # > "ly"-words
         # -------------------------------------------------------------------------------------
         print(f"Extracting food words") if self.debug else None
+        # print(f"Extracting food words (version {self.extract_version})") if self.debug else None
+        
+        # self.food = self._extract_foods(self.standard_ingredient)
+        self.food = self._extract_foods2(self.standard_ingredient)
 
-        self.food = self._extract_foods(self.standard_ingredient)
+        # if self.extract_version == 1:
+        #     self.food = self._extract_foods(self.standard_ingredient)
+        # elif self.extract_version == 2:
+        #     self.food = self._extract_foods2(self.standard_ingredient)
+        # else:
+        #     self.food = self._extract_foods(self.standard_ingredient)
+        
 
     def to_json(self) -> dict:
         """

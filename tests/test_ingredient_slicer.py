@@ -6,6 +6,148 @@ import re
 from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 
 # -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+# input_ingredient = "roughly 2.5 cups of sugar, lightly chopped (about 8 oz), to cut 1/2 inch pieces, large or medium, and a pinch too"
+# input_ingredient = "1 1/2 cups of sugar"
+# input_ingredient = "4 large skinless, boneless chicken thighs, cut into bite-sized pieces"
+# input_ingredient = "1/2 cup of sugar"
+
+input_list = [
+    "4 large skinless, boneless chicken thighs, cut into bite-sized pieces",
+    "1 (14 ounce) can coconut milk", 
+    "1 (6 ounce) can tomato paste", "2 (15-ounce) cans chickpeas, rinsed and drained",
+    "1/2 medium fresh jalapeño chile pepper, finely chopped*",
+    "1 (9.25ounce) bag corn chips, such as Fritos® Scoops!®",
+    "1/4 cup (1/2 stick) butter, divided",
+    "Graham cracker crumbs or powdered sugar for topping",
+    "1 large egg, lightly beaten"]
+
+for input_ingredient in input_list:
+    slicer = IngredientSlicer(input_ingredient)
+    slicer.parse()
+    parsed = slicer.to_json()
+    print(f"Original:\n > '{input_ingredient}'")
+    print(f"Food: '{parsed['food']}'")
+    print()
+
+slicer = IngredientSlicer(input_ingredient)
+slicer.parse()
+parsed = slicer.to_json()
+parsed["food"]
+
+# ingredient = parsed['standardized_ingredient']
+# regex = IngredientRegexPatterns()
+
+# patterns_list = [
+#     regex.SPLIT_BY_PARENTHESIS,
+#     regex.UNITS_PATTERN,
+#     regex.ALL_NUMBERS
+#     ]
+
+# for pattern in patterns_list:
+#     print(f"Starting string:\n > '{ingredient}'")
+#     # print(f"Current pattern: {pattern}")
+#     ingredient = find_and_remove(ingredient, pattern)
+#     print(f"Ending string:\n > '{ingredient}'")
+#     print()
+
+
+# def find_and_remove(string: str, pattern: re.Pattern) -> str:
+#     """Find and remove all matches of a pattern from a string.
+#     Args:
+#         string (str): The string to search for matches in
+#         pattern (re.Pattern): The pattern to search for in the string
+#     Returns:
+#         str: The modified string with all matches removed
+#     """
+
+#     pattern_iter = pattern.finditer(string)
+
+#     offset = 0
+#     replacement_index = 0
+
+#     for match in pattern_iter:
+#         start, end = match.start(), match.end()
+
+#         match_string = match.group()
+#         replacement_str = ""
+
+#         # Calculate the start and end positions in the modified string
+#         modified_start = start + offset
+#         modified_end = end + offset
+
+#         # Construct the modified string with the replacement applied
+#         string = string[:modified_start] + str(replacement_str) + string[modified_end:]
+#         # self.standard_ingredient = self.standard_ingredient[:modified_start] + str(combined_value) + self.standard_ingredient[modified_end:]
+
+#         # Update the offset for subsequent removals # NOTE: this is always 0 because we're removing the match
+#         offset += len(str(replacement_str)) - (end - start)
+#         # print(f"""
+#         # Match string: {match_string}
+#         # -> Match: {match_string} at positions {start}-{end}
+#         # --> Modified start/end match positions: {modified_start}-{modified_end}
+#         # ---> Modified string: {string}""")
+
+#     return string
+
+
+# def _extract_foods2(ingredient: str) -> str:
+#     """Does a best effort attempt to extract foods from the ingredient by 
+#     removing all extraneous details, words, characters and hope we get left with the food.
+#     """
+
+#     # # ingredient = "roughly 2.5 cups of sugar, lightly chopped (about 8 oz), to cut into 1/2 inch pieces, large or medium, and a pinch too"
+#     # ingredient = parsed['standardized_ingredient']
+#     # regex = IngredientRegexPatterns()
+
+#     print(f"Best effort extraction of food words from: {ingredient}")
+#     # print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
+
+#     # regular expressions to find and remove from the ingredient
+#     # NOTE: important to remove "parenthesis" first and "stop words" last to.
+#     # Parenthesis can contain other patterns and they need to be dealt with first (i.e. "(about 8 oz)" contains a number and a unit)
+#     patterns_map = {
+#         "parenthesis" : regex.SPLIT_BY_PARENTHESIS,
+#         "units" : regex.UNITS_PATTERN,
+#         "numbers" : regex.ALL_NUMBERS,
+#         "prep words" : regex.PREP_WORDS_PATTERN,
+#         "ly-words" : regex.WORDS_ENDING_IN_LY,
+#         "unit modifiers" : regex.UNIT_MODIFIERS_PATTERN,
+#         "dimension units" : regex.DIMENSION_UNITS_PATTERN,
+#         "approximate strings" : regex.APPROXIMATE_STRINGS_PATTERN,
+#         "sometimes units" : regex.SOMETIMES_UNITS_PATTERN,
+#         "casual quantities" : regex.CASUAL_QUANTITIES_PATTERN,
+#         "stop words" : regex.STOP_WORDS_PATTERN
+#     }
+
+#     for key, pattern in patterns_map.items():
+#         print(f" > Removing '{key}' from the ingredient")
+#         # print(f" > Removing '{key}' from the ingredient") if self.debug else None
+
+#         # print(f"Starting ingredient:\n > '{ingredient}'")
+#         ingredient = find_and_remove(ingredient, pattern)
+#         # print(f"Ending ingredient:\n > '{ingredient}'")
+#         print()
+
+#     print(f" > Removing any remaining special characters from the ingredient")
+#     # print(f" > Removing any remaining special characters") if self.debug else None
+    
+#     ingredient = re.sub(r'[^\w\s]', '', ingredient) # remove any special characters
+
+#     print(f" > Removing any extra whitespaces")
+#     # print(f" > Removing any extra whitespaces") if self.debug else None
+
+#     ingredient = re.sub(r'\s+', ' ', ingredient).strip() # remove any extra whitespace
+
+#     return ingredient
+
+# # print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
+# paranethesis_to_remove = IngredientSlicer.regex.SPLIT_BY_PARENTHESIS.findall(ingredient)
+
+# -------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # ---- Simple standard form ingredients tests ----
 # Standard form: "1 cup of sugar" (quantity, unit, ingredient)
 # -------------------------------------------------------------------------------
@@ -703,6 +845,20 @@ def test_wild_ingredients_3():
     assert parsed_ingredient['is_required'] == True
     assert parsed_ingredient['secondary_quantity'] == "1"
     assert parsed_ingredient['secondary_unit'] == "can"
+    assert parsed_ingredient['standardized_secondary_unit'] == "can"
+
+def test_wild_ingredients_4():
+    ingredient = "2 (15-ounce) cans chickpeas, rinsed and drained"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed_ingredient = parse.to_json()
+
+    assert parsed_ingredient['quantity'] == "30.0"
+    assert parsed_ingredient['unit'] == 'ounce'
+    assert parsed_ingredient['standardized_unit'] == 'ounce'
+    assert parsed_ingredient['is_required'] == True
+    assert parsed_ingredient['secondary_quantity'] == "2"
+    assert parsed_ingredient['secondary_unit'] == "cans"
     assert parsed_ingredient['standardized_secondary_unit'] == "can"
 
     # assert len(parsed_ingredient["parenthesis_notes"]) == 0
