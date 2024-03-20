@@ -41,6 +41,15 @@ class IngredientSlicer:
         self.standardized_unit           = None 
         self.standardized_secondary_unit = None
 
+        # "prep" are words that describe the state of the ingredient (i.e. "chopped", "diced", "minced")
+        self.prep                  = []
+
+        # "size modifiers" are words that describe the size of the ingredient (i.e. "large", "small", "medium")
+        self.size_modifiers        = [] 
+
+        # "dimension units" are units that describe the dimensions of the ingredient (i.e. "inch", "foot", "centimeter")
+        self.dimension_units             = []
+
         # stash the best quantity and unit for testing/debugging
         self.stashed_quantity    = None 
         self.stashed_unit        = None
@@ -84,6 +93,41 @@ class IngredientSlicer:
 
         return matched_units
     
+    def _find_and_remove_percentages(self) -> None:
+        """
+        Find and remove percentages from the ingredient string.
+        """
+
+        # # Find percentages in the ingredient string
+        # percentage_matches = IngredientSlicer.regex.PERCENTAGE_PATTERN.findall(self.standard_ingredient)
+        # # Remove percentages from the ingredient string
+        # for match in percentage_matches:
+        #     self.standard_ingredient = self.standard_ingredient.replace(match, "")
+
+        pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(self.standard_ingredient)
+        # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(ingredient)
+
+        offset = 0
+
+        for match in pattern_iter:
+            match_string    = match.group()
+
+            # Get the start and end of the match and the modified start and end positions given the offset
+            start, end = match.start(), match.end()
+            modified_start = start + offset
+            modified_end = end + offset
+
+            replacement_str = ""
+
+            # Construct the modified string with the replacement applied
+            self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
+            # ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
+            
+            # Update the offset for subsequent removals 
+            offset += len(str(replacement_str)) - (end - start)
+
+
+
     def _find_and_replace_casual_quantities(self):
         """
         Find and replace matches of CASUAL_QUANTITIES_PATTERN with the key from the CASUAL_QUANTITIES dictionary
@@ -114,13 +158,13 @@ class IngredientSlicer:
         self.standard_ingredient = self.standard_ingredient.replace("—", "-").replace("–", "-").replace("~", "-")
         return
     
-    # def _parse_fraction_words(self) -> None:
+    # def _parse_MULTI_FRACTION_WORDS(self) -> None:
     #     """
     #     Replace fraction words with their corresponding numerical values in the parsed ingredient.
     #     """
 
     #     # print("Parsing fraction words")
-    #     for word, regex_data in IngredientSlicer.regex.FRACTION_WORDS_MAP.items():
+    #     for word, regex_data in IngredientSlicer.regex.MULTI_FRACTION_WORDS_MAP.items():
     #         # print(f"Word: {word}, Regex Data: {regex_data}")
     #         pattern = regex_data[1]
     #         # print statement if word is found in ingredient and replaced
@@ -182,8 +226,8 @@ class IngredientSlicer:
             pattern = regex_data[1]
             # print statement if word is found in ingredient and replaced
             if pattern.search(self.standard_ingredient):
-                print(f"- Found {word} in ingredient. Replacing with {regex_data[0]}") if self.debug else None
-            self.standard_ingredient = pattern.sub(regex_data[0], self.standard_ingredient)
+                # print(f"- Found {word} in ingredient. Replacing with {regex_data[0]}") if self.debug else None
+                self.standard_ingredient = pattern.sub(regex_data[0], self.standard_ingredient)
 
     def _clean_html_and_unicode(self) -> None:
         """Unescape fractions from HTML code coded fractions to unicode fractions."""
@@ -290,7 +334,7 @@ class IngredientSlicer:
 
             fraction_decimal = self._fraction_str_to_decimal(match)
 
-            print(f"Fraction Decimal: {fraction_decimal}") if self.debug else None
+            # print(f"Fraction Decimal: {fraction_decimal}") if self.debug else None
 
             self.standard_ingredient = self.standard_ingredient.replace(match, str(fraction_decimal))
 
@@ -365,7 +409,6 @@ class IngredientSlicer:
         # initialize offset and replacement index values for updating the ingredient string, 
         # these will be used to keep track of the position of the match in the string
         offset = 0
-        replacement_index = 0
 
         # Update the ingredient string with the merged values
         for match in all_ranges:
@@ -374,12 +417,12 @@ class IngredientSlicer:
             # Get the start and end positions of the match
             start, end = match.start(), match.end()
 
-            print(f"Match: {match.group()} at positions {start}-{end}") if self.debug else None
+            # print(f"Match: {match.group()} at positions {start}-{end}") if self.debug else None
 
             # Get the range values from the match
             range_values = re.findall(IngredientSlicer.regex.QUANTITY_DASH_QUANTITY, match.group())
 
-            print(f"Range Values: {range_values}") if self.debug else None
+            # print(f"Range Values: {range_values}") if self.debug else None
             
             # split the range values into a list of lists
             split_range_values = [i.split("-") for i in range_values]
@@ -388,13 +431,12 @@ class IngredientSlicer:
             range_avgs    = [sum([float(num_str) for num_str in i]) / 2 for i in split_range_values][0]
             range_average = self._make_int_or_float_str(str(range_avgs))
 
-            print(f"Range Averages: {range_average}") if self.debug else None
+            # print(f"Range Averages: {range_average}") if self.debug else None
 
             # Calculate the start and end positions in the modified string
             modified_start = start + offset
             modified_end = end + offset
 
-            # print(f" -> Modified match positions: {modified_start}-{modified_end}")
             # print(f"Replacing {match.group()} with '{merged_quantity}'...")
             
             # Construct the modified string with the replacement applied
@@ -403,8 +445,8 @@ class IngredientSlicer:
 
             # Update the offset for subsequent replacements
             offset += len(range_average) - (end - start)
-            # replacement_index += 1
-            # print(f" --> Output ingredient: \n > '{ingredient}'")
+    
+        return 
 
     def _replace_and_with_hyphen(self, match):
         # Replace "and" and "&" with hyphens
@@ -427,23 +469,25 @@ class IngredientSlicer:
         # print("Fixing ranges")
         # Define the regular expression pattern to match ranges
 
-        print(f"Before initial range update:\n {self.standard_ingredient}") if self.debug else None
-        # tmp ='i like to eat 1-2 oz with cats and 1 - 2 ft of snow and 1 -- 45 inches, cats do between 1  and 5 digs, i like between 1 and 2 mm'
+        # print(f"Before initial range update:\n {self.standard_ingredient}") if self.debug else None
+
         # Update ranges of numbers that are separated by one or more hyphens
         self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_DASH_QUANTITY)
         # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.QUANTITY_RANGE)
-        # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.QUANTITY_RANGE_PATTERN)
-        print(f"After initial range update:\n {self.standard_ingredient}") if self.debug else None
+
+        # print(f"After initial range update:\n {self.standard_ingredient}") if self.debug else None
 
         # Update ranges of numbers that are preceded by "between" and followed by "and" or "&"
         self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.BETWEEN_QUANTITY_AND_QUANTITY, self._replace_and_with_hyphen)
         # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.BETWEEN_NUM_AND_NUM_PATTERN, self._replace_and_with_hyphen)
-        print(f"After between and update:\n {self.standard_ingredient}") if self.debug else None
+        
+        # print(f"After between and update:\n {self.standard_ingredient}") if self.debug else None
 
         # Update ranges that are separated by "to" or "or"
         self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_TO_OR_QUANTITY, self._replace_to_or_with_hyphen)
         # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.RANGE_WITH_TO_OR_PATTERN, self._replace_to_or_with_hyphen)
-        print(f"After to or update:\n {self.standard_ingredient}") if self.debug else None
+        
+        # print(f"After to or update:\n {self.standard_ingredient}") if self.debug else None
 
     def _remove_repeat_units(self) -> None:
         """
@@ -505,8 +549,6 @@ class IngredientSlicer:
             >>> _merge_spaced_numbers('2 8')
             '16'
         """
-
-        # spaced_numbers = '0.5'
 
         # Get the numbers from the spaced seperated string
         split_numbers = re.findall(IngredientSlicer.regex.SPLIT_SPACED_NUMS, spaced_numbers)
@@ -591,7 +633,7 @@ class IngredientSlicer:
             # unit_after_match = re.search(regex_map.UNITS_PATTERN, ingredient[end:])
             
             if unit_after_match:
-                print(f"unit after match: > '{unit_after_match.group()}'")
+                # print(f"unit after match: > '{unit_after_match.group()}'")
                 units.append(unit_after_match.group())
 
             # add the spaced number to the list
@@ -601,15 +643,15 @@ class IngredientSlicer:
             merged_quantity = self._merge_spaced_numbers(match.group())
             merge_operation = self._which_merge_on_spaced_numbers(match.group())
 
-            print(f"merged_quantity: {merged_quantity}") if self.debug else None
-            print(f"merge_operation: {merge_operation}\n") if self.debug else None
+            # print(f"merged_quantity: {merged_quantity}") if self.debug else None
+            # print(f"merge_operation: {merge_operation}\n") if self.debug else None
 
             # Calculate the start and end positions in the modified string
             modified_start = start + offset
             modified_end = end + offset
 
             # print(f" -> Modified match positions: {modified_start}-{modified_end}")
-            print(f"Replacing {match.group()} with '{merged_quantity}'...") if self.debug else None
+            # print(f"Replacing {match.group()} with '{merged_quantity}'...") if self.debug else None
             
             # Construct the modified string with the replacement applied
             self.standard_ingredient = self.standard_ingredient[:modified_start] + str(merged_quantity) + self.standard_ingredient[modified_end:]
@@ -739,7 +781,8 @@ class IngredientSlicer:
         # define a list containing the class methods that should be called in order on the input ingredient string
         methods = [
             self._drop_special_dashes,
-            # self._find_and_replace_casual_quantities, # NOTE: testing this out
+            self._find_and_remove_percentages,
+            self._find_and_replace_casual_quantities, # NOTE: testing this out
             self._parse_prefixed_number_words, # NOTE: testing this out
             self._parse_number_words,
             self._clean_html_and_unicode,
@@ -807,7 +850,7 @@ class IngredientSlicer:
 
         # debugging message
         basic_units_message = f"Valid basic units: {valid_basic_units}" if valid_basic_units else f"No valid basic units found..."
-        print(basic_units_message) if self.debug else None
+        # print(basic_units_message) if self.debug else None
 
         # if we have valid single number quantities, then set the self.quantity and the self.unit member variables and exit the function
         if basic_unit_matches and valid_basic_units:
@@ -852,8 +895,8 @@ class IngredientSlicer:
         all_quantities_message = f"Valid quantities: {valid_quantities}" if valid_quantities else f"No valid quantities found..."
         all_units_message = f"Valid units: {valid_units}" if valid_units else f"No valid units found..."
 
-        print(all_quantities_message) if self.debug else None
-        print(all_units_message) if self.debug else None
+        # print(all_quantities_message) if self.debug else None
+        # print(all_units_message) if self.debug else None
 
         # if either have valid quantities then set the best quantity and best unit to 
         # the first valid quantity and units found, otherwise set as None
@@ -889,7 +932,7 @@ class IngredientSlicer:
         # just print a message if no valid quantities or units are found and return None
         # best_quantity and best_unit are set to None by default and will remain that way if no units or quantities were found.
         no_matches_message = f"No valid quantities or units found..."
-        print(no_matches_message) if self.debug else None
+        # print(no_matches_message) if self.debug else None
 
         return 
     
@@ -970,12 +1013,8 @@ class IngredientSlicer:
             None
         """
         
-        print(f"""
-        Ingredient: '{self.reduced_ingredient}'
-        Parenthesis: '{parenthesis}'
-        self.quantity: '{self.quantity}'
-        Unit: '{self.unit}'""") if self.debug else None
-        
+        # print(f"""Ingredient: '{self.reduced_ingredient}'\nParenthesis: '{parenthesis}'\nQuantity: '{self.quantity}'\nUnit: '{self.unit}'""") if self.debug else None
+
         # Set a None Description
         description = None
 
@@ -1015,8 +1054,9 @@ class IngredientSlicer:
             self.secondary_quantity = self.quantity 
 
             # Update the quantity with the updated merged quantity
-            self.quantity = updated_quantity
-            
+            self.quantity = self._make_int_or_float_str(updated_quantity)
+            # self.quantity = updated_quantity
+
             # return [updated_quantity, self.unit, description]
             return
         
@@ -1051,7 +1091,8 @@ class IngredientSlicer:
             self.secondary_quantity = self.quantity 
 
             # Update the quantity with the updated merged quantity (original quantity * parenthesis quantity)
-            self.quantity = updated_quantity
+            self.quantity = self._make_int_or_float_str(updated_quantity)
+            # self.quantity = updated_quantity
 
             return
 
@@ -1079,11 +1120,8 @@ class IngredientSlicer:
             None
         """
 
-        print(f"""
-        Ingredient: '{self.reduced_ingredient}'
-        Parenthesis: '{parenthesis}'
-        Quantity: '{self.quantity}'
-        Unit: '{self.unit}'""") if self.debug else None
+        # print(f"""Ingredient: '{self.reduced_ingredient}'\nParenthesis: '{parenthesis}'\nQuantity: '{self.quantity}'\nUnit: '{self.unit}'""") if self.debug else None
+
         
         # Set a None Description
         description = None
@@ -1099,7 +1137,7 @@ class IngredientSlicer:
         #           OR parenthesis contains a quantity per unit like string in the parenthesis (i.e. "(about 2 ounces each)" contains "each")
         # Then return early with NO UPDATES and keep the current quantity/unit as is
         if not equivalent_quantity_unit or any([True if i in IngredientSlicer.regex.constants["QUANTITY_PER_UNIT_STRINGS"] else False for i in split_parenthesis]):
-            print(f"\n > Return early from EQUIVALENCE parenthesis") if self.debug else None
+            # print(f"\n > Return early from EQUIVALENCE parenthesis") if self.debug else None
             description = f"not a equivalence quantity unit parenthesis"
             self.parenthesis_notes.append(description)
             return
@@ -1245,12 +1283,7 @@ class IngredientSlicer:
             None
         """
 
-
-        print(f"""
-        Ingredient: '{self.reduced_ingredient}'
-        Parenthesis: '{parenthesis}'
-        Quantity: '{self.quantity}'
-        Unit: '{self.unit}'""") if self.debug else None
+        # print(f"""Ingredient: '{self.reduced_ingredient}'\nParenthesis: '{parenthesis}'\nQuantity: '{self.quantity}'\nUnit: '{self.unit}'""") if self.debug else None
 
         # Set a None Description
         description = None
@@ -1261,7 +1294,7 @@ class IngredientSlicer:
 
         # if no numbers only parenthesis, then just return the original ingredient
         if not quantity_unit_only:
-            print(f"\n > Return early from QUANTITY UNIT parenthesis") if self.debug else None
+            # print(f"\n > Return early from QUANTITY UNIT parenthesis") if self.debug else None
             description = f"not a quantity unit only parenthesis"
             self.parenthesis_notes.append(description)
             # return [self.quantity, unit, description]
@@ -1274,7 +1307,7 @@ class IngredientSlicer:
             # if no quantity AND no unit, then we can use the parenthesis self.quantity-unit as our self.quantity and unit
         if not self.quantity and not self.unit:
             # updated_quantity, updated_unit = quantity_unit_only[0]
-            print(f"\n > Case when: NO quantity, NO unit") if self.debug else None
+            # print(f"\n > Case when: NO quantity, NO unit") if self.debug else None
 
             description = f"used quantity/unit from parenthesis with no quantity/unit"
             self.parenthesis_notes.append(description)
@@ -1293,7 +1326,7 @@ class IngredientSlicer:
             # if there is a quantity but no unit, we can try to merge (multiply) the current quantity and the parenthesis quantity 
             # then use the unit in the parenthesis
         if self.quantity and not self.unit:
-            print(f"\n > Case when: YES quantity, NO unit") if self.debug else None
+            # print(f"\n > Case when: YES quantity, NO unit") if self.debug else None
 
             # quantity_unit_only[0][0]
             updated_quantity = str(float(self.quantity) * float(parenthesis_quantity))
@@ -1304,8 +1337,9 @@ class IngredientSlicer:
             # set the secondary quantity/units to the original quantity/units
             self.secondary_quantity = self.quantity
             self.secondary_unit = self.unit
-            
-            self.quantity = updated_quantity
+
+            # self.quantity = updated_quantity
+            self.quantity = self._make_int_or_float_str(updated_quantity)
             self.unit = parenthesis_unit
 
             # return [updated_quantity, parenthesis_unit, description]
@@ -1317,7 +1351,7 @@ class IngredientSlicer:
             # 2. A quantity and unit (i.e. 2 ounces)
             # either case, just return the parenthesis units to use those
         if not self.quantity and self.unit:
-            print(f"\n > Case when: NO quantity, YES unit") if self.debug else None
+            # print(f"\n > Case when: NO quantity, YES unit") if self.debug else None
 
             description = f"No quantity but has units, used parenthesis. maybe quantity/unit is: {self.quantity}/{self.unit}"
             self.parenthesis_notes.append(description)
@@ -1332,21 +1366,12 @@ class IngredientSlicer:
             # return [parenthesis_quantity, parenthesis_unit, description]
             return
 
-        # # Case when: YES quantity, YES unit:
-        #     # if we already have a quantity AND a unit, then we likely just found a description and that is all.
-        # if self.quantity and self.unit:
-        #     # use the parenthesis values as a description and join the values together 
-        #     description = f"maybe quantity/unit is: {' '.join(quantity_unit_only[0])}"
-        #     self.parenthesis_notes.append(description)
-        #     # return [self.quantity, unit, description]
-        #     return
-
         # Case when: YES quantity, YES unit:
             # if we already have a quantity AND a unit, then we likely just found a description 
             # OR we may have found an equivalence quantity unit.
             # we will choose to use the quantity/unit pairing that is has a unit in the BASIC_UNITS_SET
         if self.quantity and self.unit:
-            print(f"\n > Case when: YES quantity, YES unit") if self.debug else None
+            # print(f"\n > Case when: YES quantity, YES unit") if self.debug else None
 
             # flags for if original unit/parenthesis unit are in the set of basic units (BASIC_UNITS_SET) or not
             parenthesis_unit_is_basic = parenthesis_unit in IngredientSlicer.regex.constants["BASIC_UNITS_SET"]
@@ -1355,7 +1380,7 @@ class IngredientSlicer:
             # Case when BOTH are basic units: 
             #   use the original quantity/unit (stash the parenthesis in the description)
             if parenthesis_unit_is_basic and unit_is_basic:
-                print(f"\n >>> Case when: BASIC parenthesis unit, BASIC unit") if self.debug else None
+                # print(f"\n >>> Case when: BASIC parenthesis unit, BASIC unit") if self.debug else None
 
                 description = f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}"
                 self.parenthesis_notes.append(description)
@@ -1369,7 +1394,7 @@ class IngredientSlicer:
             #   use the original quantity/unit AND set the secondary quantity/units to the PARENTHESIS values 
             #   (stash the parenthesis in the description)
             if not parenthesis_unit_is_basic and not unit_is_basic:
-                print(f"\n >>> Case when: NOT BASIC parenthesis unit, NOT BASIC unit") if self.debug else None
+                # print(f"\n >>> Case when: NOT BASIC parenthesis unit, NOT BASIC unit") if self.debug else None
                 description = f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}"
                 self.parenthesis_notes.append(description)
 
@@ -1382,7 +1407,7 @@ class IngredientSlicer:
             #  Try to merge (multiply) the current quantity and the parenthesis quantity
             #  AND set the secondary quantity/units to the ORIGINAL values
             if parenthesis_unit_is_basic and not unit_is_basic:
-                print(f"\n >>> Case when: BASIC parenthesis unit, NOT BASIC unit (EXPLICIT)") if self.debug else None
+                # print(f"\n >>> Case when: BASIC parenthesis unit, NOT BASIC unit (EXPLICIT)") if self.debug else None
                 updated_quantity = str(float(self.quantity) * float(parenthesis_quantity))
 
                 description = f"multiplied starting quantity with parenthesis quantity"
@@ -1392,7 +1417,8 @@ class IngredientSlicer:
                 self.secondary_quantity = self.quantity
                 self.secondary_unit = self.unit
 
-                self.quantity = updated_quantity
+                # self.quantity = updated_quantity
+                self.quantity = self._make_int_or_float_str(updated_quantity)
                 self.unit = parenthesis_unit
 
                 return
@@ -1402,7 +1428,7 @@ class IngredientSlicer:
             #   then use the parenthesis quantity/unit AND set the secondary quantity/units to the ORIGINAL values
             #   (stash the original in the description)
             if parenthesis_unit_is_basic:
-                print(f"\n >>> Case when: BASIC parenthesis unit, NOT BASIC unit (IMPLICIT)") if self.debug else None
+                # print(f"\n >>> Case when: BASIC parenthesis unit, NOT BASIC unit (IMPLICIT)") if self.debug else None
                 description = f"maybe quantity/unit is: {self.quantity}/{self.unit}"
                 self.parenthesis_notes.append(description)
 
@@ -1419,7 +1445,7 @@ class IngredientSlicer:
             #   then just keep the original quantity/unit AND set the secondary quantity/units to the PARENTHESIS values
             #   (stash the original in the description)
             if unit_is_basic:
-                print(f"\n >>> Case when: NOT BASIC parenthesis unit, BASIC unit (IMPLICIT)") if self.debug else None
+                # print(f"\n >>> Case when: NOT BASIC parenthesis unit, BASIC unit (IMPLICIT)") if self.debug else None
                 description = f"maybe quantity/unit is: {self.quantity}/{self.unit}"
                 self.parenthesis_notes.append(description)
 
@@ -1526,17 +1552,12 @@ class IngredientSlicer:
 
         return string
     
-    def _extract_foods2(self, ingredient: str) -> str:
+    def _extract_foods(self, ingredient: str) -> str:
         """Does a best effort attempt to extract foods from the ingredient by 
         removing all extraneous details, words, characters and hope we get left with the food.
         """
 
-        # # ingredient = "roughly 2.5 cups of sugar, lightly chopped (about 8 oz), to cut into 1/2 inch pieces, large or medium, and a pinch too"
-        # ingredient = parsed['standardized_ingredient']
-        # regex = IngredientRegexPatterns()
-
-        print(f"Best effort extraction of food words from: {ingredient}")
-        # print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
+        print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
 
         # regular expressions to find and remove from the ingredient
         # NOTE: important to remove "parenthesis" first and "stop words" last to.
@@ -1550,137 +1571,59 @@ class IngredientSlicer:
             "unit modifiers" : IngredientSlicer.regex.UNIT_MODIFIERS_PATTERN,
             "dimension units" : IngredientSlicer.regex.DIMENSION_UNITS_PATTERN,
             "approximate strings" : IngredientSlicer.regex.APPROXIMATE_STRINGS_PATTERN,
-            "sometimes units" : IngredientSlicer.regex.SOMETIMES_UNITS_PATTERN,
+            "sometimes units" : IngredientSlicer.regex.SIZE_MODIFIERS_PATTERN,
             "casual quantities" : IngredientSlicer.regex.CASUAL_QUANTITIES_PATTERN,
             "stop words" : IngredientSlicer.regex.STOP_WORDS_PATTERN
         }
 
         for key, pattern in patterns_map.items():
-            print(f" > Removing '{key}' from the ingredient")
-            # print(f" > Removing '{key}' from the ingredient") if self.debug else None
+            print(f" > Removing '{key}' from the ingredient\n") if self.debug else None
 
             # print(f"Starting ingredient:\n > '{ingredient}'")
             ingredient = self._find_and_remove(ingredient, pattern)
             # print(f"Ending ingredient:\n > '{ingredient}'")
-            print()
 
-        print(f" > Removing any remaining special characters from the ingredient")
-        # print(f" > Removing any remaining special characters") if self.debug else None
+        print(f" > Removing any remaining special characters") if self.debug else None
         
         ingredient = re.sub(r'[^\w\s]', '', ingredient) # remove any special characters
 
-        print(f" > Removing any extra whitespaces")
-        # print(f" > Removing any extra whitespaces") if self.debug else None
+        print(f" > Removing any extra whitespaces") if self.debug else None
 
         ingredient = re.sub(r'\s+', ' ', ingredient).strip() # remove any extra whitespace
 
         return ingredient
     
-    def _extract_foods(self, ingredient: str) -> str:
-        """Does a best effort attempt to extract foods from the ingredient by 
-        removing all extraneous details, words, characters and hope we get left with the food.
-        """
+    def _extract_prep_words(self, ingredient: str) -> str:
+        """Get prep words from the ingredient (including words ending in 'ly')"""
 
-        # ingredient = "roughly 2.5 cups of sugar, lightly chopped (about 8 oz), to cut into 1/2 inch pieces, large or medium, and a pinch too"
+        ly_ending_words = set(IngredientSlicer.regex.WORDS_ENDING_IN_LY.findall(ingredient))
+        ly_ending_words = list(ly_ending_words - IngredientSlicer.regex.constants["APPROXIMATE_STRINGS"]) # remove any accidental match overlaps like "approximately"
 
-        print(f"Best effort extraction of food words from: {ingredient}") if self.debug else None
-        paranethesis_to_remove = IngredientSlicer.regex.SPLIT_BY_PARENTHESIS.findall(ingredient)
-        # paranethesis_to_remove = regex.SPLIT_BY_PARENTHESIS.findall(ingredient)
+        prep_words = IngredientSlicer.regex.PREP_WORDS_PATTERN.findall(ingredient)
+        prep_words.extend(ly_ending_words) # combine the prep words with the 'ly' ending words
+        prep_words = list(set(prep_words)) # unique 
+        prep_words.sort()       
 
-        print(f" > Removing paranethesis: {paranethesis_to_remove}") if self.debug else None
-
-        for parenthesis in paranethesis_to_remove:
-            ingredient = ingredient.replace(parenthesis, "")
-
-        # # ingredient = '2.5 cups of sugar, lightly chopped (about 8 oz)'
-        # stop_words_to_remove = IngredientSlicer.regex.STOP_WORDS_PATTERN.findall(ingredient)
-
-        # print(f" > Removing stop words: {stop_words_to_remove}") if self.debug else None
-
-        # # remove any stop words
-        # for stop_word in stop_words_to_remove:
-        #     ingredient = ingredient.replace(stop_word, "")
-
-        print(f" > Removing units, quantites, prep words, and adverbs ending in 'ly'") if self.debug else None
-
-        unit_matches        = IngredientSlicer.regex.UNITS_PATTERN.findall(ingredient)
-        quantity_matches    = IngredientSlicer.regex.ALL_NUMBERS.findall(ingredient)
-        prep_words_matches  = IngredientSlicer.regex.PREP_WORDS_PATTERN.findall(ingredient)
-        ly_words_matches    = IngredientSlicer.regex.WORDS_ENDING_IN_LY.findall(ingredient)
-
-        # unit_modifiers_matches = IngredientSlicer.regex.UNIT_MODIFIERS_PATTERN.findall(ingredient)
-        # dim_unit_matches       = IngredientSlicer.regex.DIMENSION_UNITS_PATTERN.findall(ingredient)
-        # approx_str_matches     = IngredientSlicer.regex.APPROXIMATE_STRINGS_PATTERN.findall(ingredient)
-        # sometimes_unit_matches = IngredientSlicer.regex.SOMETIMES_UNITS_PATTERN.findall(ingredient)
-        # casual_quantity_matches = IngredientSlicer.regex.CASUAL_QUANTITIES_PATTERN.findall(ingredient)
-
-        # unit_matches            = regex.UNITS_PATTERN.findall(ingredient)
-        # quantity_matches        = regex.ALL_NUMBERS.findall(ingredient)
-        # prep_words_matches      = regex.PREP_WORDS_PATTERN.findall(ingredient)
-        # ly_words_matches        = regex.WORDS_ENDING_IN_LY.findall(ingredient)
-        # unit_modifiers_matches  = regex.UNIT_MODIFIERS_PATTERN.findall(ingredient)
-        # dim_unit_matches        = regex.DIMENSION_UNITS_PATTERN.findall(ingredient)
-        # approx_str_matches      = regex.APPROXIMATE_STRINGS_PATTERN.findall(ingredient)
-        # sometimes_unit_matches  = regex.SOMETIMES_UNITS_PATTERN.findall(ingredient)
-        # casual_quantity_matches = regex.CASUAL_QUANTITIES_PATTERN.findall(ingredient)
-
-        # print(f"""Unit matches: {unit_matches}
-        # Quantity matches: {quantity_matches}
-        # Prep words matches: {prep_words_matches}
-        # Ly words matches: {ly_words_matches}
-        # Unit modifier matches: {unit_modifiers_matches}
-        # Dimension unit matches: {dim_unit_matches}
-        # Approximate string matches: {approx_str_matches}
-        # Sometimes unit matches: {sometimes_unit_matches}
-        # Casual quantity matches: {casual_quantity_matches}""") 
-
-        # TODO: Add these to removal process
-        # CASUAL_QUANTITIES
-        # DIMENSION_UNITS
-        # SOMETIMES_UNITS_SET
-        # APPROXIMATE_STRINGS
-        # make a single list of the strings to remove (IMPORATNT that parenthesis content is removed first)
-        strings_to_remove = unit_matches + quantity_matches + prep_words_matches + ly_words_matches
-
-        # strings_to_remove = unit_matches + quantity_matches + prep_words_matches + ly_words_matches + \
-        # unit_modifiers_matches + dim_unit_matches + approx_str_matches + sometimes_unit_matches + casual_quantity_matches
-
-        # for match in strings_to_remove:
-        #     print(f"Removing: {match}")
-        #     print(f"START ingredient: {ingredient}\n")
-        #     ingredient = ingredient.replace(match, "")
-        #     print(f"END ingredient: {ingredient}\n")
-
-        # ingredient = '2.5 cups of sugar, lightly chopped (about 8 oz)'
-        stop_words_to_remove = IngredientSlicer.regex.STOP_WORDS_PATTERN.findall(ingredient)
-        # stop_words_to_remove = regex.STOP_WORDS_PATTERN.finditer(ingredient)
-
-        # for stop_word in stop_words_to_remove:
-        #     print(f"Removing: {stop_word}")
-            # print(f"START ingredient: {ingredient}\n")
-            # ingredient = ingredient.replace(stop_word, "")
-            # print(f"END ingredient: {ingredient}\n")
-        
-        print(f" > Removing stop words: {stop_words_to_remove}") if self.debug else None
-
-        # remove any stop words
-        for stop_word in stop_words_to_remove:
-            ingredient = ingredient.replace(stop_word, "")
-
-        print(f" > Removing any remaining special characters") if self.debug else None
-
-        # remove any special characters
-        ingredient = re.sub(r'[^\w\s]', '', ingredient)
-
-        print(f" > Removing any extra whitespaces") if self.debug else None
-
-        # remove any extra whitespace
-        ingredient = re.sub(r'\s+', ' ', ingredient).strip()
-
-        # is_single_food_word = len(ingredient.split()) == 1
-
-        return ingredient
+        return prep_words
     
+    def _extract_size_modifiers(self, ingredient: str) -> str:
+        """Extract size modifier words from the ingredient"""
+
+        size_modifiers = IngredientSlicer.regex.SIZE_MODIFIERS_PATTERN.findall(ingredient)
+        size_modifiers.sort()
+
+        return size_modifiers
+
+    def _extract_dimension_units(self, ingredient: str) -> str:
+        """Add sometimes units to the units variables if they are the only possible units after the ingredient has been parsed."""
+        # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
+
+        dimension_units = IngredientSlicer.regex.QUANTITY_DIMENSION_UNIT_GROUPS.findall(ingredient)
+        dimension_units.sort()
+
+        return dimension_units
+
+
     def parse(self):
         # TODO: process parenthesis content
 
@@ -1771,16 +1714,16 @@ class IngredientSlicer:
         print(f"Extracting food words") if self.debug else None
         # print(f"Extracting food words (version {self.extract_version})") if self.debug else None
         
-        # self.food = self._extract_foods(self.standard_ingredient)
-        self.food = self._extract_foods2(self.standard_ingredient)
+        self.food = self._extract_foods(self.standard_ingredient)
 
-        # if self.extract_version == 1:
-        #     self.food = self._extract_foods(self.standard_ingredient)
-        # elif self.extract_version == 2:
-        #     self.food = self._extract_foods2(self.standard_ingredient)
-        # else:
-        #     self.food = self._extract_foods(self.standard_ingredient)
+        # ----------------------------------- STEP 8 ------------------------------------------
+        # ---- Extract extra, descriptors (prep words, size modifiers, dimension units) ----
+        # -------------------------------------------------------------------------------------
+        print(f"Extracting prep words, size modifiers") if self.debug else None
+        # print(f"Extracting food words (version {self.extract_version})") if self.debug else None
         
+        self.prep = self._extract_prep_words(self.standard_ingredient)
+        self.size_modifiers = self._extract_size_modifiers(self.standard_ingredient)
 
     def to_json(self) -> dict:
         """
@@ -1789,7 +1732,7 @@ class IngredientSlicer:
             dict: A dictionary containing the IngredientSlicer object's member variables.
         """
         return {
-            "ingredient": self.ingredient,                                # "2 1/2 cups of sugar (about 40 tbsp of sugar)"
+            "ingredient": self.ingredient,                                # "2 1/2 large cups of sugar lightly packed (about 40 tbsp of sugar)"
             "standardized_ingredient": self.standard_ingredient,          # "2.5 cups of sugar"
         
             "food" : self.food,                                           # "sugar"
@@ -1801,6 +1744,9 @@ class IngredientSlicer:
             "secondary_quantity": self.secondary_quantity,                # "40"
             "secondary_unit": self.secondary_unit,                        # "tbsp"
             "standardized_secondary_unit": self.standardized_secondary_unit,  # "tablespoon"
+
+            "prep": self.prep,                                            # ["lightly", "packed"]
+            "size_modifiers": self.size_modifiers,                        # ["large"]
 
             "is_required": self.is_required,                              # True
 

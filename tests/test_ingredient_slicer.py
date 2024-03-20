@@ -7,33 +7,654 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
+# ---- Simple standard form ingredients tests ----
+# Standard form: "1 cup of sugar" (quantity, unit, ingredient)
+# -------------------------------------------------------------------------------
+
+def test_standard_formatted_ingredients():
+
+    slicer = IngredientSlicer("2 tablespoons of sugar")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'tablespoons'
+    assert parsed['is_required'] == True
+
+    parse2 = IngredientSlicer("1/2 cup of sugar")
+    parse2.parse()
+    parsed = parse2.to_json()
+    assert parsed['quantity'] == "0.5"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+    parse3 = IngredientSlicer("1 1/2 cups of sugar")
+    parse3.parse()
+    parsed = parse3.to_json()
+    assert parsed['quantity'] == "1.5"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_quantity_and_unit_1():
+    parse = IngredientSlicer("3 pounds of beef")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "3"
+    assert parsed['unit'] == 'pounds'
+    assert parsed['is_required'] == True
+
+def test_quantity_and_unit_2():
+    parse = IngredientSlicer("14 lbs of lettuce")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "14"
+    assert parsed['unit'] == 'lbs'
+    assert parsed['standardized_unit'] == 'pound'
+    assert parsed['is_required'] == True
+
+    assert parsed['is_required'] == True
+
+# -------------------------------------------------------------------------------
+# ---- Words-to-numbers tests ----
+# -------------------------------------------------------------------------------
+
+def test_number_words_1():
+    parse = IngredientSlicer("two cups of flour")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+    assert parsed['is_required'] == True
+
+def test_number_words_2():
+    parse = IngredientSlicer("two cups of flour and three cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+    assert parsed['is_required'] == True
+
+    parse = IngredientSlicer("two thirds a cups of flour")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+    assert parsed['is_required'] == True
+    
+# -------------------------------------------------------------------------------
+# ---- Words-to-numbers (with prefixed word numbers) tests ----
+# -------------------------------------------------------------------------------
+
+def test_prefixed_number_words_1():
+    parse = IngredientSlicer("twenty seven cups of flour")
+    parse.parse()
+    parsed = parse.to_json()
+    
+    assert parsed['quantity'] == "27"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+    assert parsed['is_required'] == True
+
+def test_prefixed_number_words_2():
+    parse = IngredientSlicer("hundred twenty cups of flour")
+    parse.parse()
+    parsed = parse.to_json()
+    
+    assert parsed['quantity'] == "120"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+    assert parsed['is_required'] == True
+
+def test_prefixed_number_words_3():
+    parse = IngredientSlicer("a twenty-two lb bag of sugar", debug = True)
+    parse.parse()
+    parsed = parse.to_json()
+    
+
+    assert parsed['quantity'] == "22"
+    assert parsed['unit'] == 'lb'
+    assert parsed['standardized_unit'] == "pound"
+    assert parsed['is_required'] == True
+
+# -------------------------------------------------------------------------------
+# ---- Multinumber (space separated) tests ----
+# -------------------------------------------------------------------------------
+
+def test_simple_multinumber_1():
+    parse = IngredientSlicer("1 1/2 cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "1.5"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_simple_multinumber_2():
+    parse = IngredientSlicer("1 1/2  cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "1.5"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_simple_multinumber_3():
+    parse = IngredientSlicer("1 1/2 1/4 cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == '1.5 0.25 cups of sugar'
+    assert parsed['quantity'] == "1.5"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_multiple_multinumber_1():
+    parse = IngredientSlicer("1 1/2 1/4 1/8 cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '1.5 0.375 cups of sugar'
+    assert parsed['quantity'] == "1.5"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_multiple_multinumber_2():
+    parse = IngredientSlicer("1 1/2 1/4 1/8 1/16 cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '1.5 0.375 0.062 cups of sugar'
+    assert parsed['quantity'] == "1.5"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_multiple_multinumber_3():
+    parse = IngredientSlicer("1.5 2/3 cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '2.167 cups of sugar'
+    assert parsed['quantity'] == "2.167"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_multiple_multinumber_4():
+    parse = IngredientSlicer("3 12 cups of sugar (optional)")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '36 cups of sugar (optional)'
+    assert parsed['quantity'] == "36"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == False
+
+# -------------------------------------------------------------------------------
+# ---- Multinumber (space separated) tests ----
+# -------------------------------------------------------------------------------
+
+def test_multiple_multinumber_ranges_1():
+    parse = IngredientSlicer("3 - 12 1/2 cups of sugar (optional)")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '7.75 cups of sugar (optional)'
+    assert parsed['quantity'] == "7.75"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == False
+
+def test_multiple_multinumber_ranges_2():
+    parse = IngredientSlicer("3 - 12 1/2 1/4 cups of sugar (optional)")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '7.75 0.25 cups of sugar (optional)'
+    assert parsed['quantity'] == "7.75"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == False
+
+def test_multiple_multinumber_ranges_3():
+    parse = IngredientSlicer("2 1/2 - 4  cups of sugar (optional)")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '3.25  cups of sugar (optional)'
+    assert parsed['quantity'] == "3.25"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == 'cup'
+    assert parsed['is_required'] == False
+
+# parse = IngredientSlicer('1.5 0.25 cups of sugar')
+# parse.parse()
+# parsed = parse.to_json()
+# parsed
+# TODO: Maybe implement this which makes sure to always reduce any SPACE_SEP_NUMBERS to a single number
+# TODO:  where possible and do this RECURSIVELY until there are no space separated numbers left. 
+# TODO: I've got to see/think if this is a risky approach, just need to narrow down the base case of the recursion...
+# ingredient = "1 1/2 1/4 cups of sugar"
+# while regex_map.SPACE_SEP_NUMBERS.findall(ingredient):
+#     print(f"Start ingredient: {ingredient}")
+#     print(f"Continuing reducing multinumbers...")
+
+#     parse = IngredientSlicer(ingredient)
+#     parse.parse()
+
+#     ingredient = parsed["standardized_ingredient"]
+#     print(f"--> End ingredient: {ingredient}")
+#     print(f"\n")
+
+# regex_map.print_matches(ingredient)
+# regex_map.print_matches("1.75 cups of sugar")
+
+# -------------------------------------------------------------------------------
+# ---- Badly designed ingredients tests ----
+# -------------------------------------------------------------------------------
+    
+def test_quantity_only():
+    parse = IngredientSlicer("2")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == None
+    assert parsed['is_required'] == True
+
+def test_no_quantity():
+    parse = IngredientSlicer("sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == None
+    assert parsed['unit'] == None
+    assert parsed['is_required'] == True
+
+# -------------------------------------------------------------------------------
+# ---- Fraction processing tests ----
+# -------------------------------------------------------------------------------
+    
+def test_fraction_as_quantity():
+    parse = IngredientSlicer("1/4 cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "0.25"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_fraction_as_quantity_2():
+    parse = IngredientSlicer("1 1/4 cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "1.25"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+# -------------------------------------------------------------------------------
+# ---- Fraction/Range tests ----
+# -------------------------------------------------------------------------------
+    
+def test_fraction_range_as_quantity_1():
+    parse = IngredientSlicer("1-1/2 cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "0.75"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_fraction_range_as_quantity_2():
+    parse = IngredientSlicer("1/2-1 cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "0.75"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_fraction_dupe_units_range_quantity_1():
+    parse = IngredientSlicer("1cup-1/2 cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "0.75"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_fraction_dupe_units_range_quantity_2():
+    parse = IngredientSlicer("1/2 cup-1 cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "0.75"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_fraction_dupe_units_range_quantity_3():
+    parse = IngredientSlicer("1/2cup-1cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "0.75"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+# -------------------------------------------------------------------------------
+# ---- Unicode fraction tests ----
+# -------------------------------------------------------------------------------
+def test_single_unicode_fractions_1():
+    parse = IngredientSlicer("½cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == ' 0.5 cup of sugar' # TODO: add a strip() to the end of the standardized_ingredient
+    assert parsed['quantity'] == "0.5"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_single_unicode_fractions_2():
+    parse = IngredientSlicer("⅓ sugar cups")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == ' 0.333 sugar cups' # TODO: add a strip() to the end of the standardized_ingredient
+    assert parsed['quantity'] == "0.333"
+    assert parsed['unit'] == 'cups'
+    assert parsed['is_required'] == True
+
+def test_unicode_fractions_1():
+    parse = IngredientSlicer("1½cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == '1.5 cup of sugar'
+    assert parsed['quantity'] == "1.5"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_unicode_fractions_2():
+    parse = IngredientSlicer("1⅓cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == '1.333 cup of sugar'
+    assert parsed['quantity'] == "1.333"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_unicode_fractions_3():
+    parse = IngredientSlicer("2  ⅓cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed["standardized_ingredient"] == '2.333 cup of sugar'
+    assert parsed['quantity'] == "2.333"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+# -------------------------------------------------------------------------------
+# ---- Unicode fraction/range tests ----
+# -------------------------------------------------------------------------------
+    
+def test_unicode_fraction_range_1():
+    parse = IngredientSlicer("1-1½cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == '1.25 cup of sugar'
+    assert parsed['quantity'] == "1.25"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_unicode_fraction_range_2():
+    parse = IngredientSlicer("1½-2cup of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == '1.75 cup of sugar'
+    assert parsed['quantity'] == "1.75"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+def test_unicode_fraction_range_3():
+    parse = IngredientSlicer("1½-2½cup of sugar", debug=False)
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == '2 cup of sugar'
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == True
+
+# -------------------------------------------------------------------------------
+# ---- X Separator tests ----
+# -------------------------------------------------------------------------------
+def test_x_separator_1():
+    parse = IngredientSlicer("1x 2 tablespoons of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == "2 tablespoons of sugar"
+
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'tablespoons'
+    assert parsed['is_required'] == True
+
+def test_x_separator_2():
+    parse = IngredientSlicer("1x2 tablespoons of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == "2 tablespoons of sugar"
+
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'tablespoons'
+    assert parsed['is_required'] == True
+
+def test_x_separator_3():
+    parse = IngredientSlicer("3 X 4lb hamburger patties")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed["standardized_ingredient"] == '12 lb hamburger patties'
+
+    assert parsed['quantity'] == "12"
+    assert parsed['unit'] == 'lb'
+    assert parsed['is_required'] == True
+
+# -------------------------------------------------------------------------------
+# ---- Optional ingredient (no parenthesis) tests ----
+# -------------------------------------------------------------------------------
+def test_optional_ingredient_1():
+    parse = IngredientSlicer("1/3 cup sugar, optional")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "0.333"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == False
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    # assert len(parsed["parenthesis_notes"]) == 0
+
+def test_optional_ingredient_2():
+    parse = IngredientSlicer("1/3 cup sugar, opt")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "0.333"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == False
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    # assert len(parsed["parenthesis_notes"]) == 0
+
+# -------------------------------------------------------------------------------
+# ---- Optional ingredient (with parenthesis) tests ----
+# -------------------------------------------------------------------------------
+def test_optional_parenthesis_1():
+    parse = IngredientSlicer("1/3 cup sugar (optional)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "0.333"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == False
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+def test_optional_parenthesis_2():
+    parse = IngredientSlicer("1/3 cup sugar (opt)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "0.333"
+    assert parsed['unit'] == 'cup'
+    assert parsed['is_required'] == False
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+# -------------------------------------------------------------------------------
+# ---- Parenthesis (quantity only) tests ----
+# -------------------------------------------------------------------------------
+def test_quantity_only_parenthesis_1():
+    parse = IngredientSlicer("salmon steaks (2)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == None
+    assert parsed['is_required'] == True
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+def test_quantity_only_parenthesis_2():
+    parse = IngredientSlicer("salmon steaks (2) (optional)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == None
+    assert parsed['is_required'] == False
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    # assert len(parsed["parenthesis_notes"]) == 6
+
+def test_quantity_only_parenthesis_3():
+    parse = IngredientSlicer("chicken breasts (4)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "4"
+    assert parsed['unit'] == "breasts"
+    assert parsed["standardized_unit"] == "breast"
+    
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+def test_quantity_only_parenthesis_4():
+    parse = IngredientSlicer("3 chicken breasts (4) (optional)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "12"
+    assert parsed['unit'] == "breasts"
+    assert parsed["standardized_unit"] == "breast"
+    
+    assert parsed['secondary_quantity'] == '3'
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == False
+    # assert len(parsed["parenthesis_notes"]) == 6
+
+def test_quantity_only_parenthesis_5():
+    parse = IngredientSlicer("3 1/2 chicken breasts (4)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "14"
+    assert parsed['unit'] == "breasts"
+    assert parsed["standardized_unit"] == "breast"
+    
+    assert parsed['secondary_quantity'] == "3.5"
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+# -------------------------------------------------------------------------------
+# ---- Parenthesis (quantity unit only) tests ----
+# -------------------------------------------------------------------------------
+
+def test_quantity_and_unit_parenthesis_1():
+    parse = IngredientSlicer("4 chicken wings (8 oz)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "32"
+    assert parsed['unit'] == "oz"
+    assert parsed["standardized_unit"] == "ounce"
+    
+    assert parsed['secondary_quantity'] == "4"
+    assert parsed['secondary_unit'] == "wings"
+    assert parsed['standardized_secondary_unit'] == "wing"
+
+    assert parsed['is_required'] == True
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+def test_quantity_and_unit_parenthesis_2():
+    parse = IngredientSlicer(" chicken breast (12 ounces)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "12"
+    assert parsed['unit'] == "ounces"
+    assert parsed["standardized_unit"] == "ounce"
+
+    assert parsed['secondary_quantity'] == None  # TODO: maybe this case should get a quantity of 1, but for now it's None
+    assert parsed['secondary_unit'] == "breast"
+    assert parsed['standardized_secondary_unit'] == "breast"
+
+    assert parsed['is_required'] == True
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+
+def test_quantity_and_unit_parenthesis_3():
+    parse = IngredientSlicer("1/2 cup sugar (8 ounces)")
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "8"
+    assert parsed['unit'] == "ounces"
+    assert parsed["standardized_unit"] == "ounce"
+    
+    assert parsed['secondary_quantity'] == "0.5"
+    assert parsed['secondary_unit'] == "cup"
+    assert parsed['standardized_secondary_unit'] == "cup"
+
+    assert parsed['is_required'] == True
+    
+    # assert len(parsed["parenthesis_notes"]) == 3
+
+
+# -------------------------------------------------------------------------------
 # input_ingredient = "roughly 2.5 cups of sugar, lightly chopped (about 8 oz), to cut 1/2 inch pieces, large or medium, and a pinch too"
 # input_ingredient = "1 1/2 cups of sugar"
 # input_ingredient = "4 large skinless, boneless chicken thighs, cut into bite-sized pieces"
 # input_ingredient = "1/2 cup of sugar"
 
-input_list = [
-    "4 large skinless, boneless chicken thighs, cut into bite-sized pieces",
-    "1 (14 ounce) can coconut milk", 
-    "1 (6 ounce) can tomato paste", "2 (15-ounce) cans chickpeas, rinsed and drained",
-    "1/2 medium fresh jalapeño chile pepper, finely chopped*",
-    "1 (9.25ounce) bag corn chips, such as Fritos® Scoops!®",
-    "1/4 cup (1/2 stick) butter, divided",
-    "Graham cracker crumbs or powdered sugar for topping",
-    "1 large egg, lightly beaten"]
+# input_list = [
+#     "4 large skinless, boneless chicken thighs, cut into bite-sized pieces",
+#     "1 (14 ounce) can coconut milk", 
+#     "1 (6 ounce) can tomato paste", "2 (15-ounce) cans chickpeas, rinsed and drained",
+#     "1/2 medium fresh jalapeño chile pepper, finely chopped*",
+#     "1 (9.25ounce) bag corn chips, such as Fritos® Scoops!®",
+#     "1/4 cup (1/2 stick) butter, divided",
+#     "Graham cracker crumbs or powdered sugar for topping",
+#     "1 large egg, lightly beaten"]
 
-for input_ingredient in input_list:
-    slicer = IngredientSlicer(input_ingredient)
-    slicer.parse()
-    parsed = slicer.to_json()
-    print(f"Original:\n > '{input_ingredient}'")
-    print(f"Food: '{parsed['food']}'")
-    print()
+# for input_ingredient in input_list:
+#     slicer = IngredientSlicer(input_ingredient)
+#     slicer.parse()
+#     parsed = slicer.to_json()
+#     print(f"Original:\n > '{input_ingredient}'")
+#     print(f"Food: '{parsed['food']}'")
+#     print()
 
-slicer = IngredientSlicer(input_ingredient)
-slicer.parse()
-parsed = slicer.to_json()
-parsed["food"]
+# slicer = IngredientSlicer(input_ingredient)
+# slicer.parse()
+# parsed = slicer.to_json()
+# parsed["food"]
 
 # ingredient = parsed['standardized_ingredient']
 # regex = IngredientRegexPatterns()
@@ -115,7 +736,7 @@ parsed["food"]
 #         "unit modifiers" : regex.UNIT_MODIFIERS_PATTERN,
 #         "dimension units" : regex.DIMENSION_UNITS_PATTERN,
 #         "approximate strings" : regex.APPROXIMATE_STRINGS_PATTERN,
-#         "sometimes units" : regex.SOMETIMES_UNITS_PATTERN,
+#         "sometimes units" : regex.SIZE_MODIFIERS_PATTERN,
 #         "casual quantities" : regex.CASUAL_QUANTITIES_PATTERN,
 #         "stop words" : regex.STOP_WORDS_PATTERN
 #     }
@@ -146,742 +767,19 @@ parsed["food"]
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
-
-# -------------------------------------------------------------------------------
-# ---- Simple standard form ingredients tests ----
-# Standard form: "1 cup of sugar" (quantity, unit, ingredient)
-# -------------------------------------------------------------------------------
-
-def test_standard_formatted_ingredients():
-
-    parse1 = IngredientSlicer("2 tablespoons of sugar")
-    parse1.parse()
-    parsed_ingredient = parse1.to_json()
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == 'tablespoons'
-    assert parsed_ingredient['is_required'] == True
-
-    parse2 = IngredientSlicer("1/2 cup of sugar")
-    parse2.parse()
-    parsed_ingredient = parse2.to_json()
-    assert parsed_ingredient['quantity'] == "0.5"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-    parse3 = IngredientSlicer("1 1/2 cups of sugar")
-    parse3.parse()
-    parsed_ingredient = parse3.to_json()
-    assert parsed_ingredient['quantity'] == "1.5"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_quantity_and_unit_1():
-    parse = IngredientSlicer("3 pounds of beef")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "3"
-    assert parsed_ingredient['unit'] == 'pounds'
-    assert parsed_ingredient['is_required'] == True
-
-def test_quantity_and_unit_2():
-    parse = IngredientSlicer("14 lbs of lettuce")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "14"
-    assert parsed_ingredient['unit'] == 'lbs'
-    assert parsed_ingredient['standardized_unit'] == 'pound'
-    assert parsed_ingredient['is_required'] == True
-
-    assert parsed_ingredient['is_required'] == True
-
-# -------------------------------------------------------------------------------
-# ---- Words-to-numbers tests ----
-# -------------------------------------------------------------------------------
-
-def test_number_words_1():
-    parse = IngredientSlicer("two cups of flour")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['standardized_unit'] == "cup"
-    assert parsed_ingredient['is_required'] == True
-
-def test_number_words_2():
-    parse = IngredientSlicer("two cups of flour and three cups of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['standardized_unit'] == "cup"
-    assert parsed_ingredient['is_required'] == True
-
-    parse = IngredientSlicer("two thirds a cups of flour")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['standardized_unit'] == "cup"
-    assert parsed_ingredient['is_required'] == True
     
-# -------------------------------------------------------------------------------
-# ---- Words-to-numbers (with prefixed word numbers) tests ----
-# -------------------------------------------------------------------------------
-
-def test_prefixed_number_words_1():
-    parse = IngredientSlicer("twenty seven cups of flour")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    
-    assert parsed_ingredient['quantity'] == "27"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['standardized_unit'] == "cup"
-    assert parsed_ingredient['is_required'] == True
-
-def test_prefixed_number_words_2():
-    parse = IngredientSlicer("hundred twenty cups of flour")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    
-    assert parsed_ingredient['quantity'] == "120"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['standardized_unit'] == "cup"
-    assert parsed_ingredient['is_required'] == True
-
-def test_prefixed_number_words_3():
-    parse = IngredientSlicer("a twenty-two lb bag of sugar", debug = True)
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    
-
-    assert parsed_ingredient['quantity'] == "22"
-    assert parsed_ingredient['unit'] == 'lb'
-    assert parsed_ingredient['standardized_unit'] == "pound"
-    assert parsed_ingredient['is_required'] == True
-
-# -------------------------------------------------------------------------------
-# ---- Multinumber (space separated) tests ----
-# -------------------------------------------------------------------------------
-
-def test_simple_multinumber_1():
-    parse = IngredientSlicer("1 1/2 cups of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "1.5"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_simple_multinumber_2():
-    parse = IngredientSlicer("1 1/2  cups of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "1.5"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_simple_multinumber_3():
-    parse = IngredientSlicer("1 1/2 1/4 cups of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == '1.5 0.25 cups of sugar'
-    assert parsed_ingredient['quantity'] == "1.5"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_multiple_multinumber_1():
-    parse = IngredientSlicer("1 1/2 1/4 1/8 cups of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '1.5 0.375 cups of sugar'
-    assert parsed_ingredient['quantity'] == "1.5"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_multiple_multinumber_2():
-    parse = IngredientSlicer("1 1/2 1/4 1/8 1/16 cups of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '1.5 0.375 0.062 cups of sugar'
-    assert parsed_ingredient['quantity'] == "1.5"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_multiple_multinumber_3():
-    parse = IngredientSlicer("1.5 2/3 cups of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '2.167 cups of sugar'
-    assert parsed_ingredient['quantity'] == "2.167"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_multiple_multinumber_4():
-    parse = IngredientSlicer("3 12 cups of sugar (optional)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '36 cups of sugar (optional)'
-    assert parsed_ingredient['quantity'] == "36"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == False
-
-# -------------------------------------------------------------------------------
-# ---- Multinumber (space separated) tests ----
-# -------------------------------------------------------------------------------
-
-def test_multiple_multinumber_ranges_1():
-    parse = IngredientSlicer("3 - 12 1/2 cups of sugar (optional)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '7.75 cups of sugar (optional)'
-    assert parsed_ingredient['quantity'] == "7.75"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == False
-
-def test_multiple_multinumber_ranges_2():
-    parse = IngredientSlicer("3 - 12 1/2 1/4 cups of sugar (optional)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '7.75 0.25 cups of sugar (optional)'
-    assert parsed_ingredient['quantity'] == "7.75"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == False
-
-def test_multiple_multinumber_ranges_3():
-    parse = IngredientSlicer("2 1/2 - 4  cups of sugar (optional)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '3.25  cups of sugar (optional)'
-    assert parsed_ingredient['quantity'] == "3.25"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['standardized_unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == False
-
-# parse = IngredientSlicer('1.5 0.25 cups of sugar')
-# parse.parse()
-# parsed_ingredient = parse.to_json()
-# parsed_ingredient
-# TODO: Maybe implement this which makes sure to always reduce any SPACE_SEP_NUMBERS to a single number
-# TODO:  where possible and do this RECURSIVELY until there are no space separated numbers left. 
-# TODO: I've got to see/think if this is a risky approach, just need to narrow down the base case of the recursion...
-# ingredient = "1 1/2 1/4 cups of sugar"
-# while regex_map.SPACE_SEP_NUMBERS.findall(ingredient):
-#     print(f"Start ingredient: {ingredient}")
-#     print(f"Continuing reducing multinumbers...")
-
-#     parse = IngredientSlicer(ingredient)
-#     parse.parse()
-
-#     ingredient = parsed_ingredient["standardized_ingredient"]
-#     print(f"--> End ingredient: {ingredient}")
-#     print(f"\n")
-
-# regex_map.print_matches(ingredient)
-# regex_map.print_matches("1.75 cups of sugar")
-
-# -------------------------------------------------------------------------------
-# ---- Badly designed ingredients tests ----
-# -------------------------------------------------------------------------------
-    
-def test_quantity_only():
-    parse = IngredientSlicer("2")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == None
-    assert parsed_ingredient['is_required'] == True
-
-def test_no_quantity():
-    parse = IngredientSlicer("sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == None
-    assert parsed_ingredient['unit'] == None
-    assert parsed_ingredient['is_required'] == True
-
-# -------------------------------------------------------------------------------
-# ---- Fraction processing tests ----
-# -------------------------------------------------------------------------------
-    
-def test_fraction_as_quantity():
-    parse = IngredientSlicer("1/4 cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "0.25"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_fraction_as_quantity_2():
-    parse = IngredientSlicer("1 1/4 cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "1.25"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-# -------------------------------------------------------------------------------
-# ---- Fraction/Range tests ----
-# -------------------------------------------------------------------------------
-    
-def test_fraction_range_as_quantity_1():
-    parse = IngredientSlicer("1-1/2 cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "0.75"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_fraction_range_as_quantity_2():
-    parse = IngredientSlicer("1/2-1 cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "0.75"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_fraction_dupe_units_range_quantity_1():
-    parse = IngredientSlicer("1cup-1/2 cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "0.75"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_fraction_dupe_units_range_quantity_2():
-    parse = IngredientSlicer("1/2 cup-1 cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "0.75"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_fraction_dupe_units_range_quantity_3():
-    parse = IngredientSlicer("1/2cup-1cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == "0.75"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-# -------------------------------------------------------------------------------
-# ---- Unicode fraction tests ----
-# -------------------------------------------------------------------------------
-def test_single_unicode_fractions_1():
-    parse = IngredientSlicer("½cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == ' 0.5 cup of sugar' # TODO: add a strip() to the end of the standardized_ingredient
-    assert parsed_ingredient['quantity'] == "0.5"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_single_unicode_fractions_2():
-    parse = IngredientSlicer("⅓ sugar cups")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == ' 0.333 sugar cups' # TODO: add a strip() to the end of the standardized_ingredient
-    assert parsed_ingredient['quantity'] == "0.333"
-    assert parsed_ingredient['unit'] == 'cups'
-    assert parsed_ingredient['is_required'] == True
-
-def test_unicode_fractions_1():
-    parse = IngredientSlicer("1½cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == '1.5 cup of sugar'
-    assert parsed_ingredient['quantity'] == "1.5"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_unicode_fractions_2():
-    parse = IngredientSlicer("1⅓cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == '1.333 cup of sugar'
-    assert parsed_ingredient['quantity'] == "1.333"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_unicode_fractions_3():
-    parse = IngredientSlicer("2  ⅓cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient["standardized_ingredient"] == '2.333 cup of sugar'
-    assert parsed_ingredient['quantity'] == "2.333"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-# -------------------------------------------------------------------------------
-# ---- Unicode fraction/range tests ----
-# -------------------------------------------------------------------------------
-    
-def test_unicode_fraction_range_1():
-    parse = IngredientSlicer("1-1½cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == '1.25 cup of sugar'
-    assert parsed_ingredient['quantity'] == "1.25"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_unicode_fraction_range_2():
-    parse = IngredientSlicer("1½-2cup of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == '1.75 cup of sugar'
-    assert parsed_ingredient['quantity'] == "1.75"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-def test_unicode_fraction_range_3():
-    parse = IngredientSlicer("1½-2½cup of sugar", debug=False)
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == '2 cup of sugar'
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-
-# -------------------------------------------------------------------------------
-# ---- X Separator tests ----
-# -------------------------------------------------------------------------------
-def test_x_separator_1():
-    parse = IngredientSlicer("1x 2 tablespoons of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == "2 tablespoons of sugar"
-
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == 'tablespoons'
-    assert parsed_ingredient['is_required'] == True
-
-def test_x_separator_2():
-    parse = IngredientSlicer("1x2 tablespoons of sugar")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == "2 tablespoons of sugar"
-
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == 'tablespoons'
-    assert parsed_ingredient['is_required'] == True
-
-def test_x_separator_3():
-    parse = IngredientSlicer("3 X 4lb hamburger patties")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient["standardized_ingredient"] == '12 lb hamburger patties'
-
-    assert parsed_ingredient['quantity'] == "12"
-    assert parsed_ingredient['unit'] == 'lb'
-    assert parsed_ingredient['is_required'] == True
-
-# -------------------------------------------------------------------------------
-# ---- Optional ingredient (no parenthesis) tests ----
-# -------------------------------------------------------------------------------
-def test_optional_ingredient_1():
-    parse = IngredientSlicer("1/3 cup sugar, optional")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "0.333"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == False
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
-
-def test_optional_ingredient_2():
-    parse = IngredientSlicer("1/3 cup sugar, opt")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "0.333"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == False
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
-
-# -------------------------------------------------------------------------------
-# ---- Optional ingredient (with parenthesis) tests ----
-# -------------------------------------------------------------------------------
-def test_optional_parenthesis_1():
-    parse = IngredientSlicer("1/3 cup sugar (optional)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "0.333"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == False
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-def test_optional_parenthesis_2():
-    parse = IngredientSlicer("1/3 cup sugar (opt)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "0.333"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == False
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-# -------------------------------------------------------------------------------
-# ---- Parenthesis (quantity only) tests ----
-# -------------------------------------------------------------------------------
-def test_quantity_only_parenthesis_1():
-    parse = IngredientSlicer("salmon steaks (2)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == None
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-def test_quantity_only_parenthesis_2():
-    parse = IngredientSlicer("salmon steaks (2) (optional)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "2"
-    assert parsed_ingredient['unit'] == None
-    assert parsed_ingredient['is_required'] == False
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 6
-
-def test_quantity_only_parenthesis_3():
-    parse = IngredientSlicer("chicken breasts (4)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "4"
-    assert parsed_ingredient['unit'] == "breasts"
-    assert parsed_ingredient["standardized_unit"] == "breast"
-    
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient['standardized_secondary_unit'] == None
-
-    assert parsed_ingredient['is_required'] == True
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-def test_quantity_only_parenthesis_4():
-    parse = IngredientSlicer("3 chicken breasts (4) (optional)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "12.0"
-    assert parsed_ingredient['unit'] == "breasts"
-    assert parsed_ingredient["standardized_unit"] == "breast"
-    
-    assert parsed_ingredient['secondary_quantity'] == '3'
-    assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient['standardized_secondary_unit'] == None
-
-    assert parsed_ingredient['is_required'] == False
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 6
-
-def test_quantity_only_parenthesis_5():
-    parse = IngredientSlicer("3 1/2 chicken breasts (4)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "14.0"
-    assert parsed_ingredient['unit'] == "breasts"
-    assert parsed_ingredient["standardized_unit"] == "breast"
-    
-    assert parsed_ingredient['secondary_quantity'] == "3.5"
-    assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient['standardized_secondary_unit'] == None
-
-    assert parsed_ingredient['is_required'] == True
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-# -------------------------------------------------------------------------------
-# ---- Parenthesis (quantity unit only) tests ----
-# -------------------------------------------------------------------------------
-
-def test_quantity_and_unit_parenthesis_1():
-    parse = IngredientSlicer("4 chicken wings (8 oz)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "32.0"
-    assert parsed_ingredient['unit'] == "oz"
-    assert parsed_ingredient["standardized_unit"] == "ounce"
-    
-    assert parsed_ingredient['secondary_quantity'] == "4"
-    assert parsed_ingredient['secondary_unit'] == "wings"
-    assert parsed_ingredient['standardized_secondary_unit'] == "wing"
-
-    assert parsed_ingredient['is_required'] == True
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-def test_quantity_and_unit_parenthesis_2():
-    parse = IngredientSlicer(" chicken breast (12 ounces)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "12"
-    assert parsed_ingredient['unit'] == "ounces"
-    assert parsed_ingredient["standardized_unit"] == "ounce"
-
-    assert parsed_ingredient['secondary_quantity'] == None  # TODO: maybe this case should get a quantity of 1, but for now it's None
-    assert parsed_ingredient['secondary_unit'] == "breast"
-    assert parsed_ingredient['standardized_secondary_unit'] == "breast"
-
-    assert parsed_ingredient['is_required'] == True
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-
-def test_quantity_and_unit_parenthesis_3():
-    parse = IngredientSlicer("1/2 cup sugar (8 ounces)")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "8"
-    assert parsed_ingredient['unit'] == "ounces"
-    assert parsed_ingredient["standardized_unit"] == "ounce"
-    
-    assert parsed_ingredient['secondary_quantity'] == "0.5"
-    assert parsed_ingredient['secondary_unit'] == "cup"
-    assert parsed_ingredient['standardized_secondary_unit'] == "cup"
-
-    assert parsed_ingredient['is_required'] == True
-    
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-
-
-# -------------------------------------------------------------------------------
-# ---- Assortment of different ingredients seen in the "wild" tests ----
-# -------------------------------------------------------------------------------
-def test_wild_ingredients_1():
-
-    parse = IngredientSlicer("1 (10 ounce) package frozen chopped spinach, thawed, drained and squeezed dry")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "10.0"
-    assert parsed_ingredient['unit'] == 'ounce'
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == "1"
-    assert parsed_ingredient['secondary_unit'] == "package"
-
-    parse = IngredientSlicer("1 (8 ounce) container plain yogurt")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "8.0"
-    assert parsed_ingredient['unit'] == 'ounce'
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == "1"
-    assert parsed_ingredient['secondary_unit'] == "container"
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 3
-
-    parse = IngredientSlicer("salt to taste", debug= True)
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    assert parsed_ingredient['quantity'] == None
-    assert parsed_ingredient['unit'] == None
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert parsed_ingredient["parenthesis_notes"] == []
-
-    parse = IngredientSlicer("1/2 cup freshly grated Parmesan cheese, plus more for serving")
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "0.5"
-    assert parsed_ingredient['unit'] == 'cup'
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
-
-
-def test_wild_ingredients_2():
-
-    ingredient = "4 large skinless, boneless chicken thighs, cut into bite-sized pieces"
-    parse = IngredientSlicer(ingredient)
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-    
-    assert parsed_ingredient['quantity'] == "4"
-    assert parsed_ingredient['unit'] == 'thighs'
-    assert parsed_ingredient['standardized_unit'] == 'thigh'
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == None
-    assert parsed_ingredient['secondary_unit'] == None
-    assert parsed_ingredient['standardized_secondary_unit'] == None
-    # assert parsed_ingredient['food'] == 'large skinless boneless chicken cut bitesized' # TODO: this needs to be trimmed down heavily
-
-
-def test_wild_ingredients_3():
-    ingredient = "1 (6 ounce) can tomato paste"
-    parse = IngredientSlicer(ingredient)
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "6.0"
-    assert parsed_ingredient['unit'] == 'ounce'
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == "1"
-    assert parsed_ingredient['secondary_unit'] == "can"
-    assert parsed_ingredient['standardized_secondary_unit'] == "can"
-
-def test_wild_ingredients_4():
-    ingredient = "2 (15-ounce) cans chickpeas, rinsed and drained"
-    parse = IngredientSlicer(ingredient)
-    parse.parse()
-    parsed_ingredient = parse.to_json()
-
-    assert parsed_ingredient['quantity'] == "30.0"
-    assert parsed_ingredient['unit'] == 'ounce'
-    assert parsed_ingredient['standardized_unit'] == 'ounce'
-    assert parsed_ingredient['is_required'] == True
-    assert parsed_ingredient['secondary_quantity'] == "2"
-    assert parsed_ingredient['secondary_unit'] == "cans"
-    assert parsed_ingredient['standardized_secondary_unit'] == "can"
-
-    # assert len(parsed_ingredient["parenthesis_notes"]) == 0
-# "1 (14 ounce) can coconut milk"
-# "1 (6 ounce) can tomato paste"
-# "2 (15-ounce) cans chickpeas, rinsed and drained"
-# "1/2 medium fresh jalapeño chile pepper, finely chopped*"
-# "1 (9.25ounce) bag corn chips, such as Fritos® Scoops!®"
-# "1/4 cup (1/2 stick) butter, divided"
-# "Graham cracker crumbs or powdered sugar for topping"
-# "1 large egg, lightly beaten"
 ################################################################################################
 ### Old code for manual testing
 ################################################################################################
 
 # regex_map = IngredientRegexPatterns()
-# parse1 = IngredientSlicer("30 g cake flour (¼ cup minus 1 tsp; weigh your flour or use the “fluff and sprinkle“ method and level it off; you can make your own Homemade Cake Flour) ¼ 1")
-# parse1 = IngredientSlicer("1/2 cup freshly grated Parmesan cheese, plus more for serving (8 ounces, optional), won't need more (but i do like to put extra on it)")
-# parse1 = IngredientSlicer("1-4 cups of sugar, lightly chopped (about 8 oz) but please don't do it")
-# parse1 = IngredientSlicer("1/2 cup freshly grated Parmesan cheese, plus more for serving (8 ounces, optional), won't need more, but i do like to put extra on it")
+# slicer = IngredientSlicer("30 g cake flour (¼ cup minus 1 tsp; weigh your flour or use the “fluff and sprinkle“ method and level it off; you can make your own Homemade Cake Flour) ¼ 1")
+# slicer = IngredientSlicer("1/2 cup freshly grated Parmesan cheese, plus more for serving (8 ounces, optional), won't need more (but i do like to put extra on it)")
+# slicer = IngredientSlicer("1-4 cups of sugar, lightly chopped (about 8 oz) but please don't do it")
+# slicer = IngredientSlicer("1/2 cup freshly grated Parmesan cheese, plus more for serving (8 ounces, optional), won't need more, but i do like to put extra on it")
 
-# parse1.parse()
-# ingredient_object = parse1.to_json()
+# slicer.parse()
+# ingredient_object = slicer.to_json()
 # ingredient_object
 # for key, val in ingredient_object.items():
 #     print(f"{key}: > '{val}'")

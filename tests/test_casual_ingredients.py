@@ -11,51 +11,107 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 
 def test_casual_units_no_quantities_1():
 
-    parse1 = IngredientSlicer("a pinch of salt")
-    parse1.parse()
-    parsed_ingredient = parse1.to_json()
-    assert parsed_ingredient['quantity'] == "1"
-    assert parsed_ingredient['unit'] == 'pinch'
-    assert parsed_ingredient['food'] == 'salt'
-    assert parsed_ingredient['is_required'] == True
+    slicer = IngredientSlicer("a pinch of salt")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "1"
+    assert parsed['unit'] == 'pinch'
+    assert parsed['food'] == 'salt'
+    assert parsed['is_required'] == True
 
 def test_casual_units_with_number_quantity_1():
     
-        parse1 = IngredientSlicer("5 pinches of salt")
-        parse1.parse()
-        parsed_ingredient = parse1.to_json()
-        assert parsed_ingredient['quantity'] == "5"
-        assert parsed_ingredient['unit'] == 'pinches'
-        assert parsed_ingredient['standardized_unit'] == 'pinch'
-        assert parsed_ingredient['food'] == 'salt'
-        assert parsed_ingredient['is_required'] == True
+    slicer = IngredientSlicer("5 pinches of salt")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "5"
+    assert parsed['unit'] == 'pinches'
+    assert parsed['standardized_unit'] == 'pinch'
+    assert parsed['food'] == 'salt'
+    assert parsed['is_required'] == True
 
-# def test_casual_units_with_number_quantity_2():
+def test_casual_units_with_number_quantity_2():
       
-#         parse1 = IngredientSlicer("a couple of pinches of salt")
-#         parse1.parse()
-#         parsed_ingredient = parse1.to_json()
-#         assert parsed_ingredient['quantity'] == "2"
-#         assert parsed_ingredient['unit'] == 'pinches'
-#         assert parsed_ingredient['standardized_unit'] == 'pinch'
-#         assert parsed_ingredient['food'] == 'salt'
-#         assert parsed_ingredient['is_required'] == True
+    slicer = IngredientSlicer("a couple of pinches of salt")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'pinches'
+    assert parsed['standardized_unit'] == 'pinch'
+    assert parsed['food'] == 'salt'
+    assert parsed['is_required'] == True
 
-# def test_casual_units_with_number_quantity_3():
+def test_casual_units_with_number_quantity_3():
         
-#         parse1 = IngredientSlicer("a few pinches of salt")
-#         parse1.parse()
-#         parsed_ingredient = parse1.to_json()
-#         assert parsed_ingredient['quantity'] == "3"
-#         assert parsed_ingredient['unit'] == 'pinches'
-#         assert parsed_ingredient['standardized_unit'] == 'pinch'
-#         assert parsed_ingredient['food'] == 'salt'
-#         assert parsed_ingredient['is_required'] == True
+    slicer = IngredientSlicer("a few pinches of salt")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "3"
+    assert parsed['unit'] == 'pinches'
+    assert parsed['standardized_unit'] == 'pinch'
+    assert parsed['food'] == 'salt'
+    assert parsed['is_required'] == True
+
+def test_casual_quantities_with_dozen_1():
+        
+    slicer = IngredientSlicer("a couple dozen eggs")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "24"
+    assert parsed['unit'] == None
+    assert parsed['standardized_unit'] == None
+    assert parsed['food'] == 'eggs'
+    assert parsed['is_required'] == True
+
+def test_casual_quantities_with_dozen_2():
+
+    slicer = IngredientSlicer("a few dozen eggs")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "36"
+    assert parsed['unit'] == None
+    assert parsed['standardized_unit'] == None
+    assert parsed['food'] == 'eggs'
+    assert parsed['is_required'] == True
+
+def test_casual_quantities_at_end_of_ingredient():
+    
+    slicer = IngredientSlicer("large watermelon, or a couple of diced watermelons")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == None
+    assert parsed['standardized_unit'] == None
+    assert parsed['food'] == 'watermelon watermelons' # TODO: this is a bug, should be just watermelon
+    assert parsed['is_required'] == True
+
+def test_casual_quantities_in_parenthesis_1():
+
+    slicer = IngredientSlicer("a few (about 3) pinches of salt")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "3"
+    assert parsed['unit'] == 'pinches'
+    assert parsed['standardized_unit'] == 'pinch'
+    assert parsed['food'] == 'salt'
+    assert parsed['is_required'] == True
+
+def test_casual_quantities_in_parenthesis_2():
+
+    slicer = IngredientSlicer("milk (a couple of cups) ")
+    slicer.parse()
+    parsed = slicer.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == "cups"
+    assert parsed['standardized_unit'] == "cup"
+    assert parsed['food'] == 'milk'
+    assert parsed['is_required'] == True
+
 
 # input_ingredient = "a couple of pinches of salt"
-# parse1 = IngredientSlicer(input_ingredient)
-# parse1.parse()
-# parsed_ingredient = parse1.to_json()
+# slicer = IngredientSlicer(input_ingredient)
+# slicer.parse()
+# parsed = slicer.to_json()
 
 # regex = IngredientRegexPatterns()
 

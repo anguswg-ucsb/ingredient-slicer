@@ -18,9 +18,9 @@ from . import _constants
 # - Unicode fractions to decimals (e.g. "½" to "0.5")
 # -----------------------------------------------------------------------------
 
-FRACTION_WORDS_MAP = {}
-for phrase, fraction in _constants.FRACTION_WORDS.items():
-    FRACTION_WORDS_MAP[phrase] = [fraction, re.compile(r'\b' + phrase + r'\b', re.IGNORECASE)]
+MULTI_FRACTION_WORDS_MAP = {}
+for phrase, fraction in _constants.MULTI_FRACTION_WORDS.items():
+    MULTI_FRACTION_WORDS_MAP[phrase] = [fraction, re.compile(r'\b' + phrase + r'\b', re.IGNORECASE)]
 
 NUMBER_WORDS_MAP = {}
 for word, value in _constants.NUMBER_WORDS.items():
@@ -32,7 +32,7 @@ UNICODE_FRACTIONS_PATTERN = re.compile( r'\b(?:' + '|'.join(re.escape(word) for 
 # standard_ingredient = "two third of a cups of flour, 1 half n half pint"
 
 # # print("Parsing fraction words")
-# for word, regex_data in FRACTION_WORDS_MAP.items():
+# for word, regex_data in MULTI_FRACTION_WORDS_MAP.items():
 #     fraction_str, pattern = regex_data
 #     # print(f"Word: '{word}'\n > Fraction string: '{fraction_str}'\n > Pattern: {pattern}")
 #     if pattern.search(standard_ingredient):
@@ -70,8 +70,8 @@ VOLUME_UNIT_ALT = '|'.join([re.escape(unit) for variants_list in _constants.VOLU
 # VOLUME_UNIT_ALT = '|'.join('|'.join(variants) for variants in _constants.VOLUME_UNITS.values())
 
 # The "sometimes might be a unit" strings as a "or" pattern
-SOMETIMES_UNIT_ALT = '|'.join([re.escape(unit) for unit in list(_constants.SOMETIMES_UNITS_SET)])
-# SOMETIMES_UNIT_ALT = '|'.join(list(_constants.SOMETIMES_UNITS_SET))
+SOMETIMES_UNIT_ALT = '|'.join([re.escape(unit) for unit in list(_constants.SIZE_MODIFIERS_SET)])
+# SOMETIMES_UNIT_ALT = '|'.join(list(_constants.SIZE_MODIFIERS_SET))
 
 # get a pattern for the "approximate" strings (these are typically used to describe an equivelant amount of a unit)
 EQUIVALENT_ALT = '|'.join([re.escape(unit) for unit in list(_constants.APPROXIMATE_STRINGS)])
@@ -84,6 +84,9 @@ PREP_WORD_ALT = '|'.join([re.escape(prep_word) for prep_word in list(_constants.
 #  to make sure we don't match a shorter stopword that is part of a longer stopword
 STOP_WORDS_ALT = '|'.join(sorted([re.escape(stop_word) for stop_word in _constants.STOP_WORDS], key=len, reverse=True))
 # STOP_WORDS_ALT = '|'.join([re.escape(stop_word) for stop_word in list(_constants.STOP_WORDS)])
+
+
+FRACTION_WORDS_ALT = '|'.join([re.escape(fraction_word) for fraction_word in _constants.FRACTION_WORDS])
 
 # sort the denominator words by their length to make sure longer words get matched before shorter ones
 #  to make sure we don't match a shorter word that is part of a longer word
@@ -124,8 +127,8 @@ BASIC_UNITS_PATTERN = re.compile(r'\b(?:' + BASIC_UNIT_ALT + r')\b', re.IGNORECA
 NON_BASIC_UNITS_PATTERN = re.compile(r'\b(?:' + NON_BASIC_UNIT_ALT + r')\b', re.IGNORECASE)
 
 # match the "sometimes might be a unit" strings
-SOMETIMES_UNITS_PATTERN = re.compile(r'\b(?:' + SOMETIMES_UNIT_ALT + r')\b', re.IGNORECASE)
-# SOMETIMES_UNITS_PATTERN = re.compile(r'\b(?:' + '|'.join(SOMETIMES_UNITS_SET) + r')\b', re.IGNORECASE)
+SIZE_MODIFIERS_PATTERN = re.compile(r'\b(?:' + SOMETIMES_UNIT_ALT + r')\b', re.IGNORECASE)
+# SIZE_MODIFIERS_PATTERN = re.compile(r'\b(?:' + '|'.join(SIZE_MODIFIERS_SET) + r')\b', re.IGNORECASE)
 
 # create a regular expression pattern to match specifically volume units in a string
 VOLUME_UNITS_PATTERN = re.compile(r'\b(?:' + VOLUME_UNIT_ALT + r')\b', re.IGNORECASE)
@@ -136,6 +139,9 @@ PREP_WORDS_PATTERN = re.compile(r'\b(?:' + PREP_WORD_ALT + r')\b', re.IGNORECASE
 # general stop words pattern for matching stop words in a string
 STOP_WORDS_PATTERN = re.compile(r'\b(?:' + STOP_WORDS_ALT + r')\b', re.IGNORECASE)
 
+# match word versions of fractions in a string (e.g. "half", "thirds")
+FRACTION_WORDS_PATTERN = re.compile(r'\b(?:' + FRACTION_WORDS_ALT + r')\b', re.IGNORECASE)
+
 # patterns for things like "a pinch of" or "a handful" or "a sprinkle"
 CASUAL_UNITS_PATTERN       = re.compile(r'\b(?:' + CASUAL_UNITS_ALT + r')\b', re.IGNORECASE) # e.g. "bunch", "sprig", "stalk", "stick", "piece", "slice", "strip", "strip", "segment", "wedge", "chunk", "hunk", "slab", "sliver", "shred", "shard", "scrap", "scrape", "scraping", "scrapings
 CASUAL_QUANTITIES_PATTERN   = re.compile(r'\b(?:' + CASUAL_QUANTITIES_ALT + r')\b', re.IGNORECASE) # e.g. "a few", "a couple", "a handful", "a pinch", "a sprinkle", "a dash", "a smidgen", "a touch", "a bit"
@@ -144,7 +150,7 @@ CASUAL_QUANTITIES_PATTERN   = re.compile(r'\b(?:' + CASUAL_QUANTITIES_ALT + r')\
 DIMENSION_UNITS_PATTERN     = re.compile(r'\b(?:' + DIMENSION_UNITS_ALT + r')\b', re.IGNORECASE) # e.g. "inch", "inches", "cm", "mm", "millimeter", "millimeters", "centimeter", "centimeters"
 UNIT_MODIFIERS_PATTERN      = re.compile(r'\b(?:' + UNIT_MODIFIERS_ALT + r')\b', re.IGNORECASE) # e.g. "large", "small", "medium
 APPROXIMATE_STRINGS_PATTERN = re.compile(r'\b(?:' + APPROXIMATE_STRINGS_ALT + r')\b', re.IGNORECASE) # e.g. "about", "approximately", "around", "roughly", "nearly", "almost
-
+ 
 # -----------------------------------------------------------------------------
 # --------------------------- Prefix number words with number words patterns -----------------------------
 # Patterns for matching:
@@ -185,6 +191,7 @@ QUANTITY_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\
 QUANTITY_BASIC_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + BASIC_UNIT_ALT + r')\b')
 QUANTITY_NON_BASIC_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + NON_BASIC_UNIT_ALT + r')\b')
 QUANTITY_SOMETIMES_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + SOMETIMES_UNIT_ALT + r')\b')
+QUANTITY_DIMENSION_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + DIMENSION_UNITS_ALT + r')\b')
 
 QUANTITY_ANYTHING_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
 
@@ -205,8 +212,15 @@ ANY_NUMBER = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
 ALL_NUMBERS = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)')
 
 # matches any number/decimals/fractions followed by 1+ spaces then a denominator word
-NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + DENOMINATOR_WORDS_ALT + r')\b')
+# NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + DENOMINATOR_WORDS_ALT + r')\b')
+NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[-\s]*\s*)(?:' + DENOMINATOR_WORDS_ALT + r')\b')
 # NUMBER_WITH_DENOMINATOR.findall("1 quarter cup of milk")
+
+# matches any number/decimals/fractions followed by 1+ spaces then a fraction word (e.g. "1 half", "1 quarter")
+# NUMBER_WITH_FRACTION_WORD = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + FRACTION_WORDS_ALT + r')\b')
+NUMBER_WITH_FRACTION_WORD = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[-\s]*\s*)(?:' + FRACTION_WORDS_ALT + r')\b')
+NUMBER_WITH_FRACTION_WORD_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*[-\s]*\s*)(' + FRACTION_WORDS_ALT + r')\b', re.IGNORECASE)
+
 
 ### (DEPRACTED version of SPACE_SEP_NUMBERS)
 # # Match any number/decimal/fraction followed by a space and then another number/decimal/fraction
@@ -441,6 +455,11 @@ REQUIRED_STRING = re.compile(r'\b(?:required|requirement|req.|req)\b')
 # we use this to remove adverbs from the ingredient names (e.g. "lightly beaten eggs" -> "beaten eggs")
 WORDS_ENDING_IN_LY = re.compile(r'\b\w+ly\b')
 
+# Match ALL numbers followed by 0+ whitespaces and then a percentage character "%", "percentage", or "pct" 
+NUMBERS_FOLLOWED_BY_PERCENTAGE = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:%|percentage|pct)')
+# NUMBERS_FOLLOWED_BY_PERCENTAGE = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*%')
+
+
 # -----------------------------------------------------------------------------
 # --------------------------- Class to store all regex patterns -----------------------
 # A class to hold all regex patterns used in the recipe parser (version 2)
@@ -461,8 +480,8 @@ class IngredientRegexPatterns:
             # regex hashmaps
             "NUMBER_WORDS": _constants.NUMBER_WORDS,
             "NUMBER_PREFIX_WORDS": _constants.NUMBER_PREFIX_WORDS,
+            "MULTI_FRACTION_WORDS": _constants.MULTI_FRACTION_WORDS,
             "FRACTION_WORDS": _constants.FRACTION_WORDS,
-            "SINGLE_FRACTION_WORDS": _constants.SINGLE_FRACTION_WORDS,
             "DENOMINATOR_WORDS": _constants.DENOMINATOR_WORDS,
             "UNICODE_FRACTIONS": _constants.UNICODE_FRACTIONS,
             
@@ -481,7 +500,7 @@ class IngredientRegexPatterns:
             "VOLUME_UNITS_SET": _constants.VOLUME_UNITS_SET,
             "WEIGHT_UNITS_SET": _constants.WEIGHT_UNITS_SET,
             "DIMENSION_UNITS_SET": _constants.DIMENSION_UNITS_SET,
-            "SOMETIMES_UNITS_SET": _constants.SOMETIMES_UNITS_SET,
+            "SIZE_MODIFIERS_SET": _constants.SIZE_MODIFIERS_SET,
             "CASUAL_UNITS_SET": _constants.CASUAL_UNITS_SET,
             "CASUAL_QUANTITIES_SET": _constants.CASUAL_QUANTITIES_SET,
 
@@ -499,7 +518,7 @@ class IngredientRegexPatterns:
         self.NUMBER_WORDS_MAP = NUMBER_WORDS_MAP
         self.PREFIXED_NUMBER_WORDS = PREFIXED_NUMBER_WORDS
         self.PREFIXED_NUMBER_WORDS_GROUPS = PREFIXED_NUMBER_WORDS_GROUPS
-        self.FRACTION_WORDS_MAP = FRACTION_WORDS_MAP
+        self.MULTI_FRACTION_WORDS_MAP = MULTI_FRACTION_WORDS_MAP
 
         # unicode fractions
         self.UNICODE_FRACTIONS_PATTERN = UNICODE_FRACTIONS_PATTERN
@@ -509,7 +528,7 @@ class IngredientRegexPatterns:
         self.BASIC_UNITS_PATTERN = BASIC_UNITS_PATTERN
         self.NON_BASIC_UNITS_PATTERN = NON_BASIC_UNITS_PATTERN
         self.VOLUME_UNITS_PATTERN = VOLUME_UNITS_PATTERN
-        self.SOMETIMES_UNITS_PATTERN = SOMETIMES_UNITS_PATTERN
+        self.SIZE_MODIFIERS_PATTERN = SIZE_MODIFIERS_PATTERN
         self.PREP_WORDS_PATTERN = PREP_WORDS_PATTERN
         self.STOP_WORDS_PATTERN = STOP_WORDS_PATTERN
         self.CASUAL_QUANTITIES_PATTERN = CASUAL_QUANTITIES_PATTERN
@@ -530,9 +549,14 @@ class IngredientRegexPatterns:
         self.QUANTITY_BASIC_UNIT_GROUPS = QUANTITY_BASIC_UNIT_GROUPS
         self.QUANTITY_NON_BASIC_UNIT_GROUPS = QUANTITY_NON_BASIC_UNIT_GROUPS
         self.QUANTITY_SOMETIMES_UNIT_GROUPS = QUANTITY_SOMETIMES_UNIT_GROUPS
+        self.QUANTITY_DIMENSION_UNIT_GROUPS = QUANTITY_DIMENSION_UNIT_GROUPS
         self.QUANTITY_ANYTHING_UNIT_GROUPS = QUANTITY_ANYTHING_UNIT_GROUPS
         self.QUANTITY_UNIT_ONLY_GROUPS = QUANTITY_UNIT_ONLY_GROUPS
         self.EQUIV_QUANTITY_UNIT_GROUPS = EQUIV_QUANTITY_UNIT_GROUPS
+        
+        self.NUMBER_WITH_FRACTION_WORD = NUMBER_WITH_FRACTION_WORD
+        self.NUMBER_WITH_DENOMINATOR = NUMBER_WITH_DENOMINATOR
+        self.NUMBER_WITH_FRACTION_WORD_GROUPS = NUMBER_WITH_FRACTION_WORD_GROUPS
 
         self.ANY_NUMBER = ANY_NUMBER
         self.ALL_NUMBERS = ALL_NUMBERS
@@ -587,6 +611,7 @@ class IngredientRegexPatterns:
         self.OPTIONAL_STRING = OPTIONAL_STRING
         self.REQUIRED_STRING = REQUIRED_STRING
         self.WORDS_ENDING_IN_LY = WORDS_ENDING_IN_LY
+        self.NUMBERS_FOLLOWED_BY_PERCENTAGE = NUMBERS_FOLLOWED_BY_PERCENTAGE
 
     def find_matches(self, input_string: str) -> Dict[str, List[Union[str, Tuple[str]]]]:
         """
@@ -637,8 +662,8 @@ class IngredientRegexPatterns:
         descriptions = {
             ### Constants and lookup tables
             "NUMBER_WORDS": "Dictionary of number words to numerical values.",
-            "FRACTION_WORDS": "Dictionary of fraction phrases (i.e. 'two thirds' or '1 half') to their fractional string value",
-            "SINGLE_FRACTION_WORDS": "Dictionary of single fraction words that represent a singular fraction (i.e. a quarter is equal to 1/4).",
+            "MULTI_FRACTION_WORDS": "Dictionary of fraction phrases (i.e. 'two thirds' or '1 half') to their fractional string value",
+            "FRACTION_WORDS": "Dictionary of single fraction words that represent a singular fraction (i.e. a quarter is equal to 1/4).",
             "UNICODE_FRACTIONS": "Dictionary of unicode fractions to numerical values.",
 
             # dictionaries of units
@@ -653,7 +678,7 @@ class IngredientRegexPatterns:
             "UNITS_SET": "Set of units used in the recipe parser (All units, including basic, volume, and specific units).",
             "BASIC_UNITS_SET": "Set of basic units used in the recipe parser (The most common units).",
             "NON_BASIC_UNITS_SET": "Set of non-basic units used in the recipe parser (Units that are not in the BASIC_UNITS dictionary).",
-            "SOMETIMES_UNITS_SET": "Set of units that are sometimes used in the recipe parser (Set of words that MIGHT be units if no other units are around).",
+            "SIZE_MODIFIERS_SET": "Set of units that are sometimes used in the recipe parser (Set of words that MIGHT be units if no other units are around).",
             "VOLUME_UNITS_SET": "Set of volume units used in the recipe parser (Units used for measuring volume).",
             "WEIGHT_UNITS_SET": "Set of weight units used in the recipe parser (Units used for measuring weight).",
             "DIMENSION_UNITS_SET": "Set of dimension units used in the recipe parser (Units used for measuring dimensions).",
@@ -676,7 +701,7 @@ class IngredientRegexPatterns:
             "BASIC_UNITS_PATTERN": "Matches just the basic units from the BASIC_UNITS dictionary.",
             "NON_BASIC_UNITS_PATTERN": "Matches non-basic units in a string.",
             "VOLUME_UNITS_PATTERN": "Matches specifically volume units in a string.",
-            "SOMETIMES_UNITS_PATTERN": "Matches sometimes units in a string.",
+            "SIZE_MODIFIERS_PATTERN": "Matches sometimes units in a string.",
             "PREP_WORDS_PATTERN": "Matches preparation words in a string.",
             "STOP_WORDS_PATTERN": "Matches stop words in a string.",
             "CASUAL_QUANTITIES_PATTERN": "Matches casual quantities in a string (i.e. 'couple' = 2).",
@@ -697,6 +722,7 @@ class IngredientRegexPatterns:
             "QUANTITY_NON_BASIC_UNIT_GROUPS": "Matches a number followed by a non-basic unit with capture groups.",
             "QUANTITY_SOMETIMES_UNIT_GROUPS": "Matches a number followed by a 'sometimes unit' with capture groups (i.e. 'large' is sometimes a unit if no other units are around).",
             "QUANTITY_ANYTHING_UNIT_GROUPS": "Matches a number followed by any text and then a unit with capture groups.",
+            "QUANTITY_DIMENSION_UNIT_GROUPS": "Matches a number followed by a dimension unit with capture groups.",
             "QUANTITY_UNIT_ONLY_GROUPS": "Matches a quantity followed by  0+whitespaces/hypens and then a unit with capture groups.",
             "EQUIV_QUANTITY_UNIT_GROUPS": "Matches an 'approximate/equivalent' string followed by a number followed by a unit with capture groups (helpful for finding equivalent quantity-unit patterns i.e. 'about 1/2 cup').",
 
@@ -721,7 +747,11 @@ class IngredientRegexPatterns:
             "FRACTION_DASH_FRACTION": "Matches fractions separated by a hyphen.",
             "FRACTION_DASH_DECIMAL": "Matches fraction followed by a decimal separated by a hyphen.",
             "FRACTION_DASH_WHOLE_NUMBER": "Matches fraction followed by a whole number separated by a hyphen.",
+
+
             "FRACTION_PATTERN": "Matches fraction parts in a string.",
+            "NUMBER_WITH_FRACTION_WORD": "Matches a number followed by a fraction word (i.e. '1 half').",
+            "NUMBER_WITH_DENOMINATOR": "Matches a number followed by a denominator word (i.e. '1 quarter').",
             "SPLIT_SPACED_NUMS": "Splits numbers/decimals/fractions separated by 1+ whitespaces into a capture group (i.e '1.5 1/2' -> ['1.5', '1/2']).",
             "SPLIT_INTS_AND_FRACTIONS": "Splits whole numbers and fractions separated by 1+ whitespaces into a capture group (i.e '1 1/2' -> ['1', '1/2']). (Deprecated)",
             "MULTI_PART_FRACTIONS_PATTERN": "Matches multi-part fractions in a string. (Deprecated)",
@@ -741,7 +771,9 @@ class IngredientRegexPatterns:
             "QUANTITY_X_QUANTITY": "Matches a number followed by an 'x'/'X' and then another number.",
             
             "OPTIONAL_STRING": "Matches the word 'optional', 'option', 'opt', etc. in a string.",
-            "REQUIRED_STRING": "Matches the word 'required', 'requirement', 'req', etc. in a string."
+            "REQUIRED_STRING": "Matches the word 'required', 'requirement', 'req', etc. in a string.",
+            "WORDS_ENDING_IN_LY": "Matches any word ending in 'ly' (i.e. 'firmly', 'lightly', 'rapidly').",
+            "NUMBERS_FOLLOWED_BY_PERCENTAGE": "Matches any number followed by 0+ whitespaces and then a percentage character '%', 'percentage', or 'pct'  (i.e. '2% milk')."
         }
 
         # Retrieve description based on pattern name

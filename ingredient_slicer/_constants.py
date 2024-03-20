@@ -48,7 +48,7 @@ NUMBER_PREFIX_WORDS = {
 }
 
 # Fractions represented as multiple words (or numbers) and words
-FRACTION_WORDS = {
+MULTI_FRACTION_WORDS = {
     # amount with fraction words
     "one half": "1/2",
     "1 half": "1/2",
@@ -189,7 +189,7 @@ FRACTION_WORDS = {
 }
 
 # Fractions words representing a single fraction (i.e. a quarter is equal to 1/4)
-SINGLE_FRACTION_WORDS = {
+FRACTION_WORDS = {
     # singular versions
     "half": "1/2",
     "quarter": "1/4",
@@ -305,6 +305,7 @@ TEMPERATURE_UNITS = {
 }
 
 UNITS = {
+    "a taste" : ["a taste"],
     'bag': ['bag', 'bags'], 
     'bagful': ['bagful', 'bagfuls'], 
     'bottle': ['bottle', 'bottles'], 
@@ -324,20 +325,30 @@ UNITS = {
     'cube': ['cube', 'cubes'], 
     'cup': ['cup', 'cups', "C", "c"],
     'cupful': ['cupful', 'cupfuls'], 
-    'dallop': ['dallop', 'dallops'], 
+    # "dallop" : ["dallop", "dallops", "dollop", "dollops", "a dallop", "a dollop"],
+    # "dash" : ["dash", "dashes", "a dash"],
+    # "drop" : ["drop", "drops", "a drop"],
+    # "droplet" : ["droplet", "droplets", "a droplet"],
+    "dallop" : ["dallop", "dallops", "dollop", "dollops"],
     'dash': ['dash', 'dashes'], 
-    'drop': ['drop', 'drops'], 
+    "drop" : ["drop", "drops"],
+
+    "droplet" : ["droplet", "droplets"],
     'drumstick': ['drumstick', 'drumsticks'], 
+    "dusting" : ["dusting", "dustings"],
     'ear': ['ear', 'ears'], 
     'envelope': ['envelope', 'envelopes'], 
     'filet': ['filet', 'filets'], 
     'fillet': ['fillet', 'fillets'], 
-    'fluid ounce': ['fluid ounce', 'fluid ounces', 'fl oz', 'fl ozs', 'fluid oz', 'fluid ozs', 'fluid oz', 'fluid ozs'], 
+    'fluid ounce': ['fluid ounce', 'fluid ounces', 'fl oz', 'fl ozs', 'fluid oz', 'fluid ozs', 'fluid oz', 'fluid ozs'],
+    'floret': ['floret', 'florets'],
     # 'foot': ['foot', 'feet', 'ft', 'fts'], # TODO: address dimensions
     'gallon': ['gallon', 'gallons', 'gals', 'gal'], 
     'glass': ['glass', 'glasses'], 
     'gram': ['gram', 'grams', 'g'], 
-    'handful': ['handful', 'handfuls'], 
+
+    "handful" : ["handful", "handfuls", "handfull", "handfulls"],
+    # "handful" : ["handful", "handfuls", "handfull", "handfulls", "a handful"],
     'head': ['head', 'heads'], 
     # 'inch': ['inch', 'inches', 'ins'], # TODO: Removing unit "in" for now, unit "in" needs to be dealt with separately somehow, 
     #                                    # TODO: "in" is used for both the unit "inch" and the standard usage of the word "in" (i.e. "I am in a house")
@@ -359,7 +370,8 @@ UNITS = {
     'packet': ['packet', 'packets'], 
     'patty': ['patty', 'patties'], 
     'piece': ['piece', 'pieces'], 
-    'pinch': ['pinch', 'pinches'], 
+    "pinch" : ["pinch", "pinches", "pinchful", "pinchfuls", "pinchfull", "pinchfulls"],
+    # 'pinch': ['pinch', 'pinches'], 
     'pint': ['pint', 'pints', 'pt', 'pts'], 
     'plate': ['plate', 'plates'], 
     'portion': ['portion', 'portions'], 
@@ -370,15 +382,25 @@ UNITS = {
     'scoop': ['scoop', 'scoops'], 
     'sheet': ['sheet', 'sheets'], 
     'slice': ['slice', 'slices'], 
+    "smidgen" : ["smidgen", "smidgens"],
+    "sprinkle" : ["sprinkle", "sprinkles", "springkling", "sprinklings"],
+    # "smidgen" : ["smidgen", "smidgens", "a smidgen"],
+    # "sprinkle" : ["sprinkle", "sprinkles", "springkling", "sprinklings", "a sprinkle", "a sprinkling"],
     'sprig': ['sprig', 'sprigs'], 
     'stalk': ['stalk', 'stalks'], 
     'stick': ['stick', 'sticks'], 
     'strip': ['strip', 'strips'], 
+
     'tablespoon': ['tablespoon', 'tablespoons', 'tbsp', 'tbsps', "tbsp", "tbsps", "tbsp.", "tbsps.", "tbl", "tbls", "tbl.", "tbls.", "T", "tbs", "tbs."], # 'tablespoon': ['tablespoon', 'tablespoons', 'tbsp', 'tbsps', 'tbsp', 'tbsps'], 
     'tablespoonful': ['tablespoonful', 'tablespoonfuls'], 
+    "tad" : ["tad", "tads"],
+    # "tad" : ["tad", "tads", "a tad"],
     'teaspoon': ['teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "tspn", "tspns", "tspn.", "tspns.", "ts", "t", "t."], # 'teaspoon': ['teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "t"],
     'teaspoonful': ['teaspoonful', 'teaspoonfuls'], 
-    'thigh': ['thigh', 'thighs'], 
+    'thigh': ['thigh', 'thighs'],
+    "to taste" : ["to taste"], 
+    "touch" : ["touch", "touches"],
+    # "touch" : ["touch", "touches", "a touch"],
     'tube': ['tube', 'tubes'], 
     'wheel': ['wheel', 'wheels'], 
     'wing': ['wing', 'wings']
@@ -541,20 +563,33 @@ for key, pattern in CASUAL_QUANTITIES.items():
 
 # terms that are sometimes used as units (i.e. "a pinch of salt")
 CASUAL_UNITS = {
-    "bit" : ["bit", "bits"],
-    "pinch" : ["pinch", "pinches", "pinchful", "pinchfuls", "pinchfull", "pinchfulls", "a pinch"],
-    "dash" : ["dash", "dashes", "a dash"],
-    "dallop" : ["dallop", "dallops", "dollop", "dollops", "a dallop", "a dollop"],
+    "a taste" : ["a taste"],
+    "dash" : ["dash", "dashes"],
+    "dallop" : ["dallop", "dallops", "dollop", "dollops"],
     "dusting" : ["dusting", "dustings"],
-    "drop" : ["drop", "drops", "a drop"],
-    "droplet" : ["droplet", "droplets", "a droplet"],
-    "handful" : ["handful", "handfuls", "handfull", "handfulls", "a handful"],
-    "tad" : ["tad", "tads", "a tad"],
-    "smidgen" : ["smidgen", "smidgens", "a smidgen"],
-    "touch" : ["touch", "touches", "a touch"],
-    "sprinkle" : ["sprinkle", "sprinkles", "springkling", "sprinklings", "a sprinkle", "a sprinkling"],
+    "drop" : ["drop", "drops"],
+    "droplet" : ["droplet", "droplets"],
+    "handful" : ["handful", "handfuls", "handfull", "handfulls"],
+    "pinch" : ["pinch", "pinches", "pinchful", "pinchfuls", "pinchfull", "pinchfulls"],
+    "tad" : ["tad", "tads"],
+    "smidgen" : ["smidgen", "smidgens"],
+    "sprinkle" : ["sprinkle", "sprinkles", "springkling", "sprinklings"],
     "to taste" : ["to taste"],
-    "a taste" : ["a taste"]
+    "touch" : ["touch", "touches"],
+    # # NOTE: going back on forth on using units prefixed with "a " or not, for now I'm NOT using them
+    # "a taste" : ["a taste"],
+    # "bit" : ["bit", "bits"],
+    # "dash" : ["dash", "dashes", "a dash"],
+    # "dallop" : ["dallop", "dallops", "dollop", "dollops", "a dallop", "a dollop"],
+    # "dusting" : ["dusting", "dustings"],
+    # "drop" : ["drop", "drops", "a drop"],
+    # "droplet" : ["droplet", "droplets", "a droplet"],
+    # "handful" : ["handful", "handfuls", "handfull", "handfulls", "a handful"],
+    # "pinch" : ["pinch", "pinches", "pinchful", "pinchfuls", "pinchfull", "pinchfulls", "a pinch"],
+    # "tad" : ["tad", "tads", "a tad"],
+    # "smidgen" : ["smidgen", "smidgens", "a smidgen"],
+    # "sprinkle" : ["sprinkle", "sprinkles", "springkling", "sprinklings", "a sprinkle", "a sprinkling"],
+    # "touch" : ["touch", "touches", "a touch"]
 }
 
 CASUAL_UNITS_SET = set()
@@ -563,7 +598,142 @@ for key, pattern in CASUAL_UNITS.items():
     for val in pattern:
         CASUAL_UNITS_SET.add(val)
 
+# Units that if they appear in a string and there are no "real" units, then these strings might be units
+# (i.e. "2 small carrots" -> "quantity: 2, unit: small, ingredient: carrots")
+# (i.e. "medium carrot" -> "quantity: 1, unit: medium, ingredient: carrot")
+SIZE_MODIFIERS_SET = set([
+    "extra small",
+    "extra-small",
+    "small",
+    "smallish",
+    "small-ish",
+    "medium",
+    "mediumish",
+    "medium-ish",
+    "large",
+    "largeish",
+    "large-ish",
+    # "sm",
+    # "med",
+    # "lrg",
+    "extra large",
+    "extra-large",
+    "big", 
+    "bigish",
+    "big-ish",
+    "tiny",
+    "modest",
+    "huge",
+    "giant",
+    "gigantic"
+    ])
+
+PREP_WORDS = {
+    'baked',
+    'beaten',
+    'beating',
+    'beat',
+    'blended',
+    'blending',
+    'blend',
+    'blanch',
+    'blanched',
+    'blistered',
+    'boil',
+    'boiled',
+    'broil',
+    'broiled',
+    'chopped',
+    'chopping',
+    'cored',
+    'cracked',
+    'cracking',
+    'cooked',
+    'crumbled',
+    'crushed',
+    'cubed',
+    'cut',
+    'cutting',
+    'crisped',
+    'diced',
+    'divided',
+    'drained',
+    'drenched',
+    'dressed',
+    'emulsified',
+    "even",
+    "firm",
+    "firmly",
+    'flaked',
+    'fried',
+    'generous',
+    'grated',
+    'grilled',
+    'ground',
+    'grounded',
+    'halved',
+    'hardened',
+    "heaping",
+    "heaped",
+    "heavy",
+    "heavily",
+    "hefty",
+    'julienned',
+    'juiced',
+    "level",
+    "leveled",
+    "light",
+    "lightly",
+    "lightly packed",
+    'mashed',
+    'melted',
+    'minced',
+    'packed',
+    'peeled',
+    'pitted',
+    'poached',
+    # 'pounded',
+    'pressed',
+    'pureed',
+    'quartered',
+    'rinsed',
+    'roasted',
+    "roughly",
+    "round",
+    "rounded",
+    "room temp",
+    "room temperature",
+    "scant",
+    'scramble',
+    'scrambled',
+    'scrambling',
+    'scrambles',
+    'seeded',
+    'shredded',
+    'sifted',
+    'sliced',
+    'slivered',
+    "smooth",
+    "smoothed",
+    'smoothly',
+    'softened',
+    'squeezed',
+    'squeeze',
+    'squished',
+    'steamed',
+    'stewed',
+    'stirred',
+    'stirring',
+    'stir',
+    "tightly",
+    'toasted',
+    'trimmed',
+    "unsifted",
+    'zested'
+}
+
 # specific words that are used to describe something about a unit (i.e. "packed cup", "level tablespoon")
+# TODO: Probably something to remove at some point, I've split/consilidated values in this set into PREP_WORDS and SIZE_MODIFIERS_SET
 UNIT_MODIFIERS = set([
     "round",
     "rounded",
@@ -582,33 +752,16 @@ UNIT_MODIFIERS = set([
     "lightly packed",
     "heavy",
     "heavily",
+    "firm",
     "firmly",
     "tightly",
     "smooth",
-    "small",
-    "medium",
-    "large",
-    "extra large",
-    "big", 
-    "tiny",
-    "modest",
     "hefty",
-    "roughly"
-])
-
-# Units that if they appear in a string and there are no "real" units, then these strings might be units
-# (i.e. "2 small carrots" -> "quantity: 2, unit: small, ingredient: carrots")
-# (i.e. "medium carrot" -> "quantity: 1, unit: medium, ingredient: carrot")
-SOMETIMES_UNITS_SET = set([
-    "tiny",
-    "extra small",
-    "extra-small",
+    "roughly",
+    
     "small",
     "medium",
     "large",
-    # "sm",
-    # "med",
-    # "lrg",
     "extra large",
     "extra-large",
     "big", 
@@ -617,68 +770,7 @@ SOMETIMES_UNITS_SET = set([
     "huge",
     "giant",
     "gigantic"
-    ])
-
-PREP_WORDS = {
-    'baked',
-    'beaten',
-    'boil',
-    'boiled',
-    'broil',
-    'broiled',
-    'chopped',
-    'chopping',
-    'cored',
-    'crumbled',
-    'crushed',
-    'cubed',
-    'cut',
-    'cutting',
-    'crisped',
-    'diced',
-    'divided',
-    'drained',
-    'drenched',
-    'dressed',
-    'emulsified',
-    'flaked',
-    'fried',
-    'grated',
-    'grilled',
-    'halved',
-    'hardened',
-    'julienned',
-    'juiced',
-    'mashed',
-    'melted',
-    'minced',
-    'peeled',
-    'pitted',
-    'poached',
-    'quartered',
-    'rinsed',
-    'roasted',
-    'scramble',
-    'scrambled',
-    'scrambling',
-    'scrambles',
-    'seeded',
-    'shredded',
-    'sliced',
-    'slivered',
-    'softened',
-    'squeezed',
-    'squeeze',
-    'squished',
-    'steamed',
-    'stewed',
-    'stirred',
-    'stirring',
-    'stir',
-    'toasted',
-    'trimmed',
-    'zested'
-}
+])
 
 # specific words that are used to describe something about a unit (i.e. "packed cup", "level tablespoon")
 APPROXIMATE_STRINGS = set([
@@ -743,22 +835,29 @@ STOP_WORDS = set([
     "everybody", "everyone", "everything", "everywhere", "ex", "exactly", "example", "except", "ey", "f", "f2", 
     "fa", "far", "fc", "few", "ff", "fi", "fifteen", "fifth", "fify", "fill", "find", "fire", "first", "five", 
     "fix", "fj", "fl", "fn", "fo", "followed", "following", "follows", "for", "former", "formerly", "forth", 
-    "forty", "found", "four", "fr", "from", "front", "fs", "ft", "fu", "full", "further", "furthermore", "fy", 
+    "forty", "found", "four", "fr", "from", "front", "frozen", "further", "furthermore", 
+    "fs", "ft", "fu", "full", "further", "furthermore", "fy", 
     # "g",
     "ga", "gave", "ge", "get", "gets", "getting", "gi", "give", "given", "gives", "giving", "gj", "gl", 
-    "go", "goes", "going", "gone", "got", "gotten", "gr", "greetings", "gs", "gy", "h", "h2", "h3", "had", 
+    "go", "goes", "going", "gone", "got", "gotten", "gr", "greetings", "gs", "gy",
+    "h", "h2", "h3", "had", 
     "hadn", "hadn't", "happens", "hardly", "has", "hasn", "hasnt", "hasn't", "have", "haven", "haven't", "having", 
     "he", "hed", "he'd", "he'll", "hello", "help", "hence", "her", "here", "hereafter", "hereby", "herein", "heres", 
     "here's", "hereupon", "hers", "herself", "hes", "he's", "hh", "hi", "hid", "him", "himself", "his", "hither", 
-    "hj", "ho", "home", "hopefully", "how", "howbeit", "however", "how's", "hr", "hs", "http", "hu", "hundred", "hy", 
+    "hj", "ho", "home", "hopefully", "how", "howbeit", "however", "how's", "hr", "hs", "http", "hu", "hundred", "hy",
+
     "i", "i2", "i3", "i4", "i6", "i7", "i8", "ia", "ib", "ibid", "ic", "id", "i'd", "ie", "if", "ig", "ignored", 
     "ih", "ii", "ij", "il", "i'll", "im", "i'm", "immediate", "immediately", "importance", "important", "in", 
     "inasmuch", "inc", "indeed", "index", "indicate", "indicated", "indicates", "information", "inner", "insofar", 
     "instead", "interest", "into", "invention", "inward", "io", "ip", "iq", "ir", "is", "isn", "isn't", "it", "itd", 
     "it'd", "it'll", "its", "it's", "itself", "iv", "i've", "ix", "iy", "iz", "j", "jj", "jr", "js", "jt", "ju", 
-    "just", "k", "ke", "keep", "keeps", "kept", "kg", "kj", "km", "know", "known", "knows", "ko", "l", "l2", "la", 
-    "largely", "last", "lately", "later", "latter", "latterly", "lb", "lc", "le", "least", "les", "less", "lest", 
-    "let", "lets", "let's", "lf", "like", "liked", "likely", "line", "little", "lj", "ll", "ln", "lo", "look", 
+    "just", "k", "ke", "keep", "keeps", "kept", "kg", "kj", "km", "know", "known", "knows", "ko", 
+    
+    # "l",
+    "l2", "la", "largely", "last", "lately", "later", "latter", "latterly", 
+    # "lb", 
+    "lc", "le", "least", "les", "less", "lest", 
+    "let", "lets", "let's", "lf", "like", "liked", "likely", "line", "little", "lj", "ll", "ln", "lo", "lol", "look", 
     "looking", "looks", "los", "lr", "ls", "love", "loved", "loving", "lovingly",
     # "lt", # "ltd", 
     "m2", "ma", "made", "mainly", "make", "makes", "many", "may", "maybe", "me", "mean", "means", "meantime", 
@@ -775,11 +874,13 @@ STOP_WORDS = set([
     "o", "oa", "ob", "obtain", "obtained", "obviously", "oc", "od", "of", "off", "often", "og", "oh", "oi", "oj", "ok", 
     "okay", "ol", "old", "om", "omitted", "on", "once", "one", "ones", "only", "onto", "oo", "op", "oq", "or", "ord", 
     "os", "ot", "other", "others", "otherwise", "ou", "ought", "our", "ours", "ourselves", "out", "outside", "over", 
-    "overall", "ow", "owing", "own", "ox", "oz", "p1", "p2", "p3", "page", "pagecount", "pages", "par", "part", 
+    "overall", "ow", "owing", "own", "ox", "oz", 
+    "p1", "p2", "p3", "page", "pagecount", "pages", "par", "part", 
     "particular", "particularly", "pas", "past", "pc", "pd", "pe", "per", "perhaps", "pf", "ph", "pi", "pj", "pk", 
     "pl", "placed", "please", "plus", "pm", "pn", "po", "poorly", "possible", "possibly", "potentially", "pp", "pq", 
     "pr", "predominantly", "present", "presumably", "previously", "primarily", "probably", "promptly", "proud", 
-    "provides", "ps", "pt", "pu", "put", "py", "q", "qj", "qu", "que", "quickly", "quite", "qv", "r", "r2", "ra", 
+    "provides", "ps", "pt", "pu", "put", "purpose", "purposes", "py",
+    "q", "qj", "qu", "que", "quickly", "quite", "qv", "r", "r2", "ra", 
     "ran", "rather", "rc", "rd", "re", "readily", "really", "reasonably", "recent", "recently", "ref", "refs", 
     "regarding", "regardless", "regards", "related", "relatively", "research", "research-articl", "respectively", 
     "resulted", "resulting", "results", "rf", "rh", "ri", "right", "rj", "rl", "rm", "rn", "ro", "rq", "rr", "rs", 
@@ -787,17 +888,19 @@ STOP_WORDS = set([
     "s", 
     "s2", "sa", "said", "same", "saw", "say", "saying", "says", "sc", "sd", 
     "se", "sec", "second", "secondly", "section", "see", "seeing", "seem", "seemed", "seeming", "seems", "seen", 
-    "self", "selves", "sensible", "sent", "serious", "seriously", "served", "serving", "serves", "serve", "seven", "several", "sf", "shall", "shan", 
+    "self", "selves", "sensible", "sent", "serious", "seriously", "served", "serving", "servings", "serves", "serve", "seven", "several", "sf", "shall", "shan", 
     "shan't", "she", "shed", "she'd", "she'll", "shes", "she's", "should", "shouldn", "shouldn't", "should've", 
     "show", "showed", "shown", "showns", "shows", "si", "side", "significant", "significantly", "similar", "similarly", 
     "since", "sincere", "six", "sixty", "sj", "sl", "slightly", "sm", "sn", "so", "some", "somebody", "somehow", 
     "someone", "somethan", "something", "sometime", "sometimes", "somewhat", "somewhere", "soon", "sorry", "sp", 
     "specifically", "specified", "specify", "specifying", "sq", "sr", "ss", "st", "still", "stop", "strongly", 
-    "sub", "substantially", "successfully", "such", "sufficiently", "suggest", "sup", "sure", "sy", "system", "sz",
+    "sub", "substantially", "successfully", "such", "sufficiently", "suggest", "sup", "sum", "summary", 
+    "sure", "sy", "system", "sz",
 
     # "t", 
     "t1", "t2", "t3", "take", "taken", "taking", "tb", "tc", "td", "te", "tell", "ten", "tends", "tf", "th", 
-    "than", "thank", "thanks", "thanx", "that", "that'll", "thats", "that's", "that've", "the", "their", "theirs", 
+    "than", "thank", "thanks", "thanx", "that", "that'll", "thats", "that's", "that've", "thaw", "thawed", 
+    "the", "their", "theirs", 
     "them", "themselves", "then", "thence", "there", "thereafter", "thereby", "thered", "therefore", "therein", 
     "there'll", "thereof", "therere", "theres", "there's", "thereto", "thereupon", "there've", "these", "they", 
     "theyd", "they'd", "they'll", "theyre", "they're", "they've", "thickv", "thin", "think", "third", "this", 
@@ -822,9 +925,10 @@ STOP_WORDS = set([
     "wonder", "wont", "won't", 
     "words", "world", "would", "wouldn", "wouldnt", "wouldn't", "www", 
     "x", "x1", "x2", "x3", "xf", "xi", "xj", 
-    "xk", "xl", "xn", "xo", "xs", "xt", "xv", "xx", "y", "y2", "yes", "yet", "yj", "yl", "you", "youd", "you'd", 
+    "xk", "xl", "xn", "xo", "xox", "xoxo", "xs", "xt", "xv", "xx",
+    "y", "y2", "yall", "ya'll", "y'all", "yes", "yet", "yj", "yl", "you", "youd", "you'd", 
     "you'll", "your", "youre", "you're", "yours", "yourself", "yourselves", "you've", "yr", "ys", "yt", 
-    "z", "zero", "zi", "zz"
+    "z", "zero", "zi", "zz", "zip", "zips", "zipped", "zipping", "zipper"
 ])
 
 
@@ -980,7 +1084,7 @@ STOP_WORDS = set([
 # ])
 
 # # Fractions represented as words
-# FRACTION_WORDS = {
+# MULTI_FRACTION_WORDS = {
 #     # singular versions
 #     'half': round(1/2, 3),
 #     'quarter': round(1/4, 3),
@@ -1009,7 +1113,7 @@ STOP_WORDS = set([
 #     'twelfths': round(1/12, 3)
 # }
 
-# FRACTION_WORDS = {
+# MULTI_FRACTION_WORDS = {
 #     # singular versions
 #     'half': [round(1/2, 3), '1/2'],
 #     'quarter': [round(1/4, 3), '1/4'],
