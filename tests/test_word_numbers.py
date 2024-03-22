@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns
+from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 
 # regex_map = IngredientRegexPatterns()
 
@@ -11,6 +11,117 @@ from ingredient_slicer import IngredientRegexPatterns
 def regex_map():
     return IngredientRegexPatterns()
 
+# -------------------------------------------------------------------------------
+# ---- Test IngredientSlicer: Words-to-numbers tests ----
+# -------------------------------------------------------------------------------
+
+def test_number_words_1():
+    parse = IngredientSlicer("two cups of flour")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    assert parsed['prep'] == []
+    assert parsed['food'] == 'flour'
+    assert parsed['size_modifiers'] == []
+
+
+def test_number_words_2():
+    parse = IngredientSlicer("two cups of flour and three cups of sugar")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+    
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    assert parsed['prep'] == []
+    assert parsed['food'] == 'flour sugar' # TODO: not sure what the best way to handle 2 foods in one ingredient is...
+    assert parsed['size_modifiers'] == []
+
+def test_number_words_3():
+    parse = IngredientSlicer("a dozen cups of melted butter")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "12"
+    assert parsed['unit'] == 'cups'
+    assert parsed['standardized_unit'] == "cup"
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    assert parsed['prep'] == ['melted']
+    assert parsed['food'] == 'butter'
+    assert parsed['size_modifiers'] == []
+
+def test_number_words_4():
+    parse = IngredientSlicer("two or three tsp of room temp butter")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2.5"
+    assert parsed['unit'] == 'tsp'
+    assert parsed['standardized_unit'] == "teaspoon"
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    assert parsed['prep'] == ['room temp']
+    assert parsed['food'] == 'butter'
+    assert parsed['size_modifiers'] == []
+
+def test_number_words_5():
+    parse = IngredientSlicer("two to three tsp of room temp butter")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "2.5"
+    assert parsed['unit'] == 'tsp'
+    assert parsed['standardized_unit'] == "teaspoon"
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    assert parsed['prep'] == ['room temp']
+    assert parsed['food'] == 'butter'
+    assert parsed['size_modifiers'] == []
+
+# TODO: this seems like the best effort to handle "two and three" as a quantity, just a really poorly written ingredient
+def test_number_words_6():
+    parse = IngredientSlicer("two and three tsp of room temp butter")
+    parse.parse()
+    parsed = parse.to_json()
+    assert parsed['quantity'] == "5"
+    assert parsed['unit'] == 'tsp'
+    assert parsed['standardized_unit'] == "teaspoon"
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+    assert parsed['prep'] == ['room temp']
+    assert parsed['food'] == 'butter'
+    assert parsed['size_modifiers'] == []
+
+# -------------------------------------------------------------------------------
+# ---- Test regex.NUMBER_WORDS_MAP: Words-to-numbers tests ----
+# -------------------------------------------------------------------------------
 
 def test_number_words_1(regex_map):
 

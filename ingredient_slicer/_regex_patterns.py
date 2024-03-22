@@ -150,7 +150,8 @@ CASUAL_QUANTITIES_PATTERN   = re.compile(r'\b(?:' + CASUAL_QUANTITIES_ALT + r')\
 DIMENSION_UNITS_PATTERN     = re.compile(r'\b(?:' + DIMENSION_UNITS_ALT + r')\b', re.IGNORECASE) # e.g. "inch", "inches", "cm", "mm", "millimeter", "millimeters", "centimeter", "centimeters"
 UNIT_MODIFIERS_PATTERN      = re.compile(r'\b(?:' + UNIT_MODIFIERS_ALT + r')\b', re.IGNORECASE) # e.g. "large", "small", "medium
 APPROXIMATE_STRINGS_PATTERN = re.compile(r'\b(?:' + APPROXIMATE_STRINGS_ALT + r')\b', re.IGNORECASE) # e.g. "about", "approximately", "around", "roughly", "nearly", "almost
- 
+
+
 # -----------------------------------------------------------------------------
 # --------------------------- Prefix number words with number words patterns -----------------------------
 # Patterns for matching:
@@ -161,8 +162,16 @@ APPROXIMATE_STRINGS_PATTERN = re.compile(r'\b(?:' + APPROXIMATE_STRINGS_ALT + r'
 PREFIXED_NUMBER_WORDS = re.compile(r'\b(?:' + NUMBER_PREFIX_WORD_ALT + r')(?:\s*[-\s]*\s*)(?:' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE)
 # PREFIXED_NUMBER_WORDS = re.compile(r'\b(?:' + NUMBER_PREFIX_WORD_ALT + r')(?:\s*|\s*-*\s*)(?:' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE)
 
-PREFIXED_NUMBER_WORDS_GROUPS = re.compile(r'\b(' + NUMBER_PREFIX_WORD_ALT + r')(?:\s*[-\s]*\s*)(' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE)
+# PREFIXED_NUMBER_WORDS_GROUPS = re.compile(r'\b(' + NUMBER_PREFIX_WORD_ALT + r')(?:\s*[-\s]*\s*)(' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE) # OG
+PREFIXED_NUMBER_WORDS_GROUPS = re.compile(r'\b(' + NUMBER_PREFIX_WORD_ALT + r')(?:[-\s]*)(' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE) # NEW
+# PREFIXED_NUMBER_WORDS_GROUPS = re.compile(r'\b(' + NUMBER_PREFIX_WORD_ALT + r')[-\s](' + NUMBER_WORDS_ALT + r')\b', re.IGNORECASE)
 
+PREFIXED_NUMBER_WORDS_MAP = {}
+for prefix_word, prefix_number in _constants.NUMBER_PREFIX_WORDS.items():
+    for number_word, number_value in _constants.NUMBER_WORDS.items():
+        PREFIXED_NUMBER_WORDS_MAP[prefix_word + " " + number_word] = [str(prefix_number + number_value), re.compile(r'\b' + prefix_word + r'(?:[-\s]*)' + number_word + r'\b', re.IGNORECASE)]
+
+# ----------------------------------------------------------------------------------------------------------------------
 # --------------------------- Unit/Number or Number/Unit patterns -----------------------------
 # Patterns for matching:
 # - a number followed by a unit
@@ -172,6 +181,7 @@ PREFIXED_NUMBER_WORDS_GROUPS = re.compile(r'\b(' + NUMBER_PREFIX_WORD_ALT + r')(
 # - a number/decimal/fraction followed by a space and then another number/decimal/fraction
 # - a number/decimal/fraction followed by a space and then another number/decimal/fraction followed by a unit
 # -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 # Construct the regular expression pattern that matches the number (including fractions and decimals)
 # followed by 0+ spaces and then a unit in UNITS dictionary
@@ -185,6 +195,7 @@ ANY_NUMBER_THEN_ANYTHING_THEN_UNIT = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d
 # same as above but with 2 capture groups (number and unit)
 ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS  = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s+(\S*\b(?:' + ANY_UNIT_ALT + r'))\b')
 ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS2 = re.compile(r'\b(\d+)\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
+
 
 # same as above but with 2 capture groups (number and unit, either basic, non-basic, or any unit)
 QUANTITY_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
@@ -205,40 +216,6 @@ EQUIV_QUANTITY_UNIT_GROUPS = re.compile(r'\b(' + EQUIVALENT_ALT + r')\b\s*.*?\s*
 # EQUIV_QUANTITY_UNIT_GROUPS = re.compile(r'\b(' + EQUIVALENT_ALT + r')\s+((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
 # EQUIVALENT_QUANTITY_UNIT_GROUPS = re.compile(r'\b(' + EQUIVALENT_ALT + r')\s+((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
 
-# Regular expression pattern to match any number/decimals/fraction in a string padded by atleast 1+ whitespaces
-ANY_NUMBER = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
-
-# Match ALL numbers in a string regardless of padding
-ALL_NUMBERS = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)')
-
-# matches any number/decimals/fractions followed by 1+ spaces then a denominator word
-# NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + DENOMINATOR_WORDS_ALT + r')\b')
-NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[-\s]*\s*)(?:' + DENOMINATOR_WORDS_ALT + r')\b')
-# NUMBER_WITH_DENOMINATOR.findall("1 quarter cup of milk")
-
-# matches any number/decimals/fractions followed by 1+ spaces then a fraction word (e.g. "1 half", "1 quarter")
-# NUMBER_WITH_FRACTION_WORD = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + FRACTION_WORDS_ALT + r')\b')
-NUMBER_WITH_FRACTION_WORD = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[-\s]*\s*)(?:' + FRACTION_WORDS_ALT + r')\b')
-NUMBER_WITH_FRACTION_WORD_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*[-\s]*\s*)(' + FRACTION_WORDS_ALT + r')\b', re.IGNORECASE)
-
-
-### (DEPRACTED version of SPACE_SEP_NUMBERS)
-# # Match any number/decimal/fraction followed by a space and then another number/decimal/fraction
-# # (e.g "1 1/2", "3 1/4", "3 0.5", "2.5 3/4")
-# SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d+/\d+|\d+\.\d+)\b')
-
-# regex for matching numbers/fractions/decimals separated by "and" or "&" (e.g. "1/2 and 3/4", "1/2 & 3/4")
-AND_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*(?:and|&)\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+))+\b')
-
-# Match any number/decimal/fraction followed by a space and then a number/decimal/fraction (Currently used version)
-# (e.g "1 1/2", "3 1/4", "3 0.5", "2.5 3/4")
-SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s+(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
-
-# # This is VERY similar to above regex but just swaps "*" and "+" as to enforce the first pattern MUST MATCH atleast 1 time 
-# SPACE_SEP_NUMBERS_OR_ANY_NUMBER_AFTER_WS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b') 
-# SPACE_SEP_NUMBERS_OG  = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d+/\d+|\d+\.\d+)\b')
-# SPACE_SEP_NUMBERS2 = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s+\d*\.\d+|\s+\d+\s*/\s*\d+|\s+\d+)+\b')
-
 # a number/decimal/fraction followed by 1+ spaces to another number/decimal/fraction followed by a 0+ spaces then a VOLUME unit
 # (e.g. 1/2 cup, 1 1/2 cups, 1 1/2 tablespoon)
 SPACED_NUMS_THEN_VOLUME_UNITS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d+/\d+|\d+\.\d+)\s*(?:' + VOLUME_UNIT_ALT + r')\b')
@@ -258,7 +235,81 @@ NUMBER_THEN_UNIT_ABBR = re.compile(r"(\d)\-?([a-zA-Z])") # 3g = 3 g
 # Regex to match number (QUANTITY) then unit word (full word string as unit)
 NUMBER_THEN_UNIT_WORD = re.compile(r"(\d+)\-?([a-zA-Z]+)") #  "3tbsp vegetable oil" = 3 tbsp
 
-# -----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+# --------------------------- Generic number patterns and numbers w/ specific separators -----------------------------
+# Patterns for matching:
+# - a number/decimal/fraction followed by a space and then another number/decimal/fraction
+# - a number/decimal/fraction followed by a space and then another number/decimal/fraction followed by a unit
+# - a number/decimal/fraction followed by a space and then a denominator word
+# - a number/decimal/fraction followed by a space and then a fraction word
+# - a number/decimal/fraction followed by a space and then a fraction word (capture groups)
+# - numbers separated by "and" or "&" (e.g. "1/2 and 3/4", "1/2 & 3/4")
+# - numbers separated by "and", "&", "+", or "plus" (e.g. "1/2 and 3/4", "1/2 & 3/4") # NOTE: same as above with "+" and "plus" added
+# - a number followed by 0+ whitespaces and then another number
+# ----------------------------------------------------------------------------------------------------------------------
+
+# write a function to replace all instances of multiple hypens (which can be separated by whitespaces) in a string with a single hypen
+def replace_multiple_hyphens(string: str) -> str:
+    return re.sub(r'[-\s]+', '-', string)
+
+# test_string = "1 - - - 1/2 - - - 3/4 ---"
+# print(replace_multiple_hyphens(test_string))
+
+# Regular expression pattern to match any number/decimals/fraction in a string padded by atleast 1+ whitespaces
+ANY_NUMBER = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
+
+# Match ALL numbers in a string regardless of padding
+ALL_NUMBERS = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)')
+
+# matches any number/decimals/fractions followed by 1+ spaces then a denominator word
+# NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + DENOMINATOR_WORDS_ALT + r')\b')
+NUMBER_WITH_DENOMINATOR = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[-\s]*\s*)(?:' + DENOMINATOR_WORDS_ALT + r')\b')
+# NUMBER_WITH_DENOMINATOR.findall("1 quarter cup of milk")
+
+# matches any number/decimals/fractions followed by 1+ spaces then a fraction word (e.g. "1 half", "1 quarter")
+NUMBER_WITH_FRACTION_WORD = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*[-\s]*\s*)(?:' + FRACTION_WORDS_ALT + r')\b')
+# NUMBER_WITH_FRACTION_WORD = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:' + FRACTION_WORDS_ALT + r')\b')
+NUMBER_WITH_FRACTION_WORD_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*[-\s]*\s*)(' + FRACTION_WORDS_ALT + r')\b', re.IGNORECASE)
+
+NUMBER_WITH_FRACTION_WORD_MAP = {}
+for word, fraction in _constants.FRACTION_WORDS.items():
+    NUMBER_WITH_FRACTION_WORD_MAP[word] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)[-\s]*' + word + r'\b', re.IGNORECASE)
+
+# for key, value in NUMBER_WITH_FRACTION_WORD_MAP.items():
+#     print(f"key: {key}")
+#     print(f"{key}: {value.findall('1--quarter cup of milk')}")
+#     print()
+# NUMBER_WITH_FRACTION_WORD_MAP['half']
+# _constants.FRACTION_WORDS
+
+# '(?:\\d*\\.\\d+|\\d+\\s*/\\s*\\d+|\\d+)\\s*pct' # NOTE: SAFE
+# for pct_string in pct_strings:
+#     PCT_REGEX_MAP[pct_string] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + pct_string + r'')
+### (DEPRACTED version of SPACE_SEP_NUMBERS)
+# # Match any number/decimal/fraction followed by a space and then another number/decimal/fraction
+# # (e.g "1 1/2", "3 1/4", "3 0.5", "2.5 3/4")
+# SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d+/\d+|\d+\.\d+)\b')
+
+# regex for matching numbers/fractions/decimals separated by "and" or "&" (e.g. "1/2 and 3/4", "1/2 & 3/4")
+AND_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*(?:and|&)\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+))+\b')
+
+# regex for matching numbers/fractions/decimals separated by "and", "&", "+", or "plus" (e.g. "1/2 and 3/4", "1/2 & 3/4") # NOTE: same as above with "+" and "plus" added
+NUMBERS_SEPARATED_BY_ADD_SYMBOLS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s*(?:and|&|\+|plus)\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+))+\b')
+# NUMBERS_SEPARATED_BY_ADD_SYMBOLS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*(?:and|&|\+|plus)\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+))+\b')
+# NUMBER_WITH_FRACTION_WORD_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s**\s*)(' + FRACTION_WORDS_ALT + r')\b', re.IGNORECASE)
+# NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*[and|&|\+|plus\s]*\s*)(\d*\.\d+|\d+\s*/\s*\d+|\d+)\b', re.IGNORECASE)
+NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*(?:and|&|\+|plus))\s*(\d*\.\d+|\d+\s*/\s*\d+|\d+)\b', re.IGNORECASE)
+
+# Match any number/decimal/fraction followed by a space and then a number/decimal/fraction (Currently used version)
+# (e.g "1 1/2", "3 1/4", "3 0.5", "2.5 3/4")
+SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s+(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
+
+# # This is VERY similar to above regex but just swaps "*" and "+" as to enforce the first pattern MUST MATCH atleast 1 time 
+# SPACE_SEP_NUMBERS_OR_ANY_NUMBER_AFTER_WS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b') 
+# SPACE_SEP_NUMBERS_OG  = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d+/\d+|\d+\.\d+)\b')
+# SPACE_SEP_NUMBERS2 = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?:\s+\d*\.\d+|\s+\d+\s*/\s*\d+|\s+\d+)+\b')
+
+# --------------------------------------------------------------------------------------------------
 # --------------------------- RANGE PATTERNS ----------------------------------
 # Patterns to match a number followed by a hyphen and then another number
 # Handles cases with whole numbers, decimals, and fractions:
@@ -275,13 +326,36 @@ NUMBER_THEN_UNIT_WORD = re.compile(r"(\d+)\-?([a-zA-Z]+)") #  "3tbsp vegetable o
 # - "1/2 to 3/4"
 # - "1/2 or 3/4"
 # - "between 1/2 and 3/4"
-# -----------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
+
+# create a regular expressio that matches numbers or decimals separated by 0+ whitespaces and 1+ hyphens
+# QUANTITY_DASH_QUANTITY = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*[-\s]+\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
 
 # matches ANY numbers/decimals/fractions followed by a hypen to ANY numbers/decimals/fractions 
 # This pattern does a really good job of matching almost ANY hypen separated numbers in a string
 
-# # GOOD TO GO VERSION
-QUANTITY_DASH_QUANTITY = re.compile(r"\d+(?:/\d+|\.\d+)?\s*-\s*\d+(?:/\d+|\.\d+)?") # PREVIOUS VERSION THAT WORKS PERFECTLY (ALMOST)
+# Best quantity pattern with word boundaries (version WITHOUT word boundaries was what was originally used but the word boundaries lower the risk of catastrophic backtracking)
+QUANTITY_DASH_QUANTITY = re.compile(r"\b\d+(?:/\d+|\.\d+)?\s*-\s*\d+(?:/\d+|\.\d+)?\b") # NOTE:Golden child with word boundaries for safety (GOOD TO GO)
+# QUANTITY_DASH_QUANTITY = re.compile(r"\d+(?:/\d+|\.\d+)?\s*-\s*\d+(?:/\d+|\.\d+)?") # NOTE: this is the golden child, WITHOUT WORD BOUNDARDIES (GOOD TO GO)
+
+# #  other variation of the above 2 patterns
+# QUANTITY_DASH_QUANTITY = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)(?!\s*[a-zA-Z0-9])(?:[-\s]*)(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b', re.IGNORECASE) # NOTE: RUNNER UP
+
+# Capture groups version of the above pattern
+QUANTITY_DASH_QUANTITY_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?!\s*[a-zA-Z0-9])(?:[-\s]*)((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\b', re.IGNORECASE) # NOTE: safer new version (GOOD TO GO)
+# QUANTITY_DASH_QUANTITY_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?!\s*[a-zA-Z0-9])(?:\s*[-\s]*\s*)((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\b', re.IGNORECASE) # NOTE: Old dangerous version
+
+# QUANTITY_DASH_QUANTITY_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?!\s*[a-zA-Z0-9])(?:\s*[-\s]*\s*)((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\b', re.IGNORECASE) # ORIGINAL WORKING VERSION
+# QUANTITY_DASH_QUANTITY_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*[-\s]*\s*)((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\b', re.IGNORECASE)
+# QUANTITY_DASH_QUANTITY_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?!\s*[a-zA-Z0-9])(?:\s*[-\s]*\s*)(?=((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)))', re.IGNORECASE) # New version that will match multiple ranges in a string
+# QUANTITY_DASH_QUANTITY_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?!\s*[a-zA-Z0-9])(?:\s*[-\s]*\s*)((?=(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)))', re.IGNORECASE)
+
+# ingredient = '1.5  - 5 - 10 tbsp, coconut oil'
+# QUANTITY_DASH_QUANTITY_GROUPS.findall(ingredient) # output: [('1.5', '5')] Expected output: [('1.5', '5'), ('5', '10')]
+# QUANTITY_DASH_QUANTITY_GROUPS.findall("1/2 - 3/4") # output: [('1/2', '3/4')] # Expected output: [('1/2', '3/4')]
+# QUANTITY_DASH_QUANTITY_GROUPS.findall("1/2 - -3/4") # output: [('1/2', '3/4')] # Expected output: [('1/2', '3/4')]
+# QUANTITY_DASH_QUANTITY_GROUPS.findall("1/2  3/4") # output: [('1/2', '3/4')] # Expected output: []
+# QUANTITY_DASH_QUANTITY_GROUPS.findall("1/2 -- 3/4") # output: [('1/2', '3/4')] # Expected output: [('1/2', '3/4')]
 
 # NEW VERSION I AM TESTING OUT NOW
 # QUANTITY_DASH_QUANTITY = re.compile(r"\d+(?:/\d+|\.\d+)?(?:\s*-+\s*|\s+)*\d+(?:/\d+|\.\d+)?") # NEW VERSION I AM TESTING OUT NOW
@@ -315,7 +389,11 @@ FRACTION_DASH_WHOLE_NUMBER = re.compile(r"\d+/\d+\s*-\s*\d+")
 # match pattern for a range of number/decimal/fraction with "to" or "or" in between them (e.g. "1/2 to 3/4", "1/2 or 3/4", "1-to-2", "1-or-2", "1 to-2")
 QUANTITY_TO_OR_QUANTITY = re.compile(r'\b\s*((?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?)\s*(?:to|or|\s*-?\s*to\s*-?\s*|\s*-?\s*or\s*-?\s*)\s*(?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?))')
 # QUANTITY_TO_OR_QUANTITY = re.compile(r'\b\s*((?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?)\s*(?:to|or|-or-|-to-)\s*(?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?))')
+# QUANTITY_TO_OR_QUANTITY = re.compile(r'\b\s*((?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?)\s*(?:to|or|\s*-?\s*to\s*-?\s*|\s*-?\s*or\s*-?\s*)\s*(?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?\s*\b))')
+QUANTITY_TO_OR_QUANTITY = re.compile(r'\b\s*((?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?)\s*(?:to|or|\s*-?\s*to\s*-?\s*|\s*-?\s*or\s*-?\s*)\s*(?:\d+(?:\.\d+)?\s*(?:/)?\s*\d+(?:\.\d+)?|\d+(?:\.\d+)?))')
 
+QUANTITY_OR_QUANTITY = re.compile(r"\b\d+(?:/\d+|\.\d+)?\s*or\s*\d+(?:/\d+|\.\d+)?\b", re.IGNORECASE)
+QUANTITY_TO_QUANTITY = re.compile(r"\b\d+(?:/\d+|\.\d+)?\s*to\s*\d+(?:/\d+|\.\d+)?\b", re.IGNORECASE)
 
 # Regex pattern for matching "between" followed by a number/decimal/fraction, then "and" or "&", 
 # and then another number/decimal/fraction (e.g. "between 1/2 and 3/4")
@@ -458,7 +536,18 @@ WORDS_ENDING_IN_LY = re.compile(r'\b\w+ly\b')
 # Match ALL numbers followed by 0+ whitespaces and then a percentage character "%", "percentage", or "pct" 
 NUMBERS_FOLLOWED_BY_PERCENTAGE = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:%|percentage|pct)')
 # NUMBERS_FOLLOWED_BY_PERCENTAGE = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*%')
+# NUMBERS_FOLLOWED_BY_PERCENTAGE.findall("1.5%") # output: ['1.5']
 
+PCT_REGEX_MAP = {}
+pct_strings = ["%", "percentage", "percent", "pct"]
+
+for pct_string in pct_strings:
+    PCT_REGEX_MAP[pct_string] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + pct_string + r'')
+
+# for key, value in PCT_REGEX_MAP.items():
+#     print(f"key: {key}")
+#     print(f"{key}: {value.findall('I like 3 % milk cover in 1.5 percent %')}")
+#     print()
 
 # -----------------------------------------------------------------------------
 # --------------------------- Class to store all regex patterns -----------------------
@@ -543,7 +632,11 @@ class IngredientRegexPatterns:
         self.ANY_NUMBER_THEN_ANYTHING_THEN_UNIT = ANY_NUMBER_THEN_ANYTHING_THEN_UNIT
         self.ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS = ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS
         self.ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS2 = ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS2
-        
+        self.SPACED_NUMS_THEN_VOLUME_UNITS = SPACED_NUMS_THEN_VOLUME_UNITS
+        self.ANY_NUMBER_THEN_UNIT_CAPTURE = ANY_NUMBER_THEN_UNIT_CAPTURE
+        self.NUMBER_THEN_UNIT_ABBR = NUMBER_THEN_UNIT_ABBR
+        self.NUMBER_THEN_UNIT_WORD = NUMBER_THEN_UNIT_WORD
+
         # capture groups for getting anumber followed by the next closest units/basics units/non-basic units
         self.QUANTITY_UNIT_GROUPS = QUANTITY_UNIT_GROUPS
         self.QUANTITY_BASIC_UNIT_GROUPS = QUANTITY_BASIC_UNIT_GROUPS
@@ -554,25 +647,30 @@ class IngredientRegexPatterns:
         self.QUANTITY_UNIT_ONLY_GROUPS = QUANTITY_UNIT_ONLY_GROUPS
         self.EQUIV_QUANTITY_UNIT_GROUPS = EQUIV_QUANTITY_UNIT_GROUPS
         
+        # word fraction patterns
         self.NUMBER_WITH_FRACTION_WORD = NUMBER_WITH_FRACTION_WORD
         self.NUMBER_WITH_DENOMINATOR = NUMBER_WITH_DENOMINATOR
         self.NUMBER_WITH_FRACTION_WORD_GROUPS = NUMBER_WITH_FRACTION_WORD_GROUPS
+        self.NUMBER_WITH_FRACTION_WORD_MAP = NUMBER_WITH_FRACTION_WORD_MAP
 
+        # generic number matchings and/or numbers with specific separators
         self.ANY_NUMBER = ANY_NUMBER
         self.ALL_NUMBERS = ALL_NUMBERS
         self.SPACE_SEP_NUMBERS = SPACE_SEP_NUMBERS
-        self.SPACED_NUMS_THEN_VOLUME_UNITS = SPACED_NUMS_THEN_VOLUME_UNITS
-        self.ANY_NUMBER_THEN_UNIT_CAPTURE = ANY_NUMBER_THEN_UNIT_CAPTURE
-        self.NUMBER_THEN_UNIT_ABBR = NUMBER_THEN_UNIT_ABBR
-        self.NUMBER_THEN_UNIT_WORD = NUMBER_THEN_UNIT_WORD
+        self.NUMBERS_SEPARATED_BY_ADD_SYMBOLS = NUMBERS_SEPARATED_BY_ADD_SYMBOLS
+        self.NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS = NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS
 
         # range patterns
         self.QUANTITY_DASH_QUANTITY = QUANTITY_DASH_QUANTITY
-
+        self.QUANTITY_DASH_QUANTITY_GROUPS = QUANTITY_DASH_QUANTITY_GROUPS
         self.QUANTITY_DASH_QUANTITY_UNIT = QUANTITY_DASH_QUANTITY_UNIT
         self.QUANTITY_RANGE = QUANTITY_RANGE
         self.QUANTITY_TO_OR_QUANTITY = QUANTITY_TO_OR_QUANTITY
+        self.QUANTITY_OR_QUANTITY = QUANTITY_OR_QUANTITY
+        self.QUANTITY_TO_QUANTITY = QUANTITY_TO_QUANTITY
         self.BETWEEN_QUANTITY_AND_QUANTITY = BETWEEN_QUANTITY_AND_QUANTITY
+
+
         self.WHOLE_NUMBER_DASH_WHOLE_NUMBER = WHOLE_NUMBER_DASH_WHOLE_NUMBER
         self.WHOLE_NUMBER_DASH_DECIMAL = WHOLE_NUMBER_DASH_DECIMAL
         self.WHOLE_NUMBER_DASH_FRACTION = WHOLE_NUMBER_DASH_FRACTION
@@ -612,6 +710,13 @@ class IngredientRegexPatterns:
         self.REQUIRED_STRING = REQUIRED_STRING
         self.WORDS_ENDING_IN_LY = WORDS_ENDING_IN_LY
         self.NUMBERS_FOLLOWED_BY_PERCENTAGE = NUMBERS_FOLLOWED_BY_PERCENTAGE
+        self.PCT_REGEX_MAP = PCT_REGEX_MAP
+
+        # get a list of all the attributes of the class in sorted order by name
+        self.sorted_keys = sorted(self.__dict__.keys(), key=lambda x: x[0])
+
+        # # Sort attributes by name
+        # self.sorted_attrs = sorted(self.__dict__.items(), key=lambda x: x[0])
 
     def find_matches(self, input_string: str) -> Dict[str, List[Union[str, Tuple[str]]]]:
         """
@@ -630,12 +735,20 @@ class IngredientRegexPatterns:
         Print out all matches in the input string for each regex pattern.
         Returns None
         """
-
         matches = {}
-        for name, pattern in self.__dict__.items():
-            if isinstance(pattern, re.Pattern):
-                matches[name] = pattern.findall(input_string)
-                print(f"{name}: {matches[name]}")
+        
+        for key in self.sorted_keys:
+            attribute = self.__dict__[key]
+            if isinstance(attribute, re.Pattern):
+                matches[key] = attribute.findall(input_string)
+                print(f"{key}: {matches[key]}")
+
+        # matches = {}
+        # for name, pattern in self.__dict__.items():
+        #     if isinstance(pattern, re.Pattern):
+        #         matches[name] = pattern.findall(input_string)
+        #         print(f"{name}: {matches[name]}")
+
         
     def list_attrs(self) -> None:
         """
@@ -716,6 +829,10 @@ class IngredientRegexPatterns:
 
             "ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS": "Matches a number followed by any text and then a unit with capture groups.",
             "ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS2": "Matches a number followed by any text and then a unit with capture groups (version 2).",
+            "SPACED_NUMS_THEN_VOLUME_UNITS": "Matches a number/decimal/fraction followed by 1+ spaces to another number/decimal/fraction followed by a 0+ spaces then a VOLUME unit.",
+            "ANY_NUMBER_THEN_UNIT_CAPTURE": "Matches a number followed by any text and then a unit.",
+            "NUMBER_THEN_UNIT_ABBR": "Matches a number followed by a unit abbreviation.",
+            "NUMBER_THEN_UNIT_WORD": "Matches a number followed by a unit word (full word string as unit).",
 
             "QUANTITY_UNIT_GROUPS": "Matches a number followed by a unit with capture groups.", 
             "QUANTITY_BASIC_UNIT_GROUPS": "Matches a number followed by a basic unit with capture groups.",
@@ -726,17 +843,20 @@ class IngredientRegexPatterns:
             "QUANTITY_UNIT_ONLY_GROUPS": "Matches a quantity followed by  0+whitespaces/hypens and then a unit with capture groups.",
             "EQUIV_QUANTITY_UNIT_GROUPS": "Matches an 'approximate/equivalent' string followed by a number followed by a unit with capture groups (helpful for finding equivalent quantity-unit patterns i.e. 'about 1/2 cup').",
 
+            # general umber matching patterns and number with specific separators
             "ANY_NUMBER": "Matches any number/decimal/fraction in a string padded by at least 1+ whitespaces.",
             "ALL_NUMBERS": "Matches ALL number/decimal/fraction in a string regardless of padding.",
             "SPACE_SEP_NUMBERS": "Matches any number/decimal/fraction followed by a space and then another number/decimal/fraction.",
-            "SPACED_NUMS_THEN_VOLUME_UNITS": "Matches a number/decimal/fraction followed by 1+ spaces to another number/decimal/fraction followed by a 0+ spaces then a VOLUME unit.",
-            "ANY_NUMBER_THEN_UNIT_CAPTURE": "Matches a number followed by any text and then a unit.",
-            "NUMBER_THEN_UNIT_ABBR": "Matches a number followed by a unit abbreviation.",
-            "NUMBER_THEN_UNIT_WORD": "Matches a number followed by a unit word (full word string as unit).",
+            "NUMBERS_SEPARATED_BY_ADD_SYMBOLS": "Matches numbers/decimals/fractions separated by 'and', '&', 'plus', or '+' symbols.",
+            "NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS": "Matches numbers/decimals/fractions separated by 'and', '&', 'plus', or '+' symbols with capture groups.",
+
             "QUANTITY_DASH_QUANTITY": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions.",
+            "QUANTITY_DASH_QUANTITY_GROUPS": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions with capture groups.",
             "QUANTITY_DASH_QUANTITY_UNIT": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions followed by a unit (0+ whitespace between last number and the unit).",
             "QUANTITY_RANGE": "Matches numbers/decimals/fractions with a hyphen in between them.",
             "QUANTITY_TO_OR_QUANTITY": "Matches numbers/decimals/fractions separated by 'to' or 'or'.",
+            "QUANTITY_OR_QUANTITY": "Matches numbers/decimals/fractions separated by 'or'.",
+            "QUANTITY_TO_QUANTITY": "Matches numbers/decimals/fractions separated by 'to'.",
             "BETWEEN_QUANTITY_AND_QUANTITY": "Matches numbers/decimals/fractions separated by 'between' and 'and'.",
             "WHOLE_NUMBER_DASH_WHOLE_NUMBER": "Matches whole numbers separated by a hyphen.",
             "WHOLE_NUMBER_DASH_DECIMAL": "Matches whole number followed by a decimal separated by a hyphen.",
@@ -748,10 +868,14 @@ class IngredientRegexPatterns:
             "FRACTION_DASH_DECIMAL": "Matches fraction followed by a decimal separated by a hyphen.",
             "FRACTION_DASH_WHOLE_NUMBER": "Matches fraction followed by a whole number separated by a hyphen.",
 
-
-            "FRACTION_PATTERN": "Matches fraction parts in a string.",
+            # fraction word patterns
             "NUMBER_WITH_FRACTION_WORD": "Matches a number followed by a fraction word (i.e. '1 half').",
             "NUMBER_WITH_DENOMINATOR": "Matches a number followed by a denominator word (i.e. '1 quarter').",
+            "NUMBER_WITH_FRACTION_WORD_GROUPS": "Matches a number followed by a fraction word with capture groups.",
+            "NUMBER_WITH_FRACTION_WORD_MAP": "Dictionary of regex patterns to match number followed by a fraction word in a string (i.e. '1 half' : '1 1/2').",
+
+            # fraction specific patterns
+            "FRACTION_PATTERN": "Matches fraction parts in a string.",
             "SPLIT_SPACED_NUMS": "Splits numbers/decimals/fractions separated by 1+ whitespaces into a capture group (i.e '1.5 1/2' -> ['1.5', '1/2']).",
             "SPLIT_INTS_AND_FRACTIONS": "Splits whole numbers and fractions separated by 1+ whitespaces into a capture group (i.e '1 1/2' -> ['1', '1/2']). (Deprecated)",
             "MULTI_PART_FRACTIONS_PATTERN": "Matches multi-part fractions in a string. (Deprecated)",
@@ -773,7 +897,8 @@ class IngredientRegexPatterns:
             "OPTIONAL_STRING": "Matches the word 'optional', 'option', 'opt', etc. in a string.",
             "REQUIRED_STRING": "Matches the word 'required', 'requirement', 'req', etc. in a string.",
             "WORDS_ENDING_IN_LY": "Matches any word ending in 'ly' (i.e. 'firmly', 'lightly', 'rapidly').",
-            "NUMBERS_FOLLOWED_BY_PERCENTAGE": "Matches any number followed by 0+ whitespaces and then a percentage character '%', 'percentage', or 'pct'  (i.e. '2% milk')."
+            "NUMBERS_FOLLOWED_BY_PERCENTAGE": "Matches any number followed by 0+ whitespaces and then a percentage character '%', 'percentage', or 'pct'  (i.e. '2% milk').",
+            "PCT_REGEX_MAP" : "Dictionary of regex patterns to match numbers followed by a percentage character '%', 'percentage', 'percent', or 'pct'."
         }
 
         # Retrieve description based on pattern name

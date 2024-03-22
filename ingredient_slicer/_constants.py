@@ -31,7 +31,9 @@ NUMBER_WORDS = {
     'seventy': 70,
     'eighty': 80,
     'ninety': 90,
-    'hundred': 100
+    'hundred': 100,
+    'hundreds': 100,
+    'thousand': 1000
 }
 
 NUMBER_PREFIX_WORDS = {
@@ -44,7 +46,8 @@ NUMBER_PREFIX_WORDS = {
     'eighty': 80,
     'ninety': 90,
     'hundred': 100,
-    'thousand': 1000,
+    'hundreds': 100,
+    'thousand': 1000
 }
 
 # Fractions represented as multiple words (or numbers) and words
@@ -191,33 +194,61 @@ MULTI_FRACTION_WORDS = {
 # Fractions words representing a single fraction (i.e. a quarter is equal to 1/4)
 FRACTION_WORDS = {
     # singular versions
-    "half": "1/2",
-    "quarter": "1/4",
-    "third": "1/3",
-    "fourth": "1/4",
-    "fifth": "1/5",
-    "sixth": "1/6",
-    "seventh": "1/7",
-    "eighth": "1/8",
-    "ninth": "1/9",
-    "tenth": "1/10",
-    "eleventh": "1/11",
-    "twelfth": "1/12",
-
+    "half": ("1/2", "0.5"),
+    "quarter": ("1/4", "0.25"),
+    "third": ("1/3", "0.333"),
+    "fourth": ("1/4", "0.25"),
+    "fifth": ("1/5", "0.2"),
+    "sixth": ("1/6", "0.166"),
+    "seventh": ("1/7", "0.142"),
+    "eighth": ("1/8", "0.125"),
+    "ninth": ("1/9", "0.111"),
+    "tenth": ("1/10", "0.1"),
+    "eleventh": ("1/11", "0.0909"),
+    "twelfth": ("1/12", "0.0833"),
+    
     # plural versions
-    "halves": "1/2",
-    "quarters": "1/4",
-    "thirds": "1/3",
-    "fourths": "1/4",
-    "fifths": "1/5",
-    "sixths": "1/6",
-    "sevenths": "1/7",
-    "eighths": "1/8",
-    "ninths": "1/9",
-    "tenths": "1/10",
-    "elevenths": "1/11",
-    "twelfths": "1/12"
+    "halves": ("1/2", "0.5"),
+    "quarters": ("1/4", "0.25"),
+    "thirds": ("1/3", "0.333"),
+    "fourths": ("1/4", "0.25"),
+    "fifths": ("1/5", "0.2"),
+    "sixths": ("1/6", "0.166"),
+    "sevenths": ("1/7", "0.142"),
+    "eighths": ("1/8", "0.125"),
+    "ninths": ("1/9", "0.111"),
+    "tenths": ("1/10", "0.1"),
+    "elevenths": ("1/11", "0.0909"),
+    "twelfths": ("1/12", "0.0833")
+
+    # "half": "1/2", 
+    # "quarter": "1/4",
+    # "third": "1/3",
+    # "fourth": "1/4",
+    # "fifth": "1/5",
+    # "sixth": "1/6",
+    # "seventh": "1/7",
+    # "eighth": "1/8",
+    # "ninth": "1/9",
+    # "tenth": "1/10",
+    # "eleventh": "1/11",
+    # "twelfth": "1/12",
+
+    # # plural versions
+    # "halves": "1/2",
+    # "quarters": "1/4",
+    # "thirds": "1/3",
+    # "fourths": "1/4",
+    # "fifths": "1/5",
+    # "sixths": "1/6",
+    # "sevenths": "1/7",
+    # "eighths": "1/8",
+    # "ninths": "1/9",
+    # "tenths": "1/10",
+    # "elevenths": "1/11",
+    # "twelfths": "1/12"
 }
+
 
 # Fractions words representing the denominator of a fraction
 DENOMINATOR_WORDS = {
@@ -725,6 +756,8 @@ PREP_WORDS = {
     'stirred',
     'stirring',
     'stir',
+    'tenderized',
+    'thickened',
     "tightly",
     'toasted',
     'trimmed',

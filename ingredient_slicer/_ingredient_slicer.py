@@ -8,6 +8,7 @@ import warnings
 
 from ._regex_patterns import IngredientRegexPatterns
 # from . import IngredientRegexPatterns
+from . import _utils
 
 # # local
 # from ingredient_slicer import IngredientRegexPatterns
@@ -93,41 +94,157 @@ class IngredientSlicer:
 
         return matched_units
     
+    # TODO: move to a utils file for generic functions
+    def _make_int_or_float_str(self, number_str: str) -> str:
+        """ Convert a string representation of a number to its integer or float equivalent.
+        If the number is a whole number, return the integer value as a string. If the number is a decimal, return the float value as a string.
+        Args:
+            number_str (str): The string representation of the number.
+        Returns:
+            str: The integer or float value of the number as a string.
+        
+        Examples:
+        >>> make_int_or_float_str("1.0") 
+        "1"
+        >>> make_int_or_float_str("1")
+        "1"
+        >>> make_int_or_float_str("0.25")
+        "0.25"
+        """
+        number = float(number_str.strip())  # Convert string to float
+        if number == int(number):  # Check if float is equal to its integer value
+            return str(int(number))  # Return integer value if it's a whole number
+        else:
+            return str(number)  # Return float if it's a decimal
+        
     def _find_and_remove_percentages(self) -> None:
         """
         Find and remove percentages from the ingredient string.
         """
+        # ingredient = "1 cup of 2% heavy cream"
+        
+        for key, pattern in IngredientSlicer.regex.PCT_REGEX_MAP.items():
+            pattern_iter = pattern.finditer(self.standard_ingredient)
+            offset = 0
+            for match in pattern_iter:
+                match_string = match.group()
+                start, end = match.start(), match.end()
+                modified_start = start + offset
+                modified_end = end + offset
 
-        # # Find percentages in the ingredient string
-        # percentage_matches = IngredientSlicer.regex.PERCENTAGE_PATTERN.findall(self.standard_ingredient)
-        # # Remove percentages from the ingredient string
-        # for match in percentage_matches:
-        #     self.standard_ingredient = self.standard_ingredient.replace(match, "")
+                replacement_str = ""
 
-        pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(self.standard_ingredient)
-        # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(ingredient)
+                # Construct the modified string with the replacement applied
+                self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
+                # ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
+                offset += len(str(replacement_str)) - (end - start)
+
+        # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(self.standard_ingredient)
+
+        # offset = 0
+        # for match in pattern_iter:
+        #     match_string    = match.group()
+        #     start, end = match.start(), match.end()
+        #     modified_start = start + offset
+        #     modified_end = end + offset
+        #     replacement_str = ""
+
+        #     self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
+        #     offset += len(str(replacement_str)) - (end - start)
+        
+        return
+
+    def _find_and_replace_fraction_words(self) -> None:
+        """ Find and replace fraction words with their corresponding numerical values in the parsed ingredient."""
+
+        for key, pattern in IngredientSlicer.regex.NUMBER_WITH_FRACTION_WORD_MAP.items():
+            
+            pattern_iter = pattern.finditer(self.standard_ingredient)
+            offset = 0
+
+            for match in pattern_iter:
+                print(f"Got a fraction word match with key: {key}") if self.debug else None
+                match_string = match.group(0)
+                start, end = match.start(), match.end()
+                modified_start = start + offset
+                modified_end = end + offset
+
+                match_string = match_string.replace("-", " ")
+                print(f"Match: {match_string}") if self.debug else None
+                # match_string = match_string.replace("-", " ")
+                split_match = match_string.split(" ")
+
+                split_match = [i.strip() for i in split_match]
+
+                print(f"Split Match: {split_match}") if self.debug else None
+
+                number_word = split_match[0]
+                fraction_word = split_match[1]
+
+                fraction_value, decimal = IngredientSlicer.regex.constants["FRACTION_WORDS"][fraction_word]
+
+                updated_value = str(float(number_word) * float(decimal))
+                self.standard_ingredient = self.standard_ingredient[:modified_start] + str(updated_value) + self.standard_ingredient[modified_end:]
+                # self.standard_ingredient = self.standard_ingredient[:match.start()] + str(updated_value) + self.standard_ingredient[match.end():]
+                # ingredient = ingredient[:modified_start] + str(updated_value) + ingredient[modified_end:]
+
+                offset += len(str(updated_value)) - (end - start)
+
+        # pattern_iter = IngredientSlicer.regex.NUMBER_WITH_FRACTION_WORD_GROUPS.finditer(self.standard_ingredient)
+
+        # offset = 0
+
+        # for match in pattern_iter:
+        #     start, end = match.start(), match.end()
+
+        #     number_word   = match.group(1)
+        #     fraction_word = match.group(2)
+
+        #     fraction_value, decimal = IngredientSlicer.regex.constants["FRACTION_WORDS"][fraction_word]
+
+        #     # multiply first number in match by the decimal value of the fraction word (i.e. "2 third" -> 2 * 1/3)
+        #     updated_value = str(float(number_word) * float(decimal))
+
+        #     self.standard_ingredient = self.standard_ingredient[:match.start()] + str(updated_value) + self.standard_ingredient[match.end():]
+
+        #     offset += len(updated_value) - (end - start)
+        
+        return 
+
+    def _find_and_replace_numbers_separated_by_add_numbers(self) -> None:
+        """Find numbers separated by "and", "&", "plus", or "+" and replace the matched strings with their sum of the 2 number values
+        Examples:
+        "1 and 0.5" -> "1.5"
+        "1 & 0.5" -> "1.5"
+        "2 plus 0.66" -> "2.66"
+        "2 + 0.66" -> "2.66"
+        """
+        add_pattern_iter = IngredientSlicer.regex.NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS.finditer(self.standard_ingredient)
 
         offset = 0
 
-        for match in pattern_iter:
-            match_string    = match.group()
-
-            # Get the start and end of the match and the modified start and end positions given the offset
+        for match in add_pattern_iter:
+            match_string = match.group(0)
             start, end = match.start(), match.end()
             modified_start = start + offset
             modified_end = end + offset
 
-            replacement_str = ""
+            first_number = float(match.group(1).strip())
+            second_number = float(match.group(2).strip())
+            print(f"MATCH: {match_string}") if self.debug else None
+            print(f"First Number: {first_number}") if self.debug else None
+            print(f"Second Number: {second_number}") if self.debug else None
 
-            # Construct the modified string with the replacement applied
-            self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
-            # ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
-            
-            # Update the offset for subsequent removals 
-            offset += len(str(replacement_str)) - (end - start)
+            updated_value = f" {self._make_int_or_float_str(str(first_number + second_number))} "
+            print(f"Updated Value: {updated_value}") if self.debug else None
 
-
-
+            self.standard_ingredient = self.standard_ingredient[:modified_start] + str(updated_value) + self.standard_ingredient[modified_end:]
+            # self.standard_ingredient = self.standard_ingredient[:match.start()] + updated_value + self.standard_ingredient[match.end():]
+            offset += len(updated_value) - (end - start)
+            print()
+        
+        return
+    
     def _find_and_replace_casual_quantities(self):
         """
         Find and replace matches of CASUAL_QUANTITIES_PATTERN with the key from the CASUAL_QUANTITIES dictionary
@@ -172,7 +289,7 @@ class IngredientSlicer:
     #             print(f"- Found {word} in ingredient. Replacing with {regex_data[0]}") if self.debug else None
     #         self.standard_ingredient = pattern.sub(regex_data[0], self.standard_ingredient)
 
-    def _parse_prefixed_number_words(self) -> None:
+    def _find_and_replace_prefixed_number_words(self) -> None:
         """ Replace prefixed number words with their corresponding numerical values in the parsed ingredient 
         Strings like "twenty five" are replaced with "25", or "thirty-two" is replaced with "32"
 
@@ -213,10 +330,9 @@ class IngredientSlicer:
                 # Prefix value ({prefix_value}) + Number value ({number_value}) = Combined value ({combined_value})
                 # > {prefix_value} + {number_value} = {combined_value}
                 # -> Match: {match_string} at positions {start}-{end}
-                # --> Modified start/end match positions: {modified_start}-{modified_end}
                 # ---> Modified ingredient: {self.standard_ingredient}""") if self.debug else None
                 
-    def _parse_number_words(self) -> None:
+    def _find_and_replace_number_words(self) -> None:
         """
         Replace number words with their corresponding numerical values in the parsed ingredient.
         """
@@ -228,6 +344,19 @@ class IngredientSlicer:
             if pattern.search(self.standard_ingredient):
                 # print(f"- Found {word} in ingredient. Replacing with {regex_data[0]}") if self.debug else None
                 self.standard_ingredient = pattern.sub(regex_data[0], self.standard_ingredient)
+
+    def _clean_hyphen_padded_substrings(self) -> None:
+        """Find and remove hyphens around "to", "or", and "and" substrings in the parsed ingredient.
+        
+        For example, "1-to-3 cups of soup" becomes "1 to 3 cups of soup" and "1-or-2 cups of soup" becomes "1 or 2 cups of soup"
+
+        """
+
+        substrings_to_fix = ["to", "or", "and"]
+
+        for substring in substrings_to_fix:
+            self.standard_ingredient = _utils._find_and_remove_hyphens_around_substring(self.standard_ingredient, substring)
+
 
     def _clean_html_and_unicode(self) -> None:
         """Unescape fractions from HTML code coded fractions to unicode fractions."""
@@ -253,28 +382,6 @@ class IngredientSlicer:
 
         # replace consecutive sequences of letters or digits with whitespace-separated sequences
         self.standard_ingredient = re.sub(pattern, r'\1 \2\3 \4', self.standard_ingredient)
-
-    def _make_int_or_float_str(self, number_str: str) -> str:
-        """ Convert a string representation of a number to its integer or float equivalent.
-        If the number is a whole number, return the integer value as a string. If the number is a decimal, return the float value as a string.
-        Args:
-            number_str (str): The string representation of the number.
-        Returns:
-            str: The integer or float value of the number as a string.
-        
-        Examples:
-        >>> make_int_or_float_str("1.0") 
-        "1"
-        >>> make_int_or_float_str("1")
-        "1"
-        >>> make_int_or_float_str("0.25")
-        "0.25"
-        """
-        number = float(number_str.strip())  # Convert string to float
-        if number == int(number):  # Check if float is equal to its integer value
-            return str(int(number))  # Return integer value if it's a whole number
-        else:
-            return str(number)  # Return float if it's a decimal
         
     def _fractions_to_decimals(self) -> None:
         """
@@ -283,7 +390,7 @@ class IngredientSlicer:
         # print("Parsing fractions")
         fractions = re.findall(IngredientSlicer.regex.FRACTION_PATTERN, self.standard_ingredient)
 
-        split_frac = [i.replace(" ", "").split("/") for i in frac]
+        split_frac = [i.replace(" ", "").split("/") for i in fractions]
         split_frac = [(int(f[0]), int(f[1])) for f in split_frac]
         fraction_decimal = [round(float(Fraction(f[0], f[1])), 3) for f in split_frac]
 
@@ -365,8 +472,14 @@ class IngredientSlicer:
         Returns:
             str: The updated ingredient string
         """
-
+        # ingredient = '1 0.667 or 2 0.5 cups of flour'
+        # ingredient = '1 0.667 - 2 0.5 cups of flour'
+        
+        # ingredient = ingredient
+        # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
+        
         matches = pattern.findall(ingredient)
+        
         # matched_ranges = [match.split("-") for match in matches]
 
         if replacement_function:
@@ -396,6 +509,52 @@ class IngredientSlicer:
 
         return ingredient
     
+    def _avg_ranges2(self) -> None:
+        """
+        Replace ranges of numbers with their average in the parsed ingredient.
+        Examples:
+        "1-2 oz" -> "1.5 oz"
+        "1 - 2 ft" -> "1.5 ft"
+        """
+        # ingredient = "1 - 2 cups of sugar"
+        search_ranges = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY.search(self.standard_ingredient)
+        # search_ranges = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY.search(ingredient)
+
+        # OG = re.compile(r"\d+(?:/\d+|\.\d+)?\s*-\s*\d+(?:/\d+|\.\d+)?") # NOTE: this is the golden child, OG --> PREVIOUS VERSION THAT WORKS PERFECTLY (ALMOST)
+        # search_ranges = OG.search(ingredient)
+
+        print(f"Starting while loop searching for ranges in ingredient: {self.standard_ingredient}") if self.debug else None
+        while search_ranges:
+
+            start, end = search_ranges.start(), search_ranges.end()
+            match_string = search_ranges.group()
+            
+            left_range, right_range = match_string.split("-")
+            
+            left_range = left_range.strip()
+            right_range = right_range.strip()
+
+            print(f"Match: {match_string}") if self.debug else None
+            print(f"left_range: {left_range}") if self.debug else None
+            print(f"right_range: {right_range}") if self.debug else None
+            print(f"Start: {start}") if self.debug else None
+            print(f"End: {end}") if self.debug else None
+
+            first_number  = float(self._fraction_str_to_decimal(left_range).strip())
+            second_number = float(self._fraction_str_to_decimal(right_range).strip())
+            
+            range_average = f" {self._make_int_or_float_str(str((first_number + second_number) / 2))} "
+            self.standard_ingredient = self.standard_ingredient[:start] + range_average + self.standard_ingredient[end:]
+
+            search_ranges = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY.search(self.standard_ingredient)
+            # search_ranges = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY_GROUPS.search(ingredient)
+        
+        print(f"All ranges have been updated: {self.standard_ingredient}") if self.debug else None
+
+        self.standard_ingredient = self.standard_ingredient.strip()
+
+        return
+    
     def _avg_ranges(self) -> None:
         """
         Replace ranges of numbers with their average in the parsed ingredient.
@@ -412,32 +571,35 @@ class IngredientSlicer:
 
         # Update the ingredient string with the merged values
         for match in all_ranges:
-            # print(f"Ingredient string: {self.standard_ingredient}")
+            print(f"Ingredient string: {self.standard_ingredient}")
 
             # Get the start and end positions of the match
             start, end = match.start(), match.end()
 
-            # print(f"Match: {match.group()} at positions {start}-{end}") if self.debug else None
+            print(f"Match: {match.group()} at positions {start}-{end}") if self.debug else None
 
             # Get the range values from the match
             range_values = re.findall(IngredientSlicer.regex.QUANTITY_DASH_QUANTITY, match.group())
 
-            # print(f"Range Values: {range_values}") if self.debug else None
+            print(f"Range Values: {range_values}") if self.debug else None
             
             # split the range values into a list of lists
             split_range_values = [i.split("-") for i in range_values]
+            
+            print(f"  >>> Split Range Values: {split_range_values}") if self.debug else None
+            print() if self.debug else None
 
             # get the average of each of the range values
             range_avgs    = [sum([float(num_str) for num_str in i]) / 2 for i in split_range_values][0]
             range_average = self._make_int_or_float_str(str(range_avgs))
 
-            # print(f"Range Averages: {range_average}") if self.debug else None
+            print(f"Range Averages: {range_average}") if self.debug else None
 
             # Calculate the start and end positions in the modified string
             modified_start = start + offset
             modified_end = end + offset
 
-            # print(f"Replacing {match.group()} with '{merged_quantity}'...")
+            print(f"Replacing {match.group()} with '{range_average}'...")
             
             # Construct the modified string with the replacement applied
             self.standard_ingredient = self.standard_ingredient[:modified_start] + str(range_average) + self.standard_ingredient[modified_end:]
@@ -455,7 +617,58 @@ class IngredientSlicer:
     def _replace_to_or_with_hyphen(self, match):
         # Replace "and" and "&" with hyphens
         return match.replace("to", "-").replace("or", "-")
+    
+    def _replace_to_with_hyphen(self, match):
+        # Replace "to" with hyphen
+        return match.replace("to", "-")
+    
+    def _replace_or_with_hyphen(self, match):
+        # Replace "or" with hyphen
+        return match.replace("or", "-")
 
+    # TODO: write tests for this
+    def _merge_misleading_ranges(self) -> str:
+        """ Merge misleading ranges in the parsed ingredient (i.e. "4-1/2" is not a valid range, it should be "4.5" instead)"""
+
+        # Find all the ranges in the ingredient
+        range_iter = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY_GROUPS.finditer(self.standard_ingredient)
+
+        offset = 0
+
+        for match in range_iter:
+            match_string    = match.group()
+            start, end = match.start(), match.end()
+            modified_start = start + offset
+            modified_end = end + offset
+
+            left_range = match.group(1).strip()
+            right_range = match.group(2).strip()
+
+            first_number  = float(self._fraction_str_to_decimal(left_range).strip())
+            second_number = float(self._fraction_str_to_decimal(right_range).strip())
+
+            # If the second number is less than the first number, then the range is misleading
+            #  and the numbers should be merged (added if second number is a fraction)
+            if second_number < first_number:
+                # print(f"Fixing misleading range: {match_string} with ")
+                second_number_is_fraction = second_number < 1
+                multiply_or_add_str = "add" if second_number_is_fraction else "multiply"
+
+                print(f"Second number is a fraction: {second_number_is_fraction}\n > '{multiply_or_add_str}' {first_number} and {second_number}") if self.debug else None
+
+                updated_value = f" {self._make_int_or_float_str(str(first_number + second_number))} " if second_number_is_fraction else f" {self._make_int_or_float_str(str(first_number * second_number))} "
+                # updated_value = f" {_make_int_or_float_str(str(first_number + second_number))} "
+                print(f"Fixing misleading range: {match_string} with {updated_value}") if self.debug else None
+                
+                self.standard_ingredient = self.standard_ingredient[:modified_start] + updated_value + self.standard_ingredient[modified_end:]
+                offset += len(updated_value) - (end - start)
+
+                print(f"Ingredient after updating: {self.standard_ingredient}") if self.debug else None
+
+        self.standard_ingredient = self.standard_ingredient.strip()
+
+        return
+    
     def _fix_ranges(self):
         """
         Fix ranges in the parsed ingredient.
@@ -466,28 +679,64 @@ class IngredientSlicer:
         - "1 to 5" -> "1 - 5"
 
         """
-        # print("Fixing ranges")
+        print("Fixing ranges") if self.debug else None
         # Define the regular expression pattern to match ranges
 
-        # print(f"Before initial range update:\n {self.standard_ingredient}") if self.debug else None
+        print(f"Before initial range update:\n {self.standard_ingredient}") if self.debug else None
+        # ingredient = '1 0.667 or 2 0.5 cups of flour'
 
         # Update ranges of numbers that are separated by one or more hyphens
         self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_DASH_QUANTITY)
         # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.QUANTITY_RANGE)
+        # self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_DASH_QUANTITY)
 
-        # print(f"After initial range update:\n {self.standard_ingredient}") if self.debug else None
+        print(f"After initial range update:\n {self.standard_ingredient}") if self.debug else None
+        # IngredientSlicer._update_ranges(ingredient = ingredient, pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY)
 
         # Update ranges of numbers that are preceded by "between" and followed by "and" or "&"
         self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.BETWEEN_QUANTITY_AND_QUANTITY, self._replace_and_with_hyphen)
         # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.BETWEEN_NUM_AND_NUM_PATTERN, self._replace_and_with_hyphen)
         
+        ############################################################################################################################
+        # #### OLD WORKING METHOD (BELOW) ########
+        ############################################################################################################################
         # print(f"After between and update:\n {self.standard_ingredient}") if self.debug else None
 
-        # Update ranges that are separated by "to" or "or"
-        self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_TO_OR_QUANTITY, self._replace_to_or_with_hyphen)
-        # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.RANGE_WITH_TO_OR_PATTERN, self._replace_to_or_with_hyphen)
+        # # Update ranges that are separated by "to" or "or"
+        # self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_TO_OR_QUANTITY, self._replace_to_or_with_hyphen)
+        # # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.RANGE_WITH_TO_OR_PATTERN, self._replace_to_or_with_hyphen)
         
         # print(f"After to or update:\n {self.standard_ingredient}") if self.debug else None
+        ############################################################################################################################
+        # #### OLD WORKING METHOD (ABOVE) ########
+        ############################################################################################################################
+        
+        ############################################################################################################################
+        # #### NEW METHOD BELOW  ########
+        ############################################################################################################################
+
+        # Update ranges that are separated by "to" or "or"
+        self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_TO_QUANTITY, self._replace_to_with_hyphen)
+        # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.RANGE_WITH_TO_OR_PATTERN, self._replace_to_or_with_hyphen)
+        
+        print(f"After 'TO' update:\n {self.standard_ingredient}") if self.debug else None
+
+        # Update ranges that are separated by "to" or "or"
+        self.standard_ingredient = self._update_ranges(self.standard_ingredient, IngredientSlicer.regex.QUANTITY_OR_QUANTITY, self._replace_or_with_hyphen)
+        # self.standard_ingredient = self._update_ranges(self.standard_ingredient, regex.RANGE_WITH_TO_OR_PATTERN, self._replace_to_or_with_hyphen)
+        
+        print(f"After 'OR' update:\n {self.standard_ingredient}") if self.debug else None
+
+        ############################################################################################################################
+        # #### NEW METHOD ABOVE  ########
+        ############################################################################################################################
+
+        # check and merge any misleading ranges
+        self._merge_misleading_ranges()
+
+        print(f"After misleading range update:\n {self.standard_ingredient}") if self.debug else None
+
+        return
 
     def _remove_repeat_units(self) -> None:
         """
@@ -776,6 +1025,11 @@ class IngredientSlicer:
 
         return first_unit
     
+    def _remove_extra_whitespaces(self, input_string: str) -> str:
+        """Remove extra whitespaces from a string and return the string with only single whitespaces."""
+        # ingredient = re.sub(r'\s+', ' ', ingredient).strip() # remove any extra whitespace
+        return " ".join(input_string.split())
+    
     def standardize(self):
         
         # define a list containing the class methods that should be called in order on the input ingredient string
@@ -783,20 +1037,25 @@ class IngredientSlicer:
             self._drop_special_dashes,
             self._find_and_remove_percentages,
             self._find_and_replace_casual_quantities, # NOTE: testing this out
-            self._parse_prefixed_number_words, # NOTE: testing this out
-            self._parse_number_words,
+            self._find_and_replace_prefixed_number_words, # NOTE: testing this out
+            self._find_and_replace_number_words,
+            self._find_and_replace_fraction_words, # NOTE: testing this out
             self._clean_html_and_unicode,
             self._replace_unicode_fraction_slashes,
             self._convert_fractions_to_decimals,
-            self._fix_ranges,
+            # self._fix_ranges, # TODO: ORIGINAL place for fix_ranges() ---> need to decide where this should go
             # self._remove_x_separators,
             self._force_ws,
             self._remove_repeat_units,
             self._remove_x_separators,
+            self._clean_hyphen_padded_substrings, # Still needs tests written for this
             self._merge_multi_nums,
+            self._fix_ranges,  # TODO: NEW place for fix_ranges() (THIS MIGHT BREAK THINGS) ---> need to decide where this should go
+            self._find_and_replace_numbers_separated_by_add_numbers, # NOTE: testing this out (THIS MIGHT BREAK THINGS)
             # self._merge_multi_nums2,
             self._replace_a_or_an_units,
-            self._avg_ranges,
+            self._avg_ranges2,
+            # self._avg_ranges,
             self._separate_parenthesis,
             self._pull_units
         ]
@@ -809,7 +1068,12 @@ class IngredientSlicer:
             method()
 
             print(f"> Ending ingredient: '{self.standard_ingredient}'") if self.debug else None
-            
+        
+        
+        print(f"Removing extra whitespaces...") if self.debug else None
+
+        self.standard_ingredient = self._remove_extra_whitespaces(self.standard_ingredient)
+
         print(f"Done, returning standardized ingredient: \n > '{self.standard_ingredient}'") if self.debug else None
 
         # return the parsed ingredient string
