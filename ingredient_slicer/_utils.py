@@ -39,7 +39,7 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str, debug=F
 
 
     text = text.lower()
-    substring = substring.lower()
+    substring = substring.lower().replace("-", "")
 
     substring_length = len(substring)
 
@@ -101,7 +101,7 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str, debug=F
         replacement_string = f" {hyphen_substring.replace('-', '').replace(' ', '')} " 
         text = text.replace(hyphen_substring, replacement_string) 
         print(f"Replacing '{hyphen_substring}' in 'text' with '{replacement_string}'\n") if debug else None
-        
+
     text = text.strip()
 
     return text

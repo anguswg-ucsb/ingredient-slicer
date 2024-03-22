@@ -7,34 +7,43 @@ from ingredient_slicer import _utils
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
-# ---- Duplicate unit ranges tests ----
+# ---- Test _find_and_remove_hyphens_around_substring() utils function  ----
 # -------------------------------------------------------------------------------
 
-test_cases = {
-    "test_case_1": ["I love cats -to- dogs to ", "to", "i love cats to dogs to"],
-    "test_case_2": ["g -to- -to- -to-", "to", "g to to to"],
-    "test_case_3": ["-to- -to- -to-", "to", "to to to"],
-    "test_case_4": ["1-to-three cups of tomato-juice", "to", "1 to three cups of tomato-juice"],
-    # "test_case_2": ["-to- -to- -to-", "to", "-to- to -to-"],
-    # "test_case_3": ["I love cats -to- - dogs to ", "cat", "i love cats -to- - dogs to "],
-    # "test_case_4": ["I love cats -to- - dogs to ", "love", "i love cats -to- - dogs to "],
-    # "test_case_5": ["I love cats -to- - dogs to ", "dogs", "i love cats -to- - dogs to "],
-    # "test_case_6": ["I love cats -to- - dogs to ", " ", "i love cats -to- - dogs to "],
-    # "test_case_7": ["I love cats -to- - dogs to ", "-", "i love cats -to- - dogs to "],
-    # "test_case_8": ["I love cats -to- - dogs to ", "dogs to", "i love cats -to- - dogs to "],
-    # "test_case_9": ["I love cats -to- - dogs to ", "-to-", "i love cats -to- - dogs to "],
-    # "test_case_10": ["I love cats -to- - dogs to ", "lo", "i ve cats -to- - dogs to "],
-    # "test_case_11": ["I love cats -to- - dogs to ", "-to- -", "i love cats -to- - dogs to "],
-    # "test_case_12": ["I love cats -to- - dogs to ", "c -to- - dogs", "i love cats -to- - dogs to "],
-    # "test_case_13": ["I love cats -to- - dogs to ", " ", "i love cats -to- - dogs to "],
-    # "test_case_14": ["I love cats -to- - dogs to ", "to", "i love cats to dogs to "],
-    # "test_case_15": ["I love cats -to- - dogs to ", "to", "i love cats to dogs to "],
-    # "test_case_16": ["-to- -to- -to-", "to", "-to- to -to-"],
-    # "test_case_17": ["I love cats -to- - dogs to ", "cat", "i love cats -to- - dogs to "]
-    # Add more test cases as needed
-}
+def test_single_hyphens_around_a_to():
+    assert _utils._find_and_remove_hyphens_around_substring("I love cats -to- dogs to ", "to") == "i love cats to dogs to"
 
-for test_name, (text, substring, expected_result) in test_cases.items():
-    # _utils._find_and_remove_hyphens_around_substring("I love cats -to- dogs to ", "to", debug=True)
-    # _utils._find_and_remove_hyphens_around_substring("g -to- -to- -to-", "to", debug=True)
-    assert _utils._find_and_remove_hyphens_around_substring(text, substring) == expected_result, f"Failed test: {test_name}"
+def test_multiple_hyphen_padded_substrings_1():
+    assert _utils._find_and_remove_hyphens_around_substring("g -to- -to- -to-", "to") == "g to to to"
+
+def test_multiple_hyphen_padded_substrings_2():
+    assert _utils._find_and_remove_hyphens_around_substring("-to- -to- -to-", "to") == "to to to"
+
+def test_single_hyphen_padded_substrings():
+    assert _utils._find_and_remove_hyphens_around_substring("1-to-three cups of tomato-juice", "to") == "1 to three cups of tomato-juice"
+
+def test_for_more_than_one_substring_surrounded_with_hyphens_1():
+    assert _utils._find_and_remove_hyphens_around_substring("i love chocolate cake -but- i won't --eat-- it", "but") == "i love chocolate cake but i won't --eat-- it"
+
+def test_for_more_than_one_substring_surrounded_with_hyphens_2():
+    assert _utils._find_and_remove_hyphens_around_substring("i love chocolate cake -but- i won't --eat-- it", "eat") == "i love chocolate cake -but- i won't eat it"
+
+def test_substrings_that_include_hyphens():
+    assert _utils._find_and_remove_hyphens_around_substring("remove -my- lovely hyphens!", "my-") == 'remove my lovely hyphens!'
+    assert _utils._find_and_remove_hyphens_around_substring("remove -my- lovely hyphens!", "-my-") == 'remove my lovely hyphens!'
+    assert _utils._find_and_remove_hyphens_around_substring("remove -my- lovely hyphens!", "-my") == 'remove my lovely hyphens!'
+    assert _utils._find_and_remove_hyphens_around_substring("remove -my- lovely hyphens!", "my-------") == 'remove my lovely hyphens!'
+
+
+def test_empty_substring():
+    assert _utils._find_and_remove_hyphens_around_substring("I want tests to write themselves", "") == "I want tests to write themselves"
+    assert _utils._find_and_remove_hyphens_around_substring("please ai save me somehow", "") == "please ai save me somehow"
+
+def test_empty_string():
+    assert _utils._find_and_remove_hyphens_around_substring("", "to") == ""
+    assert _utils._find_and_remove_hyphens_around_substring("", "") == ""
+
+def test_hyphen_only_string():
+    assert _utils._find_and_remove_hyphens_around_substring("-", "to") == "-"
+    assert _utils._find_and_remove_hyphens_around_substring("-", "-") == "-"
+    assert _utils._find_and_remove_hyphens_around_substring("-----", "-") == "" # TODO: this is not right
