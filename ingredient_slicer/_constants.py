@@ -964,6 +964,10 @@ STOP_WORDS = set([
     "z", "zero", "zi", "zz", "zip", "zips", "zipped", "zipping", "zipper"
 ])
 
+# sets of all dashes and hyphens, and sets of dashes that should be removed
+DASH_SYMBOLS = set(["-", "‐" "−", "–", "—"])
+REMOVABLE_DASH_SYMBOLS = set(["‐" "−", "–", "—"])
+
 
 # STOP_WORDS = set([
 #     "i",

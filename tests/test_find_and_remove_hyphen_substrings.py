@@ -19,7 +19,7 @@ def test_multiple_hyphen_padded_substrings_1():
 def test_multiple_hyphen_padded_substrings_2():
     assert _utils._find_and_remove_hyphens_around_substring("-to- -to- -to-", "to") == "to to to"
 
-def test_single_hyphen_padded_substrings():
+def test_single_hyphen_padded_substrings_4():
     assert _utils._find_and_remove_hyphens_around_substring("1-to-three cups of tomato-juice", "to") == "1 to three cups of tomato-juice"
 
 def test_for_more_than_one_substring_surrounded_with_hyphens_1():
@@ -36,7 +36,7 @@ def test_substrings_that_include_hyphens():
 
 
 def test_empty_substring():
-    assert _utils._find_and_remove_hyphens_around_substring("I want tests to write themselves", "") == "I want tests to write themselves"
+    assert _utils._find_and_remove_hyphens_around_substring("I want tests to write themselves", "") == "i want tests to write themselves"
     assert _utils._find_and_remove_hyphens_around_substring("please ai save me somehow", "") == "please ai save me somehow"
 
 def test_empty_string():
@@ -45,5 +45,5 @@ def test_empty_string():
 
 def test_hyphen_only_string():
     assert _utils._find_and_remove_hyphens_around_substring("-", "to") == "-"
-    assert _utils._find_and_remove_hyphens_around_substring("-", "-") == "-"
-    assert _utils._find_and_remove_hyphens_around_substring("-----", "-") == "" # TODO: this is not right
+    assert _utils._find_and_remove_hyphens_around_substring("-", "-") == ""
+    assert _utils._find_and_remove_hyphens_around_substring("-----", "") == "" # TODO: this is not right

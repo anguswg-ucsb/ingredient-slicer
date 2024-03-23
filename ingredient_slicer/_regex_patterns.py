@@ -196,7 +196,7 @@ ANY_NUMBER_THEN_ANYTHING_THEN_UNIT = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d
 ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS  = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s+(\S*\b(?:' + ANY_UNIT_ALT + r'))\b')
 ANY_NUMBER_THEN_ANYTHING_THEN_UNIT_GROUPS2 = re.compile(r'\b(\d+)\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
 
-
+r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(can|cup|cups|cabin)\b'
 # same as above but with 2 capture groups (number and unit, either basic, non-basic, or any unit)
 QUANTITY_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
 QUANTITY_BASIC_UNIT_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + BASIC_UNIT_ALT + r')\b')
@@ -302,7 +302,11 @@ NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*
 
 # Match any number/decimal/fraction followed by a space and then a number/decimal/fraction (Currently used version)
 # (e.g "1 1/2", "3 1/4", "3 0.5", "2.5 3/4")
-SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s+(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
+SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s+(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b') # NOTE: New version (good to go) (testing out, this ones safer, because the removal of the "+" after first group)
+# SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s+(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b') # NOTE: Original working version (risky regex though)
+
+# SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s+(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b')
+# SPACE_SEP_NUMBERS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s+(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b') 
 
 # # This is VERY similar to above regex but just swaps "*" and "+" as to enforce the first pattern MUST MATCH atleast 1 time 
 # SPACE_SEP_NUMBERS_OR_ANY_NUMBER_AFTER_WS = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)+\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b') 
@@ -599,7 +603,9 @@ class IngredientRegexPatterns:
             "APPROXIMATE_STRINGS": _constants.APPROXIMATE_STRINGS,
             "QUANTITY_PER_UNIT_STRINGS": _constants.QUANTITY_PER_UNIT_STRINGS,
             "UNIT_TO_STANDARD_UNIT": _constants.UNIT_TO_STANDARD_UNIT,
-            "STOP_WORDS": _constants.STOP_WORDS
+            "STOP_WORDS": _constants.STOP_WORDS,
+            "DASH_SYMBOLS": _constants.DASH_SYMBOLS,
+            'REMOVABLE_DASH_SYMBOLS': _constants.REMOVABLE_DASH_SYMBOLS
         }
 
         # Define regex patterns
@@ -750,7 +756,7 @@ class IngredientRegexPatterns:
         #         print(f"{name}: {matches[name]}")
 
         
-    def list_attrs(self) -> None:
+    def list_constants(self) -> None:
         """
         List all the attributes of the class.
         """ 
