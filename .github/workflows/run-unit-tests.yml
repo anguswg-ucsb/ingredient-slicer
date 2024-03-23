@@ -1,0 +1,43 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+    - "**.py"
+  pull_request:
+    branches:
+      - main
+    paths:
+    - "**.py"
+
+jobs:
+  run_tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install -U pip
+        pip install ."[test]"
+
+    - name: Echo dependency versions
+      run: |
+        pip freeze
+
+    - name: Run unit tests 
+      run: |
+        python -m pytest tests/

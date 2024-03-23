@@ -402,7 +402,108 @@ def test_wild_ingredients_additional_10():
     assert parsed['size_modifiers'] == []
 
 
+def test_wild_ingredients_additional_11():
+    ingredient = "2 pieces dried shiitake mushrooms (17 g, 0.6 oz for the dashi broth and the minced mushrooms below)"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed = parse.to_json()
 
+    assert parsed['quantity'] == "34"
+    assert parsed['unit'] == 'g'
+    assert parsed['standardized_unit'] == 'gram'
+
+    assert parsed['secondary_quantity'] == '2'
+    assert parsed['secondary_unit'] == 'pieces'
+    assert parsed['standardized_secondary_unit'] == 'piece'
+
+    assert parsed['is_required'] == True
+
+    assert parsed['prep'] == ['minced']
+    assert parsed['food'] == 'dried shiitake mushrooms'
+    assert parsed['size_modifiers'] == []
+
+def test_wild_ingredients_additional_12():
+    ingredient = "1/2 tablespoon olive oil"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "0.5"
+    assert parsed['unit'] == 'tablespoon'
+    assert parsed['standardized_unit'] == 'tablespoon'
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+
+    assert parsed['prep'] == []
+    assert parsed['food'] == 'olive oil'
+    assert parsed['size_modifiers'] == []
+
+
+def test_wild_ingredients_additional_13():
+    ingredient = "2 cloves garlic, minced"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "2"
+    assert parsed['unit'] == None
+    assert parsed['standardized_unit'] == None
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+
+    assert parsed['prep'] == ['minced']
+    assert parsed['food'] == 'cloves garlic'
+    assert parsed['size_modifiers'] == []
+
+
+def test_wild_ingredients_additional_14():
+    ingredient = "1/4 cup chopped fresh cilantro leaves"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "0.25"
+    assert parsed['unit'] == 'cup'
+    assert parsed['standardized_unit'] == 'cup'
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+
+    assert parsed['prep'] == ['chopped']
+    assert parsed['food'] == 'fresh cilantro leaves'
+    assert parsed['size_modifiers'] == []
+
+
+def test_wild_ingredients_additional_15():
+    ingredient = "1/2 teaspoon freshly ground black pepper, or to taste"
+    parse = IngredientSlicer(ingredient)
+    parse.parse()
+    parsed = parse.to_json()
+
+    assert parsed['quantity'] == "0.5"
+    assert parsed['unit'] == 'teaspoon'
+    assert parsed['standardized_unit'] == 'teaspoon'
+
+    assert parsed['secondary_quantity'] == None
+    assert parsed['secondary_unit'] == None
+    assert parsed['standardized_secondary_unit'] == None
+
+    assert parsed['is_required'] == True
+
+    assert parsed['prep'] == ['freshly', 'ground']
+    assert parsed['food'] == 'black pepper'
+    assert parsed['size_modifiers'] == []
 
 # "1 (14 ounce) can coconut milk"
 # "1 (6 ounce) can tomato paste"
