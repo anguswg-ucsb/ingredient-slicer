@@ -138,20 +138,8 @@ class IngredientSlicer:
                 self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
                 # ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
                 offset += len(str(replacement_str)) - (end - start)
-
         # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(self.standard_ingredient)
-
-        # offset = 0
-        # for match in pattern_iter:
-        #     match_string    = match.group()
-        #     start, end = match.start(), match.end()
-        #     modified_start = start + offset
-        #     modified_end = end + offset
-        #     replacement_str = ""
-
-        #     self.standard_ingredient = self.standard_ingredient[:modified_start] + str(replacement_str) + self.standard_ingredient[modified_end:]
-        #     offset += len(str(replacement_str)) - (end - start)
-        
+                
         return
 
     def _find_and_replace_fraction_words(self) -> None:
@@ -191,24 +179,18 @@ class IngredientSlicer:
                 offset += len(str(updated_value)) - (end - start)
 
         # pattern_iter = IngredientSlicer.regex.NUMBER_WITH_FRACTION_WORD_GROUPS.finditer(self.standard_ingredient)
-
         # offset = 0
 
         # for match in pattern_iter:
         #     start, end = match.start(), match.end()
-
         #     number_word   = match.group(1)
         #     fraction_word = match.group(2)
-
         #     fraction_value, decimal = IngredientSlicer.regex.constants["FRACTION_WORDS"][fraction_word]
-
         #     # multiply first number in match by the decimal value of the fraction word (i.e. "2 third" -> 2 * 1/3)
         #     updated_value = str(float(number_word) * float(decimal))
-
         #     self.standard_ingredient = self.standard_ingredient[:match.start()] + str(updated_value) + self.standard_ingredient[match.end():]
-
         #     offset += len(updated_value) - (end - start)
-        
+
         return 
 
     def _find_and_replace_numbers_separated_by_add_numbers(self) -> None:
@@ -274,20 +256,6 @@ class IngredientSlicer:
         # print("Dropping special dashes")
         self.standard_ingredient = self.standard_ingredient.replace("—", "-").replace("–", "-").replace("~", "-")
         return
-    
-    # def _parse_MULTI_FRACTION_WORDS(self) -> None:
-    #     """
-    #     Replace fraction words with their corresponding numerical values in the parsed ingredient.
-    #     """
-
-    #     # print("Parsing fraction words")
-    #     for word, regex_data in IngredientSlicer.regex.MULTI_FRACTION_WORDS_MAP.items():
-    #         # print(f"Word: {word}, Regex Data: {regex_data}")
-    #         pattern = regex_data[1]
-    #         # print statement if word is found in ingredient and replaced
-    #         if pattern.search(self.standard_ingredient):
-    #             print(f"- Found {word} in ingredient. Replacing with {regex_data[0]}") if self.debug else None
-    #         self.standard_ingredient = pattern.sub(regex_data[0], self.standard_ingredient)
 
     def _find_and_replace_prefixed_number_words(self) -> None:
         """ Replace prefixed number words with their corresponding numerical values in the parsed ingredient 
@@ -347,9 +315,7 @@ class IngredientSlicer:
 
     def _clean_hyphen_padded_substrings(self) -> None:
         """Find and remove hyphens around "to", "or", and "and" substrings in the parsed ingredient.
-        
         For example, "1-to-3 cups of soup" becomes "1 to 3 cups of soup" and "1-or-2 cups of soup" becomes "1 or 2 cups of soup"
-
         """
 
         substrings_to_fix = ["to", "or", "and", "&"]
@@ -429,9 +395,6 @@ class IngredientSlicer:
         """
         Convert fractions in the parsed ingredient to their decimal equivalents.
         """
-        
-        # std_ingred = '1⁄4 cup prepared lemon curd (from 10-to-12 ounce jar)'
-        # regex.FRACTION_PATTERN.findall(std_ingred)
 
         # fraction_str = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
         matches = IngredientSlicer.regex.FRACTION_PATTERN.findall(self.standard_ingredient)
@@ -442,9 +405,7 @@ class IngredientSlicer:
             # print(f"Match: {match}")
 
             fraction_decimal = _utils._fraction_str_to_decimal(match)
-
             # print(f"Fraction Decimal: {fraction_decimal}") if self.debug else None
-
             self.standard_ingredient = self.standard_ingredient.replace(match, str(fraction_decimal))
 
     def _force_ws(self):
@@ -608,23 +569,11 @@ class IngredientSlicer:
     
         return 
     
-    # TODO: DELETE, now in _utils.py
-    # def _replace_and_with_hyphen(self, match):
-    #     # Replace "and" and "&" with hyphens
-    #     return match.replace("and", "-").replace("&", "-")
+    def _average_ranges(self) -> None:
+        """ Average all hyphen separated ranges of numbers in the parsed ingredient. """
+        self.standard_ingredient = _utils.avg_ranges(self.standard_ingredient)
+        return
     
-    # def _replace_to_or_with_hyphen(self, match):
-    #     # Replace "and" and "&" with hyphens
-    #     return match.replace("to", "-").replace("or", "-")
-    
-    # def _replace_to_with_hyphen(self, match):
-    #     # Replace "to" with hyphen
-    #     return match.replace("to", "-")
-    
-    # def _replace_or_with_hyphen(self, match):
-    #     # Replace "or" with hyphen
-    #     return match.replace("or", "-")
-
     # TODO: write tests for this
     def _merge_misleading_ranges(self) -> None:
         """ Merge misleading ranges in the parsed ingredient (i.e. "4-1/2" is not a valid range, it should be "4.5" instead)"""
@@ -1072,10 +1021,11 @@ class IngredientSlicer:
             self._find_and_replace_numbers_separated_by_add_numbers, # NOTE: testing this out (THIS MIGHT BREAK THINGS)
             # self._merge_multi_nums2,
             self._replace_a_or_an_units,
-            self._avg_ranges2,
+            self._average_ranges,
+            # self._avg_ranges2,
             # self._avg_ranges,
-            self._separate_parenthesis,
-            self._pull_units
+            self._separate_parenthesis
+            # self._pull_units
         ]
 
         # call each method in the list on the input ingredient string
@@ -1908,6 +1858,28 @@ class IngredientSlicer:
 
         return dimension_units
 
+    def _address_parenthesis(self) -> None:
+        """
+        Address any parenthesis that were in the ingredient.
+        """
+
+        # print(f"Addressing parenthesis: '{self.parenthesis_content}'") if self.debug else None
+
+        # loop through each of the parenthesis in the parenthesis content and apply address_parenthesis functions 
+        for parenthesis in self.parenthesis_content:
+            print(f"Addressing parenthesis: '{parenthesis}'") if self.debug else None
+
+            # address the case where the parenthesis content only contains a quantity
+            print(f"> Apply QUANTITY Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
+            self._address_quantity_only_parenthesis(parenthesis)
+            
+            print(f"> Apply EQUIVALENCE Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
+            self._address_equivalence_parenthesis(parenthesis)
+
+            print(f"> Apply QUANTITY UNIT Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
+            self._address_quantity_unit_only_parenthesis(parenthesis)
+
+        return
 
     def parse(self):
         # TODO: process parenthesis content
@@ -1959,19 +1931,21 @@ class IngredientSlicer:
                 > Parenthesis content: '{self.parenthesis_content}'
             """) if self.debug else None
         
-        # loop through each of the parenthesis in the parenthesis content and apply address_parenthesis functions 
-        for parenthesis in self.parenthesis_content:
-            print(f"Addressing parenthesis: '{parenthesis}'") if self.debug else None
+        # # loop through each of the parenthesis in the parenthesis content and apply address_parenthesis functions 
+        # for parenthesis in self.parenthesis_content:
+        #     print(f"Addressing parenthesis: '{parenthesis}'") if self.debug else None
 
-            # address the case where the parenthesis content only contains a quantity
-            print(f"> Apply QUANTITY Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
-            self._address_quantity_only_parenthesis(parenthesis)
+        #     # address the case where the parenthesis content only contains a quantity
+        #     print(f"> Apply QUANTITY Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
+        #     self._address_quantity_only_parenthesis(parenthesis)
             
-            print(f"> Apply EQUIVALENCE Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
-            self._address_equivalence_parenthesis(parenthesis)
+        #     print(f"> Apply EQUIVALENCE Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
+        #     self._address_equivalence_parenthesis(parenthesis)
 
-            print(f"> Apply QUANTITY UNIT Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
-            self._address_quantity_unit_only_parenthesis(parenthesis)
+        #     print(f"> Apply QUANTITY UNIT Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
+        #     self._address_quantity_unit_only_parenthesis(parenthesis)
+
+        self._address_parenthesis()
 
         # ----------------------------------- STEP 5 ------------------------------------------
         # ---- Get the standard names of the units and secondary units ----

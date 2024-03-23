@@ -213,6 +213,41 @@ def _update_ranges2(ingredient: str, pattern: re.Pattern) -> str:
             
         return ingredient
 
+def avg_ranges(ingredient: str) -> str:
+    """
+    Replace ranges of numbers with their average in the parsed ingredient.
+    Examples:
+    "1-2 oz" -> "1.5 oz"
+    "1 - 2 ft" -> "1.5 ft"
+    """
+
+    regex_patterns = _regex_patterns.IngredientRegexPatterns()
+    search_ranges = regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
+    
+    while search_ranges:
+        start, end = search_ranges.start(), search_ranges.end()
+        match_string = search_ranges.group()
+        match_string = search_ranges.group()
+            
+        left_range, right_range = match_string.split("-")
+
+        left_range = left_range.strip()
+        right_range = right_range.strip()
+        # left_range, right_range = map(str.strip, match_string.split("-"))
+
+        first_number = float(_fraction_str_to_decimal(left_range))
+        second_number = float(_fraction_str_to_decimal(right_range))
+        
+        range_average = _make_int_or_float_str(str((first_number + second_number) / 2))
+        
+        ingredient = ingredient[:start] + range_average + ingredient[end:]
+        
+        search_ranges = regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
+    
+    ingredient = ingredient.strip()
+    
+    return ingredient
+
 # -----------------------------------------------------------------------------------------------
 # ---- Substring finder and substring hyphen finder functions ----
 # -----------------------------------------------------------------------------------------------
