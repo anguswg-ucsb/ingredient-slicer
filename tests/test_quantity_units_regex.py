@@ -3,12 +3,12 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns
-# regex_map = IngredientRegexPatterns()
+from ingredient_slicer import IngredientTools
+# regex_map = IngredientTools()
 
 @pytest.fixture
 def regex_map():
-    return IngredientRegexPatterns()
+    return IngredientTools()
 
 def test_ANY_NUMBER_THEN_UNIT(regex_map):
     assert regex_map.ANY_NUMBER_THEN_UNIT.findall("I need 2 cups of sugar") == ['2 cups']

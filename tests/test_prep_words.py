@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # ---- Prep words extraction tests ----
@@ -13,7 +13,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 def test_prep_words_simple_1():
 
     slicer = IngredientSlicer("1 cup sliced apples")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'cup'
@@ -24,7 +24,7 @@ def test_prep_words_simple_1():
 def test_prep_words_simple_2():
 
     slicer = IngredientSlicer("1 cup peeled apples")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "1"
@@ -36,7 +36,7 @@ def test_prep_words_simple_2():
 def test_prep_words_simple_3():
 
     slicer = IngredientSlicer("2 cups of crushed and diced onions")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -47,7 +47,7 @@ def test_prep_words_simple_3():
 
 def test_prep_words_additional_1():
     slicer = IngredientSlicer("1 cup chopped and diced carrots")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'cup'
@@ -57,7 +57,7 @@ def test_prep_words_additional_1():
 
 def test_prep_words_additional_2():
     slicer = IngredientSlicer("2 tablespoons thinly sliced scallions")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "2"
     assert parsed['unit'] == 'tablespoons'
@@ -67,7 +67,7 @@ def test_prep_words_additional_2():
 
 def test_prep_words_additional_3():
     slicer = IngredientSlicer("3 cloves minced garlic")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "3"
@@ -78,7 +78,7 @@ def test_prep_words_additional_3():
 
 def test_prep_words_additional_4():
     slicer = IngredientSlicer("1 cup packed brown sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'cup'
@@ -88,7 +88,7 @@ def test_prep_words_additional_4():
 
 def test_prep_words_additional_5():
     slicer = IngredientSlicer("2 tablespoons grated Parmesan cheese")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "2"
     assert parsed['unit'] == 'tablespoons'
@@ -98,7 +98,7 @@ def test_prep_words_additional_5():
 
 def test_prep_words_additional_6():
     slicer = IngredientSlicer("1 cup toasted almonds")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'cup'
@@ -108,7 +108,7 @@ def test_prep_words_additional_6():
 
 def test_prep_words_additional_7():
     slicer = IngredientSlicer("1 teaspoon firmly packed brown sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'teaspoon'
@@ -118,7 +118,7 @@ def test_prep_words_additional_7():
 
 def test_prep_words_additional_8():
     slicer = IngredientSlicer("1 cup halved strawberries")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'cup'
@@ -128,7 +128,7 @@ def test_prep_words_additional_8():
 
 def test_prep_words_additional_9():
     slicer = IngredientSlicer("2 tablespoons roughly chopped cilantro")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "2"
     assert parsed['unit'] == 'tablespoons'
@@ -138,7 +138,7 @@ def test_prep_words_additional_9():
 
 def test_prep_words_additional_10():
     slicer = IngredientSlicer("1 cup unsifted all-purpose flour")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'cup'

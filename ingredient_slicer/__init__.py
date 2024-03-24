@@ -1,6 +1,6 @@
 # __init__.py
 
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 
 from ._constants import NUMBER_WORDS,  NUMBER_PREFIX_WORDS, \
     MULTI_FRACTION_WORDS, FRACTION_WORDS, DENOMINATOR_WORDS, UNICODE_FRACTIONS, \
@@ -15,7 +15,7 @@ from ._utils import _make_int_or_float_str, _fraction_str_to_decimal, \
     # _replace_and_with_hyphen, _replace_to_or_with_hyphen, _replace_to_with_hyphen, _replace_or_with_hyphen
     
 
-from ._regex_patterns import IngredientRegexPatterns
+from ._regex_patterns import IngredientTools
 from ._ingredient_slicer import IngredientSlicer
 
 __all__ = [
@@ -47,6 +47,7 @@ __all__ = [
     'APPROXIMATE_STRINGS', 
 
     # Recipes regex and parser classes
-    'IngredientRegexPatterns', 
-    'IngredientSlicer'
+    'IngredientTools', 
+    'IngredientSlicer',
+    'FoodCatalog'
     ]

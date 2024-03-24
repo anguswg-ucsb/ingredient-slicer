@@ -16,19 +16,61 @@ from ingredient_slicer import _utils
 
 ])
 
-# "1/2 - 2 or 1/2 - 4"
-# "1/2 - 2 - 1/2 - 4"
-# avg_ranges("1-2 oz")
-# avg_ranges("1 - 2 - 4 ft")
-# avg_ranges("1 - 2 or 5-10 ft")
-# avg_ranges("1 - 2 - 5-10 ft")
-# avg_ranges("1 - 2 - 5-10 ft")
-# avg_ranges("1 - 2 - 5-10 ft")
-# _utils.avg_ranges("1- 3 1/2 tests a day keeps the doctor away")
-
-# _utils.avg_ranges("1/2 - 2 oz")
-# avg_ranges("1/2 - 2 - 1/2 - 4 oz")
-# avg_ranges("1/2 - 2 or 1/2 - 4 oz - 2") # "1/2 - 3 oz - 2"
-
 def test_avg_ranges(input_string, expected_output):
     assert _utils.avg_ranges(input_string) == expected_output
+
+def test_no_number_ranges():
+    assert _utils.avg_ranges("testing is so fun") == "testing is so fun"
+
+def test_hyphen_only_ranges():
+    assert _utils.avg_ranges(" - ") == "-"
+
+def test_single_number_than_hyphen():
+    assert _utils.avg_ranges("1 - ") == "1 -"
+
+def test_single_number_than_hyphen_than_number():
+    assert _utils.avg_ranges("1 - 2") == "1.5"
+
+def test_single_number_than_hyphen_than_number_than_hyphen():
+    assert _utils.avg_ranges("1 - 2 -") == "1.5 -"
+
+def test_single_number_than_hyphen_than_number_than_hyphen_than_number():
+    assert _utils.avg_ranges("1 - 2 - 3") == "2.25"
+
+def test_single_number_than_hyphen_than_number_than_hyphen_than_number_than_hyphen():
+    assert _utils.avg_ranges("1 - 2 - 3 -") == "2.25 -"
+
+def test_single_number_than_hyphen_than_number_than_hyphen_than_number_than_hyphen_than_number():
+    assert _utils.avg_ranges("1 - 2 - 3 - 4") == "3.125"
+
+def test_integer_input():
+    with pytest.raises(ValueError):
+        _utils.avg_ranges(1)
+
+def test_list_input():
+    with pytest.raises(ValueError):
+        _utils.avg_ranges([1,2,3])
+
+def test_dict_input():
+    with pytest.raises(ValueError):
+        _utils.avg_ranges({"1": 1, "2": 2})
+
+def test_tuple_input():
+    with pytest.raises(ValueError):
+        _utils.avg_ranges((1,2,3))
+
+def test_float_input():
+    with pytest.raises(ValueError):
+        _utils.avg_ranges(1.5)
+
+def test_boolean_input():
+    with pytest.raises(ValueError):
+        _utils.avg_ranges(True)
+    with pytest.raises(ValueError):
+        _utils.avg_ranges(False)
+                          
+def test_none_input():
+    with pytest.raises(ValueError):
+        _utils.avg_ranges(None)
+            
+

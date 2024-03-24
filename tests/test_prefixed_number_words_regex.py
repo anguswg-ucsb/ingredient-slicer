@@ -3,12 +3,12 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns
-# regex_map = IngredientRegexPatterns()
+from ingredient_slicer import IngredientTools
+# regex_map = IngredientTools()
 
 @pytest.fixture
 def regex_map():
-    return IngredientRegexPatterns()
+    return IngredientTools()
 
 def test_prefixed_number_words_1(regex_map):
     assert regex_map.PREFIXED_NUMBER_WORDS_GROUPS.findall("twenty five eggs") == [('twenty', 'five')]

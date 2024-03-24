@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
 # IngredientSlicer.regex.PREP_WORDS_PATTERN.findall("3 tablespoons unsalted butter, softened at room temperature")
 # IngredientSlicer.regex.print_matches("3 tablespoons unsalted butter, softened at room temperature")
@@ -15,7 +15,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 def test_wild_ingredients_1():
 
     parse = IngredientSlicer("1 (10 ounce) package frozen chopped spinach, thawed, drained and squeezed dry")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "10"
@@ -36,7 +36,7 @@ def test_wild_ingredients_2():
 
     ingredient = "4 large skinless, boneless chicken thighs, cut into bite-sized pieces"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     
     assert parsed['quantity'] == "4"
@@ -56,7 +56,7 @@ def test_wild_ingredients_2():
 def test_wild_ingredients_3():
     ingredient = "1 (6 ounce) can tomato paste"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "6"
@@ -76,7 +76,7 @@ def test_wild_ingredients_3():
 def test_wild_ingredients_4():
     ingredient = "2 (15-ounce) cans chickpeas, rinsed and drained"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "30"
@@ -97,7 +97,7 @@ def test_wild_ingredients_4():
 def test_wild_ingredients_5():
     ingredient = "2 servings udon noodles (1.1 lb, 500 g frozen or parboiled udon noodles; 6.3 oz, 180 g dry udon noodles)"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2.2"
@@ -117,7 +117,7 @@ def test_wild_ingredients_5():
 def test_wild_ingredients_6():
     ingredient = "1/2 medium fresh jalapeño chile pepper, finely chopped*"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"
@@ -139,7 +139,7 @@ def test_wild_ingredients_7():
     ingredient = "1 cube Japanese curry roux (1 oz, 32 g)"
     
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "1"
@@ -153,7 +153,7 @@ def test_wild_ingredients_7():
 
 def test_wild_ingredients_8():
     parse = IngredientSlicer("1 (8 ounce) container plain yogurt")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "8"
@@ -166,7 +166,7 @@ def test_wild_ingredients_8():
 
 def test_wild_ingredients_9():
     parse = IngredientSlicer("1 (8.5 ounce) container plain yogurt")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "8.5"
@@ -179,7 +179,7 @@ def test_wild_ingredients_9():
 
 def test_wild_ingredients_10():
     parse = IngredientSlicer("salt to taste", debug= True)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == None
     assert parsed['unit'] == "to taste"
@@ -190,7 +190,7 @@ def test_wild_ingredients_10():
 
 def test_wild_ingredients_11():
     parse = IngredientSlicer("1/2 cup freshly grated Parmesan cheese, plus more for serving")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"
@@ -202,7 +202,7 @@ def test_wild_ingredients_11():
 def test_wild_ingredients_additional_1():
     ingredient = "3 tablespoons unsalted butter, softened at room temperature"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "3"
@@ -222,7 +222,7 @@ def test_wild_ingredients_additional_1():
 def test_wild_ingredients_additional_2():
     ingredient = "1/4 cup sliced almonds, toasted"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.25"
@@ -242,7 +242,7 @@ def test_wild_ingredients_additional_2():
 def test_wild_ingredients_additional_3():
     ingredient = "1 teaspoon minced fresh ginger"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "1"
@@ -262,7 +262,7 @@ def test_wild_ingredients_additional_3():
 def test_wild_ingredients_additional_4():
     ingredient = "2 cloves garlic, minced"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
@@ -284,7 +284,7 @@ def test_wild_ingredients_additional_4():
 def test_wild_ingredients_additional_5():
     ingredient = "1 cup cooked quinoa"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "1"
@@ -304,7 +304,7 @@ def test_wild_ingredients_additional_5():
 def test_wild_ingredients_additional_6():
     ingredient = "2 tablespoons chopped fresh parsley leaves"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
@@ -324,7 +324,7 @@ def test_wild_ingredients_additional_6():
 def test_wild_ingredients_additional_7():
     ingredient = "1/2 cup grated Parmesan cheese"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"
@@ -344,7 +344,7 @@ def test_wild_ingredients_additional_7():
 def test_wild_ingredients_additional_8():
     ingredient = "1/4 teaspoon ground cinnamon"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.25"
@@ -364,7 +364,7 @@ def test_wild_ingredients_additional_8():
 def test_wild_ingredients_additional_9():
     ingredient = "1 cup packed light brown sugar"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "1"
@@ -384,7 +384,7 @@ def test_wild_ingredients_additional_9():
 def test_wild_ingredients_additional_10():
     ingredient = "1/2 cup thinly sliced green onions"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"
@@ -405,7 +405,7 @@ def test_wild_ingredients_additional_10():
 def test_wild_ingredients_additional_11():
     ingredient = "2 pieces dried shiitake mushrooms (17 g, 0.6 oz for the dashi broth and the minced mushrooms below)"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "34"
@@ -425,7 +425,7 @@ def test_wild_ingredients_additional_11():
 def test_wild_ingredients_additional_12():
     ingredient = "1/2 tablespoon olive oil"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"
@@ -446,7 +446,7 @@ def test_wild_ingredients_additional_12():
 def test_wild_ingredients_additional_13():
     ingredient = "2 cloves garlic, minced"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
@@ -467,7 +467,7 @@ def test_wild_ingredients_additional_13():
 def test_wild_ingredients_additional_14():
     ingredient = "1/4 cup chopped fresh cilantro leaves"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.25"
@@ -488,7 +488,7 @@ def test_wild_ingredients_additional_14():
 def test_wild_ingredients_additional_15():
     ingredient = "1/2 teaspoon freshly ground black pepper, or to taste"
     parse = IngredientSlicer(ingredient)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"

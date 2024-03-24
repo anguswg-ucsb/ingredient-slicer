@@ -5,12 +5,12 @@ import pytest
 import re
 
 
-from ingredient_slicer import IngredientRegexPatterns
-# regex_map = IngredientRegexPatterns()
+from ingredient_slicer import IngredientTools
+# regex_map = IngredientTools()
 
 @pytest.fixture
 def regex_map():
-    return IngredientRegexPatterns()
+    return IngredientTools()
 
 # Test cases for QUANTITY_DASH_QUANTITY
 def test_QUANTITY_DASH_QUANTITY(regex_map):

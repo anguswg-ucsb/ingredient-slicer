@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # ---- Size modifier words tests ----
@@ -13,7 +13,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 def test_size_modifier_words_simple_1():
 
     slicer = IngredientSlicer("1 small apple")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == None
@@ -24,7 +24,7 @@ def test_size_modifier_words_simple_1():
 def test_size_modifier_words_simple_2():
     
     slicer = IngredientSlicer("1 large apple")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "1"
@@ -36,7 +36,7 @@ def test_size_modifier_words_simple_2():
 def test_size_modifier_words_simple_3():
         
     slicer = IngredientSlicer("2 medium apples")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -48,7 +48,7 @@ def test_size_modifier_words_simple_3():
 def test_size_modifier_words_simple_4():
             
     slicer = IngredientSlicer("1 small to medium apple")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == None

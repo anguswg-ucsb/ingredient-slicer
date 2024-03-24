@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
 # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(self.standard_ingredient)
 # # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(ingredient)
@@ -37,7 +37,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 def test_percentages_1():
     
     slicer = IngredientSlicer("1 cup of 2% milk")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     assert parsed['quantity'] == "1"
     assert parsed['unit'] == 'cup'
@@ -56,7 +56,7 @@ def test_percentages_1():
 
 def test_percentages_2():
     slicer = IngredientSlicer("2% milk, 1 cup")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "1"

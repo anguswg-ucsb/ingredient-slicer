@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 
 def test_fraction_dupe_units_range_quantity_1():
     parse = IngredientSlicer("1cup-1/2 cup of sugar")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "1.5"
     assert parsed['unit'] == 'cup'
@@ -20,7 +20,7 @@ def test_fraction_dupe_units_range_quantity_1():
 
 def test_fraction_dupe_units_range_quantity_2():
     parse = IngredientSlicer("1/2 cup-1 cup of sugar")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "0.75"
     assert parsed['unit'] == 'cup'
@@ -28,7 +28,7 @@ def test_fraction_dupe_units_range_quantity_2():
 
 def test_fraction_dupe_units_range_quantity_3():
     parse = IngredientSlicer("1/2cup-1cup of sugar")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "0.75"
     assert parsed['unit'] == 'cup'

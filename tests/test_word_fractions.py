@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # ---- Test IngredientSlicer: Fraction words tests ----
@@ -11,7 +11,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 
 def test_fraction_words_1():
     parse = IngredientSlicer("two thirds a cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "0.666"
     assert parsed['unit'] == 'cups'
@@ -29,7 +29,7 @@ def test_fraction_words_1():
 
 def test_fraction_words_2():
     parse = IngredientSlicer("two and two thirds cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "2.666"
     assert parsed['unit'] == 'cups'
@@ -48,7 +48,7 @@ def test_fraction_words_2():
 
 def test_fraction_words_3():
     parse = IngredientSlicer("two and two thirds or 1 and 3 quarters cups of flour", debug = False)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     
     assert parsed['quantity'] == "2.208"

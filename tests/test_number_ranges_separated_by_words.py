@@ -5,7 +5,7 @@ import re
 
 # from fractions import Fraction
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer, _utils
+from ingredient_slicer import IngredientTools, IngredientSlicer, _utils
 
 # _utils._find_substring_indices("1/2 cup of sugar", "cup")
 # _utils._find_and_remove_hyphens_around_substring("use 1-to-4 cups of soup", "to")
@@ -18,7 +18,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer, _utils
 # -------------------------------------------------------------------------------
 def test_numbers_separated_by_to_1():
     slicer = IngredientSlicer("1 to 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -37,7 +37,7 @@ def test_numbers_separated_by_to_1():
 
 def test_numbers_separated_by_to_2():
     slicer = IngredientSlicer("1.5 to 4.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "3"
@@ -56,7 +56,7 @@ def test_numbers_separated_by_to_2():
 
 def test_number_and_decimal_separated_by_to_1():
     slicer = IngredientSlicer("1 to 4.5 cups of sugar", debug=True)
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -75,7 +75,7 @@ def test_number_and_decimal_separated_by_to_1():
 
 def test_decimal_and_decimal_separated_by_to_1():
     slicer = IngredientSlicer("1.5 to 4.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
     
     assert parsed['quantity'] == "3"
@@ -95,7 +95,7 @@ def test_decimal_and_decimal_separated_by_to_1():
 
 def test_decimal_and_decimal_separated_by_to_with_hyphens_1():
     slicer = IngredientSlicer("1.5-to-4.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "3"
@@ -115,7 +115,7 @@ def test_decimal_and_decimal_separated_by_to_with_hyphens_1():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_to_1():
     slicer = IngredientSlicer("1 1/2 to 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -133,7 +133,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_to_1():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_to_with_hypens_1():
     slicer = IngredientSlicer("1 1/2-to-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -151,7 +151,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_to_with_hypens_1():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_to_with_left_hyphen_1():
     slicer = IngredientSlicer("1 1/2-to 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -169,7 +169,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_to_with_left_hyphen_1():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_to_with_right_hyphen_1():
     slicer = IngredientSlicer("1 1/2 to-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -187,7 +187,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_to_with_right_hyphen_1()
 
 def test_decimal_and_mixed_fraction_separated_by_to_with_hyphens_1():
     slicer = IngredientSlicer("1.5-to-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -205,7 +205,7 @@ def test_decimal_and_mixed_fraction_separated_by_to_with_hyphens_1():
 
 def test_decimal_and_mixed_fraction_separated_by_to_with_left_hyphen_1():
     slicer = IngredientSlicer("1.5-to 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -224,7 +224,7 @@ def test_decimal_and_mixed_fraction_separated_by_to_with_left_hyphen_1():
 
 def test_decimal_and_mixed_fraction_separated_by_to_with_right_hyphen_1():
     slicer = IngredientSlicer("1.5-to 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -243,7 +243,7 @@ def test_decimal_and_mixed_fraction_separated_by_to_with_right_hyphen_1():
 
 def test_mixed_fraction_and_decimal_separated_by_to_with_hyphens_1():
     slicer = IngredientSlicer("1 1/2-to-2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -261,7 +261,7 @@ def test_mixed_fraction_and_decimal_separated_by_to_with_hyphens_1():
 
 def test_mixed_fraction_and_decimal_separated_by_to_with_left_hyphen_1():
     slicer = IngredientSlicer("1 1/2-to 2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -279,7 +279,7 @@ def test_mixed_fraction_and_decimal_separated_by_to_with_left_hyphen_1():
 
 def test_decimal_and_mixed_fraction_separated_by_to_with_left_hyphen_2():
     slicer = IngredientSlicer("1.5- to 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -297,7 +297,7 @@ def test_decimal_and_mixed_fraction_separated_by_to_with_left_hyphen_2():
 
 def test_mixed_fraction_and_decimal_separated_by_to_with_right_hyphen_1():
     slicer = IngredientSlicer("1 1/2 to-2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -315,7 +315,7 @@ def test_mixed_fraction_and_decimal_separated_by_to_with_right_hyphen_1():
 
 def test_decimal_and_mixed_fraction_separated_by_to_with_right_hyphen_2():
     slicer = IngredientSlicer("1.5 to- 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -334,7 +334,7 @@ def test_decimal_and_mixed_fraction_separated_by_to_with_right_hyphen_2():
 
 def test_number_and_mixed_fraction_separated_by_to_1():
     slicer = IngredientSlicer("5 to 5 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "5.25"
@@ -353,7 +353,7 @@ def test_number_and_mixed_fraction_separated_by_to_1():
 def test_number_and_mixed_fraction_separated_by_to_with_hyphens_1():
 
     slicer = IngredientSlicer("5-to-5 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "5.25"
@@ -373,7 +373,7 @@ def test_number_and_mixed_fraction_separated_by_to_with_hyphens_1():
 # -------------------------------------------------------------------------------
 def test_numbers_separated_by_or_1():
     slicer = IngredientSlicer("1 or 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -392,7 +392,7 @@ def test_numbers_separated_by_or_1():
 
 def test_numbers_separated_by_or_2():
     slicer = IngredientSlicer("1    or 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -411,7 +411,7 @@ def test_numbers_separated_by_or_2():
 
 def test_fraction_and_fraction_separated_by_or_1():
     slicer = IngredientSlicer("1/2 or 2/3 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "0.5835"
@@ -429,7 +429,7 @@ def test_fraction_and_fraction_separated_by_or_1():
 
 def test_number_and_mixed_fraction_separated_by_or_2():
     slicer = IngredientSlicer("5 or 5 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "5.25"
@@ -447,7 +447,7 @@ def test_number_and_mixed_fraction_separated_by_or_2():
 
 def test_number_and_mixed_fraction_separated_by_or_with_hyphens_2():
     slicer = IngredientSlicer("5-or-5 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "5.25"
@@ -465,7 +465,7 @@ def test_number_and_mixed_fraction_separated_by_or_with_hyphens_2():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_or_no_hyphens_1():
     slicer = IngredientSlicer("1 1/2 or 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -483,7 +483,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_or_no_hyphens_1():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_or_with_hyphens_1():
     slicer = IngredientSlicer("1 1/2-or-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -502,7 +502,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_or_with_hyphens_1():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_or_with_left_hyphen_1():
     slicer = IngredientSlicer("1 1/2-or 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -520,7 +520,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_or_with_left_hyphen_1():
 
 def test_mixed_fraction_and_mixed_fraction_separated_by_or_with_right_hyphen_1():
     slicer = IngredientSlicer("1 1/2 or-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -538,7 +538,7 @@ def test_mixed_fraction_and_mixed_fraction_separated_by_or_with_right_hyphen_1()
 
 def test_decimal_and_mixed_fraction_separated_by_or_with_hyphens_1():
     slicer = IngredientSlicer("1.5-or-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -557,7 +557,7 @@ def test_decimal_and_mixed_fraction_separated_by_or_with_hyphens_1():
 
 def test_decimal_and_mixed_fraction_separated_by_or_with_left_hyphen_1():
     slicer = IngredientSlicer("1.5-or 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -576,7 +576,7 @@ def test_decimal_and_mixed_fraction_separated_by_or_with_left_hyphen_1():
 def test_decimal_and_mixed_fraction_separated_by_or_with_right_hyphen_1():
 
     slicer = IngredientSlicer("1.5 or-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -594,7 +594,7 @@ def test_decimal_and_mixed_fraction_separated_by_or_with_right_hyphen_1():
 
 def test_decimal_and_mixed_fraction_separated_by_or_no_hyphen_1():
     slicer = IngredientSlicer("1.5 or 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -616,7 +616,7 @@ def test_decimal_and_mixed_fraction_separated_by_or_no_hyphen_1():
     
 def test_between_number_and_number_1():
     slicer = IngredientSlicer("between 1 and 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -636,7 +636,7 @@ def test_between_number_and_number_1():
     
 def test_between_number_and_number_with_hyphens():
     slicer = IngredientSlicer("between 1-and-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -655,7 +655,7 @@ def test_between_number_and_number_with_hyphens():
 
 def test_between_number_and_number_with_left_hyphen():
     slicer = IngredientSlicer("between 1-and 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -674,7 +674,7 @@ def test_between_number_and_number_with_left_hyphen():
 
 def test_between_number_and_number_with_right_hyphen():
     slicer = IngredientSlicer("between 1 and-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -693,7 +693,7 @@ def test_between_number_and_number_with_right_hyphen():
 
 def test_between_number_and_number_with_hyphens_and_spaces():
     slicer = IngredientSlicer("between 1 - and - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -712,7 +712,7 @@ def test_between_number_and_number_with_hyphens_and_spaces():
 
 def test_between_number_and_number_with_hyphens_and_spaces_and_extra_spaces():
     slicer = IngredientSlicer("between 1 - and    - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -731,7 +731,7 @@ def test_between_number_and_number_with_hyphens_and_spaces_and_extra_spaces():
 
 def test_between_number_and_number_with_hyphens_and_spaces_and_extra_spaces_and_extra_hyphens():
     slicer = IngredientSlicer("between 1 - and    - 4 - cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -750,7 +750,7 @@ def test_between_number_and_number_with_hyphens_and_spaces_and_extra_spaces_and_
 
 def test_between_number_and_number_with_hyphens_and_spaces_and_extra_spaces_and_extra_hyphens_and_extra_and():
     slicer = IngredientSlicer("between 1 - and    - 4 - and cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -770,7 +770,7 @@ def test_between_number_and_number_with_hyphens_and_spaces_and_extra_spaces_and_
 # Decimal "and" Number
 def test_between_decimal_and_number_1():
     slicer = IngredientSlicer("between 1.5 and 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -789,7 +789,7 @@ def test_between_decimal_and_number_1():
 
 def test_between_decimal_and_number_with_hyphens_1():
     slicer = IngredientSlicer("between 1.5-and-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -808,7 +808,7 @@ def test_between_decimal_and_number_with_hyphens_1():
 
 def test_between_decimal_and_number_with_left_hyphen_1():
     slicer = IngredientSlicer("between 1.5-and 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -827,7 +827,7 @@ def test_between_decimal_and_number_with_left_hyphen_1():
 
 def test_between_decimal_and_number_with_right_hyphen_1():
     slicer = IngredientSlicer("between 1.5 and-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -846,7 +846,7 @@ def test_between_decimal_and_number_with_right_hyphen_1():
 
 def test_between_decimal_and_number_with_hyphens_and_spaces_1():
     slicer = IngredientSlicer("between 1.5 - and - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -865,7 +865,7 @@ def test_between_decimal_and_number_with_hyphens_and_spaces_1():
 
 def test_between_decimal_and_number_with_hyphens_and_spaces_and_extra_spaces_1():
     slicer = IngredientSlicer("between 1.5 - and    - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -884,7 +884,7 @@ def test_between_decimal_and_number_with_hyphens_and_spaces_and_extra_spaces_1()
 
 def test_between_decimal_and_number_with_hyphens_and_spaces_and_extra_spaces_and_extra_hyphens_1():
     slicer = IngredientSlicer("between 1.5 - and    - 4 - cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -903,7 +903,7 @@ def test_between_decimal_and_number_with_hyphens_and_spaces_and_extra_spaces_and
 
 def test_between_decimal_and_number_with_hyphens_and_spaces_and_extra_spaces_and_extra_hyphens_and_extra_and_1():
     slicer = IngredientSlicer("between 1.5 - and    - 4 - and cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -926,7 +926,7 @@ def test_between_decimal_and_number_with_hyphens_and_spaces_and_extra_spaces_and
     
 def test_between_decimal_and_mixed_fraction_1():
     slicer = IngredientSlicer("between 1.5 and 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -945,7 +945,7 @@ def test_between_decimal_and_mixed_fraction_1():
 
 def test_between_decimal_and_mixed_fraction_with_hyphens_1():
     slicer = IngredientSlicer("between 1.5-and-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -964,7 +964,7 @@ def test_between_decimal_and_mixed_fraction_with_hyphens_1():
 
 def test_between_decimal_and_mixed_fraction_with_left_hyphen_1():
     slicer = IngredientSlicer("between 1.5-and 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -983,7 +983,7 @@ def test_between_decimal_and_mixed_fraction_with_left_hyphen_1():
 
 def test_between_decimal_and_mixed_fraction_with_right_hyphen_1():
     slicer = IngredientSlicer("between 1.5 and-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1002,7 +1002,7 @@ def test_between_decimal_and_mixed_fraction_with_right_hyphen_1():
 
 def test_between_decimal_and_mixed_fraction_with_hyphens_and_spaces_1():
     slicer = IngredientSlicer("between 1.5 - and - 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1021,7 +1021,7 @@ def test_between_decimal_and_mixed_fraction_with_hyphens_and_spaces_1():
 
 def test_between_decimal_and_mixed_fraction_with_hyphens_and_spaces_and_extra_spaces_1():
     slicer = IngredientSlicer("between 1.5 - and    - 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1040,7 +1040,7 @@ def test_between_decimal_and_mixed_fraction_with_hyphens_and_spaces_and_extra_sp
 
 def test_between_decimal_and_mixed_fraction_with_hyphens_and_spaces_and_extra_spaces_and_extra_and_1():
     slicer = IngredientSlicer("between 1.5 - and    - 2 - and 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1063,7 +1063,7 @@ def test_between_decimal_and_mixed_fraction_with_hyphens_and_spaces_and_extra_sp
 
 def test_between_mixed_fraction_and_decimal_1():
     slicer = IngredientSlicer("between 1 1/2 and 2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1082,7 +1082,7 @@ def test_between_mixed_fraction_and_decimal_1():
 
 def test_between_mixed_fraction_and_decimal_with_hyphens_1():
     slicer = IngredientSlicer("between 1 1/2-and-2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1101,7 +1101,7 @@ def test_between_mixed_fraction_and_decimal_with_hyphens_1():
 
 def test_between_mixed_fraction_and_decimal_with_left_hyphen_1():
     slicer = IngredientSlicer("between 1 1/2-and 2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1120,7 +1120,7 @@ def test_between_mixed_fraction_and_decimal_with_left_hyphen_1():
 
 def test_between_mixed_fraction_and_decimal_with_right_hyphen_1():
     slicer = IngredientSlicer("between 1 1/2 and-2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1139,7 +1139,7 @@ def test_between_mixed_fraction_and_decimal_with_right_hyphen_1():
 
 def test_between_mixed_fraction_and_decimal_with_hyphens_and_spaces_1():
     slicer = IngredientSlicer("between 1 1/2 - and - 2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1167,7 +1167,7 @@ def test_between_mixed_fraction_and_decimal_with_hyphens_and_spaces_1():
     
 def test_between_number_ampersand_number_1():
     slicer = IngredientSlicer("between 1 & 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1187,7 +1187,7 @@ def test_between_number_ampersand_number_1():
     
 def test_between_number_ampersand_number_with_hyphens():
     slicer = IngredientSlicer("between 1-&-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1206,7 +1206,7 @@ def test_between_number_ampersand_number_with_hyphens():
 
 def test_between_number_ampersand_number_with_left_hyphen():
     slicer = IngredientSlicer("between 1-& 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1225,7 +1225,7 @@ def test_between_number_ampersand_number_with_left_hyphen():
 
 def test_between_number_ampersand_number_with_right_hyphen():
     slicer = IngredientSlicer("between 1 &-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1244,7 +1244,7 @@ def test_between_number_ampersand_number_with_right_hyphen():
 
 def test_between_number_ampersand_number_with_hyphens_ampersand_spaces():
     slicer = IngredientSlicer("between 1 - & - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1263,7 +1263,7 @@ def test_between_number_ampersand_number_with_hyphens_ampersand_spaces():
 
 def test_between_number_ampersand_number_with_hyphens_and_spaces_and_extra_spaces():
     slicer = IngredientSlicer("between 1 - &    - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1282,7 +1282,7 @@ def test_between_number_ampersand_number_with_hyphens_and_spaces_and_extra_space
 
 def test_between_number_ampersand_number_with_hyphens_and_spaces_and_extra_spaces_and_extra_hyphens():
     slicer = IngredientSlicer("between 1 - &    - 4 - cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1301,7 +1301,7 @@ def test_between_number_ampersand_number_with_hyphens_and_spaces_and_extra_space
 
 def test_between_number_ampersand_number_with_hyphens_and_spaces_and_extra_spaces_and_extra_hyphens_and_extra_and():
     slicer = IngredientSlicer("between 1 - &    - 4 - & cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.5"
@@ -1321,7 +1321,7 @@ def test_between_number_ampersand_number_with_hyphens_and_spaces_and_extra_space
 # Decimal "and" Number
 def test_between_decimal_ampersand_number_1():
     slicer = IngredientSlicer("between 1.5 & 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1340,7 +1340,7 @@ def test_between_decimal_ampersand_number_1():
 
 def test_between_decimal_ampersand_number_with_hyphens_1():
     slicer = IngredientSlicer("between 1.5-&-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1359,7 +1359,7 @@ def test_between_decimal_ampersand_number_with_hyphens_1():
 
 def test_between_decimal_ampersand_number_with_left_hyphen_1():
     slicer = IngredientSlicer("between 1.5-& 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1378,7 +1378,7 @@ def test_between_decimal_ampersand_number_with_left_hyphen_1():
 
 def test_between_decimal_ampersand_number_with_right_hyphen_1():
     slicer = IngredientSlicer("between 1.5 &-4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1397,7 +1397,7 @@ def test_between_decimal_ampersand_number_with_right_hyphen_1():
 
 def test_between_decimal_ampersand_number_with_hyphens_and_spaces_1():
     slicer = IngredientSlicer("between 1.5 - & - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1416,7 +1416,7 @@ def test_between_decimal_ampersand_number_with_hyphens_and_spaces_1():
 
 def test_between_decimal_ampersand_number_with_hyphens_and_spaces_and_extra_spaces_1():
     slicer = IngredientSlicer("between 1.5 - &    - 4 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1435,7 +1435,7 @@ def test_between_decimal_ampersand_number_with_hyphens_and_spaces_and_extra_spac
 
 def test_between_decimal_ampersand_number_with_hyphens_and_spaces_and_extra_spaces_and_extra_hyphens_1():
     slicer = IngredientSlicer("between 1.5 - &    - 4 - cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1454,7 +1454,7 @@ def test_between_decimal_ampersand_number_with_hyphens_and_spaces_and_extra_spac
 
 def test_between_decimal_ampersand_number_with_hyphens_ampersand_spaces_and_extra_spaces_and_extra_hyphens_and_extra_ampersand_1():
     slicer = IngredientSlicer("between 1.5 - &    - 4 - & cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2.75"
@@ -1477,7 +1477,7 @@ def test_between_decimal_ampersand_number_with_hyphens_ampersand_spaces_and_extr
     
 def test_between_decimal_ampersand_mixed_fraction_1():
     slicer = IngredientSlicer("between 1.5 & 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1496,7 +1496,7 @@ def test_between_decimal_ampersand_mixed_fraction_1():
 
 def test_between_decimal_ampersand_mixed_fraction_with_hyphens_1():
     slicer = IngredientSlicer("between 1.5-&-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1515,7 +1515,7 @@ def test_between_decimal_ampersand_mixed_fraction_with_hyphens_1():
 
 def test_between_decimal_ampersand_mixed_fraction_with_left_hyphen_1():
     slicer = IngredientSlicer("between 1.5-& 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1534,7 +1534,7 @@ def test_between_decimal_ampersand_mixed_fraction_with_left_hyphen_1():
 
 def test_between_decimal_ampersand_mixed_fraction_with_right_hyphen_1():
     slicer = IngredientSlicer("between 1.5 &-2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1553,7 +1553,7 @@ def test_between_decimal_ampersand_mixed_fraction_with_right_hyphen_1():
 
 def test_between_decimal_ampersand_mixed_fraction_with_hyphens_and_spaces_1():
     slicer = IngredientSlicer("between 1.5 - & - 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1572,7 +1572,7 @@ def test_between_decimal_ampersand_mixed_fraction_with_hyphens_and_spaces_1():
 
 def test_between_decimal_ampersand_mixed_fraction_with_hyphens_and_spaces_and_extra_spaces_1():
     slicer = IngredientSlicer("between 1.5 - &    - 2 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1591,7 +1591,7 @@ def test_between_decimal_ampersand_mixed_fraction_with_hyphens_and_spaces_and_ex
 
 def test_between_decimal_ampersand_mixed_fraction_with_hyphens_and_spaces_and_extra_spaces_and_extra_and_1():
     slicer = IngredientSlicer("between 1.5 - &    - 2 - & 1/2 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1614,7 +1614,7 @@ def test_between_decimal_ampersand_mixed_fraction_with_hyphens_and_spaces_and_ex
 
 def test_between_mixed_fraction_ampersand_decimal_1():
     slicer = IngredientSlicer("between 1 1/2 & 2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1633,7 +1633,7 @@ def test_between_mixed_fraction_ampersand_decimal_1():
 
 def test_between_mixed_fraction_ampersand_decimal_with_hyphens_1():
     slicer = IngredientSlicer("between 1 1/2-&-2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1652,7 +1652,7 @@ def test_between_mixed_fraction_ampersand_decimal_with_hyphens_1():
 
 def test_between_mixed_fraction_ampersand_decimal_with_left_hyphen_1():
     slicer = IngredientSlicer("between 1 1/2-& 2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1671,7 +1671,7 @@ def test_between_mixed_fraction_ampersand_decimal_with_left_hyphen_1():
 
 def test_between_mixed_fraction_ampersand_decimal_with_right_hyphen_1():
     slicer = IngredientSlicer("between 1 1/2 &-2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"
@@ -1690,7 +1690,7 @@ def test_between_mixed_fraction_ampersand_decimal_with_right_hyphen_1():
 
 def test_between_mixed_fraction_ampersand_decimal_with_hyphens_and_spaces_1():
     slicer = IngredientSlicer("between 1 1/2 - & - 2.5 cups of sugar")
-    slicer.parse()
+    # slicer.parse()
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "2"

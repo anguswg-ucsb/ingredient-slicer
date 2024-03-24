@@ -98,7 +98,7 @@ def _fraction_str_to_decimal(fraction_str: str) -> str:
         # return _make_int_or_float_str(str(round(float(Fraction(numerator, denominator)), 3)))
         return decimal_str
 
-# regex_patterns = _regex_patterns.IngredientRegexPatterns()
+# regex_patterns = _regex_patterns.IngredientTools()
 
 # ingredient = "1-2 apples and 1- 45 orange slices (2)"
 # pattern = regex_patterns.QUANTITY_DASH_QUANTITY
@@ -153,9 +153,9 @@ def _update_ranges(ingredient: str, pattern: re.Pattern, replacement_function=No
 # BETWEEN_QUANTITY_AND_QUANTITY 
 # _replace_and_with_hyphen
 
-def _update_ranges2(ingredient: str, pattern: re.Pattern) -> str:
+def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
         """Update the number ranges in the ingredient string to always have two numbers separated by a whitespace, then a hyphen, then another whitespace.
-        Notes: Currently supports the following patterns in the IngredientRegexPatterns class:
+        Notes: Currently supports the following patterns in the IngredientTools class:
             - QUANTITY_DASH_QUANTITY
             - BETWEEN_QUANTITY_AND_QUANTITY
             - QUANTITY_TO_QUANTITY
@@ -221,7 +221,10 @@ def avg_ranges(ingredient: str) -> str:
     "1 - 2 ft" -> "1.5 ft"
     """
 
-    regex_patterns = _regex_patterns.IngredientRegexPatterns()
+    if not isinstance(ingredient, str):
+        raise ValueError("Invalid input. Ingredient must be a string.")
+
+    regex_patterns = _regex_patterns.IngredientTools()
     search_ranges = regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
     
     while search_ranges:
@@ -247,6 +250,48 @@ def avg_ranges(ingredient: str) -> str:
     ingredient = ingredient.strip()
     
     return ingredient
+
+# -----------------------------------------------------------------------------------------------
+# ---- Replace leading "a" and "an" words if no quantities given ----
+# -----------------------------------------------------------------------------------------------
+
+def _replace_a_or_an_quantities(ingredient: str) -> str:
+        """
+        Replace "a" or "an" with "1" in the parsed ingredient if no number is present in the ingredient string.
+        Args:
+            ingredient (str): The ingredient string to parse.
+        Returns:
+            str: The updated ingredient string with "a" or "an" replaced with "1" if no other quantites are found.
+        """
+
+        if not isinstance(ingredient, str):
+            raise ValueError("Invalid input. Ingredient must be a string.")
+
+        regex_patterns = _regex_patterns.IngredientTools()
+
+        # lowercase and split the ingredient string
+        ingredient = ingredient.lower()
+        split_ingredient = ingredient.split()
+
+        quantity_matches = re.findall(regex_patterns.ALL_NUMBERS, ingredient)
+
+        # if no quantities are found in the ingredient string, 
+        # look for and replace the first "a" or "an" with "1"
+        if not quantity_matches:
+            
+            # go and replace the first "a" or "an" with "1"
+            for index, word in enumerate(split_ingredient):
+                if set(word) == {"a"} or word == "an":
+                    split_ingredient[index] = "1"
+                    ingredient = " ".join(split_ingredient)
+                    break
+
+        # if (set(split_ingredient[0]) == {"a"} or split_ingredient[0] == "an") and not quantity_matches:
+        #     split_ingredient[0] = "1"
+        #     # ingredient = " ".join(split_ingredient)
+        #     ingredient = " ".join(split_ingredient)
+
+        return ingredient
 
 # -----------------------------------------------------------------------------------------------
 # ---- Substring finder and substring hyphen finder functions ----
@@ -413,13 +458,27 @@ def _replace_to_with_hyphen(match):
 def _replace_or_with_hyphen(match):
     # Replace "or" with hyphen
     return match.replace("or", "-")
+
+# replace all instances of multiple hypens (which can be separated by whitespaces) in a string with a single hypen
+def replace_multiple_hyphens(string: str) -> str:
+    return re.sub(r'[-\s]+', '-', string)
+
+# -----------------------------------------------------------------------------------------------
+# ---- Removes any extrawhitespaces from a string makes the string single spaced ----
+# -----------------------------------------------------------------------------------------------
+
+def _remove_extra_whitespaces(input_string: str) -> str:
+    """Remove extra whitespaces from a string and return the string with only single whitespaces."""
+    # ingredient = re.sub(r'\s+', ' ', ingredient).strip() # remove any extra whitespace
+    return " ".join(input_string.split())
+
 # -----------------------------------------------------------------------------------------------
 # ---- Functions for parsing parenthesis content / quantity unit regex functions ----
 # -----------------------------------------------------------------------------------------------
 
 # def test_parenthesis_with_equiv_quantity_unit_1():
 #     parse = IngredientSlicer("1 cup of chopped chicken breast (about 12 ounces)", debug = True)
-#     parse.parse()
+#     # parse.parse()
 #     parsed = parse.to_json()
 
 #     assert parsed['quantity'] == "12"
@@ -436,7 +495,7 @@ def _replace_or_with_hyphen(match):
 # ingredient = '1 cup of chopped chicken breast (about 12 ounces)'
 # EQUIV_QUANTITY_UNIT_GROUPS
 # QUANTITY_UNIT_GROUPS
-# regex_patterns = _regex_patterns.IngredientRegexPatterns()
+# regex_patterns = _regex_patterns.IngredientTools()
 
 # # ingredient = "1 cup of chopped chicken breast (about 12 ounces)"
 # ingredient = '1 cup of chopped chicken breast (about 12 tender and juicy ounces)'
@@ -446,7 +505,7 @@ def _replace_or_with_hyphen(match):
 
 # regex_patterns.EQUIV_QUANTITY_UNIT_GROUPS.findall(parenthesis)
 
-# regex_patterns = _regex_patterns.IngredientRegexPatterns()
+# regex_patterns = _regex_patterns.IngredientTools()
 def _extract_quantities_only(input_string: str) -> list:
 
     """From a string get all quantities if they exist WITHOUT units
@@ -466,7 +525,7 @@ def _extract_quantities_only(input_string: str) -> list:
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
-    regex_patterns = _regex_patterns.IngredientRegexPatterns()
+    regex_patterns = _regex_patterns.IngredientTools()
 
 
     # first check for units
@@ -507,7 +566,7 @@ def _extract_quantity_unit_pairs(input_string: str) -> list[tuple]:
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
-    regex_patterns = _regex_patterns.IngredientRegexPatterns()
+    regex_patterns = _regex_patterns.IngredientTools()
 
     # regex_patterns.QUANTITY_UNIT_GROUPS.findall(input_string)
     quantity_matches = regex_patterns.ALL_NUMBERS.finditer(input_string)
@@ -559,7 +618,7 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
-    regex_patterns = _regex_patterns.IngredientRegexPatterns()
+    regex_patterns = _regex_patterns.IngredientTools()
 
     approximate_string_matches = regex_patterns.APPROXIMATE_STRINGS_PATTERN.finditer(input_string)
 
@@ -658,3 +717,169 @@ def _fractions_to_decimals(input_string) -> str:
         input_string = input_string.replace(f, str(fraction_decimal[i]))
 
     return input_string
+
+def _extract_parenthesis(ingredient: str) -> str:
+
+    """Extract the content of the parenthesis in an ingredient string.
+    Stack based approach to extract the content of the parenthesis in an ingredient string, probably deprecated...
+    """
+    if not _is_valid_parenthesis(ingredient):
+        # print(f"Invalid parenthesis: {ingredient}")
+        # cleaned_ingredient = ingredient.replace("(", "").replace(")", "")
+        # cleaned_ingredient = cleaned_ingredient.strip()
+        # cleaned_ingredient = _remove_extra_whitespaces(cleaned_ingredient)
+        return ingredient, []
+    
+    stack = []
+    parenthesis_list = []
+
+    for i, char in enumerate(ingredient):
+
+        if stack and stack[-1] == ")":
+
+            stack.pop()
+            parenthesis = []
+
+            while stack and stack[-1] != "(":
+                popped_char = stack.pop()
+                parenthesis.append(popped_char)
+            parenthesis = "".join(parenthesis[::-1])
+            parenthesis_list.append(parenthesis)
+            stack.pop()
+
+        stack.append(char)
+    
+    return ["".join(stack), parenthesis_list]
+
+# ingredient = "1 rice with (2 cups of (444) water) and (another) (())love"
+# _extract_parenthesis(ingredient) # output: ['1 rice with  and  love', ['444', '2 cups of  water', 'another', '', '']]
+
+def _split_by_parenthesis(ingredient: str) -> list:
+    """ Split an ingredient string by parenthesis and return the cleaned ingredient and the content of the parenthesis.
+    If the parenthesis is invalid, return the original ingredient string. and an empty list.
+    If there are valid parenthesis, the function pulls out the parenthesis and unnests any nested parenthesis within 
+    those parenthesis, it will the return the ingredient with the parenthesis extracted and 
+    a list of the unnested parenthesis content.
+    Args:
+        ingredient (str): The ingredient string to split by parenthesis.
+    Returns:
+        list: A list containing the cleaned ingredient and a list of the content of the parenthesis.
+    """
+
+    if not isinstance(ingredient, str):
+        raise ValueError("Invalid input. Ingredient must be a string.")
+
+    if not _is_valid_parenthesis(ingredient):
+        # print(f"Invalid parenthesis: {ingredient}")
+        cleaned_ingredient = ingredient.replace("(", "").replace(")", "")
+        cleaned_ingredient = cleaned_ingredient.strip()
+        cleaned_ingredient = _remove_extra_whitespaces(cleaned_ingredient)
+        return [cleaned_ingredient, []]
+
+    stack = []
+    parenthesis_list = []
+
+    nested_level = 0
+    cleaned_ingredient = []
+
+    for char in ingredient:
+        if char == '(':
+            nested_level += 1
+            if nested_level > 1:
+                cleaned_ingredient.append(char)
+        elif char == ')':
+            if nested_level > 1:
+                cleaned_ingredient.append(char)
+            nested_level -= 1
+            if nested_level == 0:
+                parenthesis = []
+                while stack:
+                    parenthesis.append(stack.pop())
+                parenthesis_list.append(''.join(parenthesis[::-1]))
+        elif nested_level == 0:
+            cleaned_ingredient.append(char)
+        elif nested_level > 0:
+            stack.append(char)
+
+    cleaned_ingredient = ''.join(cleaned_ingredient)
+
+    cleaned_ingredient = cleaned_ingredient.replace("(", "").replace(")", "")
+    cleaned_ingredient = cleaned_ingredient.strip()
+    cleaned_ingredient = _remove_extra_whitespaces(cleaned_ingredient)
+
+    parenthesis_list = [_remove_extra_whitespaces(p.replace("(", "").replace(")", "").strip()) for p in parenthesis_list]
+    # parenthesis_list = [p for p in parenthesis_list if p]
+
+    return [cleaned_ingredient, parenthesis_list]
+
+def _is_valid_parenthesis(string: str) -> bool:
+    if not isinstance(string, str):
+        raise ValueError("Invalid input. Ingredient must be a string.")
+    
+    count = 0
+    for char in string:
+        if char == "(":
+            count += 1
+        elif char == ")":
+            count -= 1
+            if count < 0:
+                return False
+    return count == 0
+
+def _remove_parenthesis_from_str(ingredient: str) -> str:
+    """Remove parenthesis and their content from an ingredient string.
+    Args:
+        ingredient (str): The ingredient string to remove parenthesis from.
+    Returns:
+        str: The ingredient string with the parenthesis removed.
+    """
+
+    if not isinstance(ingredient, str):
+        raise ValueError("Invalid input. Ingredient must be a string.")
+
+    MATCH_PARENTHESIS = re.compile(r'\([^()]*\)|\[[^][]*]|[{}]')
+    while MATCH_PARENTHESIS.search(ingredient):  # While regex matches the string
+        ingredient = MATCH_PARENTHESIS.sub('', ingredient)  # Remove the matches
+
+    ingredient = ingredient.replace("(", "").replace(")", "").strip()
+    ingredient = _remove_extra_whitespaces(ingredient)
+    return ingredient.strip()
+
+
+def _find_and_remove(string: str, pattern: re.Pattern) -> str:
+        """Find and remove all matches of a pattern from a string.
+        Args:
+            string (str): The string to search for matches in
+            pattern (re.Pattern): The pattern to search for in the string
+        Returns:
+            str: The modified string with all matches removed
+        """
+
+        pattern_iter = pattern.finditer(string)
+
+        offset = 0
+
+        for match in pattern_iter:
+            match_string    = match.group()
+            replacement_str = ""
+
+            # Get the start and end of the match and the modified start and end positions given the offset
+            start, end = match.start(), match.end()
+            modified_start = start + offset
+            modified_end = end + offset
+
+            # Construct the modified string with the replacement applied
+            string = string[:modified_start] + str(replacement_str) + string[modified_end:]
+            # self.standardized_ingredient = self.standardized_ingredient[:modified_start] + str(replacement_str) + self.standardized_ingredient[modified_end:]
+
+            # Update the offset for subsequent removals # TODO: this is always 0 because we're removing the match, probably just remove...
+            offset += len(str(replacement_str)) - (end - start)
+            # print(f"""
+            # Match string: {match_string}
+            # -> Match: {match_string} at positions {start}-{end}
+            # --> Modified start/end match positions: {modified_start}-{modified_end}
+            # ---> Modified string: {string}""")
+        
+        string = string.strip()
+
+        return string

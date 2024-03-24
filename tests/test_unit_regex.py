@@ -3,12 +3,12 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns
-# regex_map = IngredientRegexPatterns()
+from ingredient_slicer import IngredientTools
+# regex_map = IngredientTools()
 
 @pytest.fixture
 def regex_map():
-    return IngredientRegexPatterns()
+    return IngredientTools()
 
 def test_units_pattern(regex_map):
 

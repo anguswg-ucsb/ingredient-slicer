@@ -3,13 +3,13 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
-# regex_map = IngredientRegexPatterns()
+# regex_map = IngredientTools()
 
 @pytest.fixture
 def regex_map():
-    return IngredientRegexPatterns()
+    return IngredientTools()
 
 # -------------------------------------------------------------------------------
 # ---- Test IngredientSlicer: Words-to-numbers tests ----
@@ -17,7 +17,7 @@ def regex_map():
 
 def test_number_words_1():
     parse = IngredientSlicer("two cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "2"
     assert parsed['unit'] == 'cups'
@@ -35,7 +35,7 @@ def test_number_words_1():
 
 def test_number_words_2():
     parse = IngredientSlicer("two cups of flour and three cups of sugar")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "2"
     assert parsed['unit'] == 'cups'
@@ -52,7 +52,7 @@ def test_number_words_2():
 
 def test_number_words_3():
     parse = IngredientSlicer("a dozen cups of melted butter")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "12"
     assert parsed['unit'] == 'cups'
@@ -69,7 +69,7 @@ def test_number_words_3():
 
 def test_number_words_4():
     parse = IngredientSlicer("two or three tsp of room temp butter")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "2.5"
     assert parsed['unit'] == 'tsp'
@@ -86,7 +86,7 @@ def test_number_words_4():
 
 def test_number_words_5():
     parse = IngredientSlicer("two to three tsp of room temp butter")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "2.5"
     assert parsed['unit'] == 'tsp'
@@ -104,7 +104,7 @@ def test_number_words_5():
 # TODO: this seems like the best effort to handle "two and three" as a quantity, just a really poorly written ingredient
 def test_number_words_6():
     parse = IngredientSlicer("two and three tsp of room temp butter")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "5"
     assert parsed['unit'] == 'tsp'

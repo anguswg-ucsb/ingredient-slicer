@@ -3,13 +3,13 @@ import pytest
 
 import re
 # from fractions import Fraction
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
-# regex_map = IngredientRegexPatterns()
+# regex_map = IngredientTools()
 
 @pytest.fixture
 def regex_map():
-    return IngredientRegexPatterns()
+    return IngredientTools()
 
 # -------------------------------------------------------------------------------
 # ---- Test IngredientSlicer: Merge space separated numbers ----
@@ -17,7 +17,7 @@ def regex_map():
 
 def test_merge_numbers_1():
     parse = IngredientSlicer("1 2/3 cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "1.667"
     assert parsed['unit'] == 'cups'
@@ -34,7 +34,7 @@ def test_merge_numbers_1():
 
 # def test_merge_numbers_2():
 #     parse = IngredientSlicer("1 2/3 and 2 1/2 cups of flour")
-#     parse.parse()
+#     # parse.parse()
 #     parsed = parse.to_json()
 #     assert parsed['quantity'] == "4.167"
 #     assert parsed['unit'] == 'cups'
@@ -51,7 +51,7 @@ def test_merge_numbers_1():
 
 def test_merge_numbers_3():
     parse = IngredientSlicer("1 2/3 or 2 1/2 cups of flour", debug=True)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     # (1.667 + 2.5)
@@ -71,7 +71,7 @@ def test_merge_numbers_3():
 
 def test_merge_mixed_fractions_with_extra_spaces_1():
     parse = IngredientSlicer("1 2 / 3 cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "1.667"
     assert parsed['unit'] == 'cups'
@@ -88,7 +88,7 @@ def test_merge_mixed_fractions_with_extra_spaces_1():
 
 def test_merge_mixed_fractions_range_with_extra_spaces_1():
     parse = IngredientSlicer("1 2 / 3 - 2 1 / 2 cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2.0835"
@@ -106,7 +106,7 @@ def test_merge_mixed_fractions_range_with_extra_spaces_1():
 
 def test_merge_mixed_fraction_with_multiple_leading_spaces_1():
     parse = IngredientSlicer("1  2/3 cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "1.667"
     assert parsed['unit'] == 'cups'
@@ -123,7 +123,7 @@ def test_merge_mixed_fraction_with_multiple_leading_spaces_1():
 
 def test_merge_mixed_fraction_with_multiple_trailing_spaces_1():
     parse = IngredientSlicer("1 2/3  cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "1.667"
     assert parsed['unit'] == 'cups'
@@ -140,7 +140,7 @@ def test_merge_mixed_fraction_with_multiple_trailing_spaces_1():
 
 def test_merge_mixed_fraction_with_multiple_leading_and_trailing_spaces_1():
     parse = IngredientSlicer("1  2/3  cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "1.667"
     assert parsed['unit'] == 'cups'
@@ -157,7 +157,7 @@ def test_merge_mixed_fraction_with_multiple_leading_and_trailing_spaces_1():
 
 def test_merge_mixed_fraction_with_multiple_leading_and_trailing_spaces_2():
     parse = IngredientSlicer("1  2 /3  cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "1.667"
     assert parsed['unit'] == 'cups'
@@ -174,7 +174,7 @@ def test_merge_mixed_fraction_with_multiple_leading_and_trailing_spaces_2():
 
 def test_decimal_then_fraction_1():
     parse = IngredientSlicer("1.5 2/3 cups of flour")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     
     assert parsed['quantity'] == "2.167"
@@ -192,7 +192,7 @@ def test_decimal_then_fraction_1():
 
 def test_decimal_then_mixed_fraction_1(): 
     parse = IngredientSlicer("1 2 2/3 cups of flour") # TODO: this is a bug and should really result in 2.667 cups
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
     assert parsed['quantity'] == "2"
     assert parsed['unit'] == 'cups'

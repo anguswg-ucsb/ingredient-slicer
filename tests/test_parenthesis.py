@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
+from ingredient_slicer import IngredientTools, IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ from ingredient_slicer import IngredientRegexPatterns, IngredientSlicer
 
 def test_parenthesis_with_equiv_quantity_unit_1():
     parse = IngredientSlicer("1 cup of chopped chicken breast (about 12 ounces)", debug = False)
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "12"
@@ -35,7 +35,7 @@ def test_parenthesis_with_equiv_quantity_unit_1():
 
 def test_equiv_quantity_unit_1():
     parse = IngredientSlicer("1 cup of chopped chicken breast (about 12 ounces)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "12"
@@ -54,7 +54,7 @@ def test_equiv_quantity_unit_1():
 
 def test_equiv_quantity_unit_2():
     parse = IngredientSlicer("1/2 stalk of brocolli (probably about 8 ounces)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "8"
@@ -76,7 +76,7 @@ def test_equiv_quantity_unit_2():
 
 def test_equiv_quantity_unit_equiv_at_the_end_1():
     parse = IngredientSlicer("1/2 cup of chopped onions (4 ounces about)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "4"
@@ -94,7 +94,7 @@ def test_equiv_quantity_unit_equiv_at_the_end_1():
 
 def test_equiv_quantity_unit_equiv_with_pair_of_quantity_units_1():
     parse = IngredientSlicer("1/2 cup of chopped onions (about 4 oz, 34 grams)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "4"
@@ -112,7 +112,7 @@ def test_equiv_quantity_unit_equiv_with_pair_of_quantity_units_1():
 
 def test_equiv_quantity_unit_equiv_with_triplet_of_quantity_units_1():
     parse = IngredientSlicer("1/2 cup of chopped onions (about 4 oz, 34 grams, 0.034 kg)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "4"
@@ -130,7 +130,7 @@ def test_equiv_quantity_unit_equiv_with_triplet_of_quantity_units_1():
 
 def test_equiv_quantity_unit_equiv_with_triplet_of_quantity_units_outer_unit_is_weight_1():
     parse = IngredientSlicer("1/2 lb of chopped onions (about 4 oz, 34 grams, 0.034 kg)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"
@@ -154,7 +154,7 @@ def test_equiv_quantity_unit_equiv_with_triplet_of_quantity_units_outer_unit_is_
 # -------------------------------------------------------------------------------
 def test_optional_ingredient_1():
     parse = IngredientSlicer("1/3 cup sugar, optional")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.333"
@@ -166,7 +166,7 @@ def test_optional_ingredient_1():
 
 def test_optional_ingredient_2():
     parse = IngredientSlicer("1/3 cup sugar, opt")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.333"
@@ -181,7 +181,7 @@ def test_optional_ingredient_2():
 # -------------------------------------------------------------------------------
 def test_optional_parenthesis_1():
     parse = IngredientSlicer("1/3 cup sugar (optional)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.333"
@@ -193,7 +193,7 @@ def test_optional_parenthesis_1():
 
 def test_optional_parenthesis_2():
     parse = IngredientSlicer("1/3 cup sugar (opt)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.333"
@@ -208,7 +208,7 @@ def test_optional_parenthesis_2():
 # -------------------------------------------------------------------------------
 def test_quantity_only_parenthesis_1():
     parse = IngredientSlicer("salmon steaks (2)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
@@ -220,7 +220,7 @@ def test_quantity_only_parenthesis_1():
 
 def test_quantity_only_parenthesis_2():
     parse = IngredientSlicer("salmon steaks (2) (optional)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
@@ -232,7 +232,7 @@ def test_quantity_only_parenthesis_2():
 
 def test_quantity_only_parenthesis_3():
     parse = IngredientSlicer("chicken breasts (4)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "4"
@@ -248,7 +248,7 @@ def test_quantity_only_parenthesis_3():
 
 def test_quantity_only_parenthesis_4():
     parse = IngredientSlicer("3 chicken breasts (4) (optional)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "12"
@@ -264,7 +264,7 @@ def test_quantity_only_parenthesis_4():
 
 def test_quantity_only_parenthesis_5():
     parse = IngredientSlicer("3 1/2 chicken breasts (4)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "14"
@@ -280,7 +280,7 @@ def test_quantity_only_parenthesis_5():
 
 def test_quantity_only_parenthesis_outer_unit_is_weight_1():
     parse = IngredientSlicer("3 1/2 lbs chicken breasts (4)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "14"
@@ -299,7 +299,7 @@ def test_quantity_only_parenthesis_outer_unit_is_weight_1():
 
 def test_quantity_only_parenthesis_outer_unit_is_volume_1():
     parse = IngredientSlicer("3 1/2 cups chicken breasts (4)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "14"
@@ -318,7 +318,7 @@ def test_quantity_only_parenthesis_outer_unit_is_volume_1():
 
 def test_quantity_only_parenthesis_with_equiv_parenthesis_after_1():
     parse = IngredientSlicer("3 1/2 cups chicken breasts (4) (about 32 oz)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "32"
@@ -337,7 +337,7 @@ def test_quantity_only_parenthesis_with_equiv_parenthesis_after_1():
 
 def test_quantity_only_parenthesis_with_equiv_parenthesis_after_and_optional_1():
     parse = IngredientSlicer("3 1/2 cups chicken breasts (4) (about 32 oz) (optional)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "32"
@@ -362,7 +362,7 @@ def test_quantity_only_parenthesis_with_equiv_parenthesis_after_and_optional_1()
 
 def test_quantity_and_unit_parenthesis_1():
     parse = IngredientSlicer("4 chicken wings (8 oz)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "32"
@@ -378,7 +378,7 @@ def test_quantity_and_unit_parenthesis_1():
 
 def test_quantity_and_unit_parenthesis_2():
     parse = IngredientSlicer(" chicken breast (12 ounces)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "12"
@@ -395,7 +395,7 @@ def test_quantity_and_unit_parenthesis_2():
 
 def test_quantity_and_unit_parenthesis_3():
     parse = IngredientSlicer("1/2 cup sugar (8 ounces)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "8"
@@ -410,7 +410,7 @@ def test_quantity_and_unit_parenthesis_3():
 
 def test_quantity_and_unit_parenthesis_pair_quantity_units_1():
     parse = IngredientSlicer("1/2 cup sugar (8 oz, 34 grams)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "8"
@@ -425,7 +425,7 @@ def test_quantity_and_unit_parenthesis_pair_quantity_units_1():
 
 def test_quantity_and_unit_parenthesis_triplet_quantity_units_1():
     parse = IngredientSlicer("1/2 cup sugar (8 oz, 34 grams, 0.034 kg)")
-    parse.parse()
+    # parse.parse()
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "8"
