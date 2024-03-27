@@ -1,6 +1,6 @@
 # __init__.py
 
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 
 # from ._constants import NUMBER_WORDS,  NUMBER_PREFIX_WORDS, \
 #     MULTI_FRACTION_WORDS, FRACTION_WORDS, DENOMINATOR_WORDS, UNICODE_FRACTIONS, \

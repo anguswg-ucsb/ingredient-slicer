@@ -148,6 +148,12 @@ class IngredientSlicer:
                 
         return
     
+    def _replace_number_followed_by_inch_symbol(self) -> None:
+
+        self.standardized_ingredient = _utils._replace_number_followed_by_inch_symbol(self.standardized_ingredient)
+
+        return 
+    
     def _find_and_replace_fraction_words(self) -> None:
         """ Find and replace fraction words with their corresponding numerical values in the parsed ingredient."""
 
@@ -952,6 +958,7 @@ class IngredientSlicer:
         methods = [
             self._drop_special_dashes,
             self._find_and_remove_percentages,
+            self._replace_number_followed_by_inch_symbol,
             self._find_and_replace_casual_quantities, # NOTE: testing this out
             self._find_and_replace_prefixed_number_words, # NOTE: testing this out
             self._find_and_replace_number_words,

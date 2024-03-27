@@ -7,7 +7,7 @@ name = "ingredient_slicer"
 authors = [
   {name = "Angus Watters", email = "anguswatters@gmail.com"},
 ]
-version = "0.0.6"
+version = "0.0.7"
 description = "Parse quantities, units, and (sometimes) foods from recipe ingredients into structured data"
 classifiers = [
   "Development Status :: 3 - Alpha",

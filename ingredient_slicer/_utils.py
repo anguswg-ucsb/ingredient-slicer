@@ -385,7 +385,7 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str) -> str:
                 # look LEFT of the matched substring
                 GO_LEFT_INDEX = L - 1
 
-                print(f"Try to go LEFT of '{substring}' substring") if debug else None
+                # print(f"Try to go LEFT of '{substring}' substring") if debug else None
                 while GO_LEFT_INDEX >= 0 and (text[GO_LEFT_INDEX] == " " or text[GO_LEFT_INDEX] == "-"):
                     # print(f"GO_LEFT_INDEX: '{GO_LEFT_INDEX}'") if debug else None
                     # print(f" - text[GO_LEFT_INDEX]: '{text[GO_LEFT_INDEX]}'") if debug else None
@@ -877,3 +877,124 @@ def _find_and_remove(string: str, pattern: re.Pattern) -> str:
         string = string.strip()
 
         return string
+
+
+def replace_number_followed_by_inch_symbol(ingredient: str) -> str:
+    """Replace numbers followed by the inch symbol with the word 'inch' in the ingredient string.
+    Args:
+        ingredient (str): The ingredient string to parse.
+    Returns:
+        str: The updated ingredient string with numbers followed by the inch symbol replaced with the word 'inch'.
+    """
+    if not isinstance(ingredient, str):
+        raise ValueError("Invalid input. Ingredient must be a string.")
+
+    # regex_patterns = _regex_patterns.IngredientTools()
+    NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
+    # Find all numbers followed by the inch symbol in the ingredient string
+    matches = _regex_patterns.NUMBER_WITH_INCH_SYMBOL.finditer(ingredient)
+    matches = NUMBER_WITH_INCH_SYMBOL.finditer(ingredient)
+
+    # Replace all numbers followed by the inch symbol with the word 'inch'
+    for match in matches:
+        match_string = match.group()
+        ingredient = ingredient.replace(match_string, "inch")
+
+    return ingredient
+
+def _replace_number_followed_by_inch_symbol(ingredient: str ) -> str:
+    """
+    Find inch symbols (i.e. " or ”) in the ingredient string and replace them with the word "inch".
+    """
+
+    # ingredient = "fruit (4-2/3” long x 2-3/4” dia)"
+    # ingredient = 'waffle round (4 " dia)'
+
+    for key, pattern in _regex_patterns.NUMBER_WITH_INCH_SYMBOL_MAP.items():
+        pattern_iter = pattern.finditer(ingredient)
+        
+        offset = 0
+        for match in pattern_iter:
+            match_string = match.group()
+            start, end = match.start(), match.end()
+            modified_start = start + offset
+            modified_end = end + offset
+
+            replacement_str = match_string.replace(key, "inch")
+
+            ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
+
+            offset += len(str(replacement_str)) - (end - start)
+
+    return ingredient
+
+
+
+# # import re
+# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
+# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\”')
+# NUMBER_WITH_FOOT_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\'')
+
+
+# test_strings = [
+#     f""" 1" """,
+#     f""" 1 1/2" """,
+#     f""" 1 1/2 inch """,
+#     f""" 1 1/2 inches """,
+#     f""" 1 1/2 inch(es)" """,
+#     f""" 1 1/2" incch """,
+#     f""" 1 0.5" inch """,
+#     f""" 1 0.5 " inches """
+# ]
+
+# for test_string in test_strings:
+#     print(NUMBER_WITH_INCH_SYMBOL.findall(test_string))
+
+# NUMBER_WITH_INCH_SYMBOL.findall("1 1/2\"")
+
+# # ingredient = "fruit (4-2/3” long x 2-3/4” dia)"
+# # ingredient = 'waffle round (4" dia)'
+
+# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
+# # NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\”')
+
+# NUMBER_WITH_INCH_SYMBOL_MAP = {}
+# for inch_symbol in ["\"", "”"]:
+#     NUMBER_WITH_INCH_SYMBOL_MAP[inch_symbol] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + inch_symbol + r'')
+
+# def _replace_number_followed_by_inch_symbol(ingredient: str ) -> str:
+#     """
+#     Find and remove percentages from the ingredient string.
+#     """
+#     # ingredient = "1 cup of 2% heavy cream"
+#     # ingredient = "fruit (4-2/3” long x 2-3/4” dia)"
+#     # ingredient = 'waffle round (4 " dia)'
+
+#     for key, pattern in _regex_patterns.NUMBER_WITH_INCH_SYMBOL_MAP.items():
+#         # print(f"Key: {key}")
+#         # print(f"Pattern: {pattern}")
+#         pattern_iter = pattern.finditer(ingredient)
+#         # print(f"Pattern Iter: {pattern_iter}")
+#         # all_matches = pattern.findall(ingredient)
+#         # print(f"All Matches: {all_matches}")
+        
+#         offset = 0
+#         for match in pattern_iter:
+#             match_string = match.group()
+#             start, end = match.start(), match.end()
+#             modified_start = start + offset
+#             modified_end = end + offset
+
+#             # replacement_str = ""
+#             # print(f"Match String: {match_string}")
+#             # print(f"Start: {start} | End: {end}")
+#             replacement_str = match_string.replace(key, "inch")
+
+#             # Construct the modified string with the replacement applied
+#             ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
+
+#             offset += len(str(replacement_str)) - (end - start)
+
+#     return
+
+

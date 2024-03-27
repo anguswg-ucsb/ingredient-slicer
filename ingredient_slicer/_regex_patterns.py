@@ -373,6 +373,19 @@ PCT_REGEX_MAP = {}
 for pct_string in ["%", "percent", "pct"]:
     PCT_REGEX_MAP[pct_string] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + pct_string + r'')
 
+# create a map containg regexs for matching a number followed by a "%", "percent", or "pct" string
+# NUMBER_WITH_DIMENSIONS_SYMBOLS_MAP = {}
+
+# NUMBER_WITH_INCH_SYMBOL.findall("1 1/2\"")
+# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
+# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\”')
+# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
+
+NUMBER_WITH_INCH_SYMBOL_MAP = {}
+for inch_symbol in ["\"", "”"]:
+    NUMBER_WITH_INCH_SYMBOL_MAP[inch_symbol] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + inch_symbol + r'')
+
+
 # -----------------------------------------------------------------------------
 # --------------------------- Class to store all regex patterns -----------------------
 # A class to hold all regex patterns used in the recipe parser (version 2)
@@ -500,6 +513,7 @@ class IngredientTools:
         self.REQUIRED_STRING = REQUIRED_STRING
         self.WORDS_ENDING_IN_LY = WORDS_ENDING_IN_LY
         self.PCT_REGEX_MAP = PCT_REGEX_MAP
+        self.NUMBER_WITH_INCH_SYMBOL_MAP = NUMBER_WITH_INCH_SYMBOL_MAP
 
         # get a list of all the attributes of the class in sorted order by name
         self.sorted_keys = sorted(self.__dict__.keys(), key=lambda x: x[0])
