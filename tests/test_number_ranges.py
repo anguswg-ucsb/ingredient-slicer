@@ -5,10 +5,7 @@ import re
 
 # from fractions import Fraction
 
-from ingredient_slicer import IngredientTools, IngredientSlicer, _utils
-
-# _utils._find_substring_indices("1/2 cup of sugar", "cup")
-# _utils._find_and_remove_hyphens_around_substring("use 1-to-4 cups of soup", "to")
+from ingredient_slicer import IngredientSlicer, _utils
 
 # -------------------------------------------------------------------------------
 # ---- Simple number ranges (whole numbers/decimals to whole numbers/decimals) ----

@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientTools, IngredientSlicer
+from ingredient_slicer import IngredientSlicer
 
 # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(self.standard_ingredient)
 # # pattern_iter = IngredientSlicer.regex.NUMBERS_FOLLOWED_BY_PERCENTAGE.finditer(ingredient)

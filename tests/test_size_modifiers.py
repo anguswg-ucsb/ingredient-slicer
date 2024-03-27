@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientTools, IngredientSlicer
+from ingredient_slicer import IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # ---- Size modifier words tests ----

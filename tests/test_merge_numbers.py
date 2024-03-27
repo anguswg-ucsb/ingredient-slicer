@@ -3,13 +3,7 @@ import pytest
 
 import re
 # from fractions import Fraction
-from ingredient_slicer import IngredientTools, IngredientSlicer
-
-# regex_map = IngredientTools()
-
-@pytest.fixture
-def regex_map():
-    return IngredientTools()
+from ingredient_slicer import IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # ---- Test IngredientSlicer: Merge space separated numbers ----

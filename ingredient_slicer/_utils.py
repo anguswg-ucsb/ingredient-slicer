@@ -106,52 +106,49 @@ def _fraction_str_to_decimal(fraction_str: str) -> str:
 
 
 # BETWEEN_QUANTITY_AND_QUANTITY 
-# _replace_and_with_hyphen
-def _update_ranges(ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
-        """Update the ranges in the ingredient string with the updated ranges
-        Args:
-            ingredient (str): The ingredient string to update
-            pattern (re.Pattern): The pattern to use to find the ranges
-            replacement_function (function, optional): A function to use to replace the matched ranges. Defaults to None.
-        Returns:
-            str: The updated ingredient string
-        """
+# # _replace_and_with_hyphen
+# def _update_ranges(ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
+#         """Update the ranges in the ingredient string with the updated ranges
+#         Args:
+#             ingredient (str): The ingredient string to update
+#             pattern (re.Pattern): The pattern to use to find the ranges
+#             replacement_function (function, optional): A function to use to replace the matched ranges. Defaults to None.
+#         Returns:
+#             str: The updated ingredient string
+#         """
         
-        # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
+#         # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
         
-        matches = pattern.findall(ingredient)
+#         matches = pattern.findall(ingredient)
 
-        # matched_ranges = [match.split("-") for match in matches]
+#         # matched_ranges = [match.split("-") for match in matches]
 
-        if replacement_function:
-            # print(f"Replacement Function given")
-            matched_ranges = [replacement_function(match).split("-") for match in matches]
-        else:
-            # print(f"No Replacement Function given")
-            matched_ranges = [match.split("-") for match in matches]
+#         if replacement_function:
+#             # print(f"Replacement Function given")
+#             matched_ranges = [replacement_function(match).split("-") for match in matches]
+#         else:
+#             # print(f"No Replacement Function given")
+#             matched_ranges = [match.split("-") for match in matches]
 
-        # print(f"Matched Ranges: \n > {matched_ranges}") if self.debug else None
+#         # print(f"Matched Ranges: \n > {matched_ranges}") if self.debug else None
 
-        updated_ranges = [" - ".join([str(_fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
-        # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
+#         updated_ranges = [" - ".join([str(_fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
+#         # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
         
-        # Create a dictionary to map the matched ranges to the updated ranges
-        ranges_map = dict(zip(matches, updated_ranges))
+#         # Create a dictionary to map the matched ranges to the updated ranges
+#         ranges_map = dict(zip(matches, updated_ranges))
 
-        # Replace the ranges in the original string with the updated ranges
-        for original_range, updated_range in ranges_map.items():
-            # print(f"Original Range: {original_range}")
-            # print(f"Updated Range: {updated_range}")
-            # if replacement_function:
-            #     print(f"Replacement Function given")
-            #     updated_range = replacement_function(updated_range)
-            ingredient = ingredient.replace(original_range, updated_range)
-            # print("\n") if self.debug else None
+#         # Replace the ranges in the original string with the updated ranges
+#         for original_range, updated_range in ranges_map.items():
+#             # print(f"Original Range: {original_range}")
+#             # print(f"Updated Range: {updated_range}")
+#             # if replacement_function:
+#             #     print(f"Replacement Function given")
+#             #     updated_range = replacement_function(updated_range)
+#             ingredient = ingredient.replace(original_range, updated_range)
+#             # print("\n") if self.debug else None
 
-        return ingredient
-
-# BETWEEN_QUANTITY_AND_QUANTITY 
-# _replace_and_with_hyphen
+#         return ingredient
 
 def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
         """Update the number ranges in the ingredient string to always have two numbers separated by a whitespace, then a hyphen, then another whitespace.
@@ -170,16 +167,16 @@ def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
         
         # # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
         # ingredient = "1-2 apples and 1- 45 orange slices between 4 and 5 lemons or 1 or 2 oranges and use 1 to 2 lemons"
-        # pattern = regex_patterns.QUANTITY_DASH_QUANTITY
+        # pattern = _regex_patterns.QUANTITY_DASH_QUANTITY
         
         # ingredient = '1 - 2 apples and 1 - 45 orange slices between 4 and 5 lemons or 1 or 2 oranges and use 1 to 2 lemons'
-        # pattern = regex_patterns.BETWEEN_QUANTITY_AND_QUANTITY
+        # pattern = _regex_patterns.BETWEEN_QUANTITY_AND_QUANTITY
 
         # ingredient = '1 - 2 apples and 1 - 45 orange slices 4 - 5 lemons or 1 or 2 oranges and use 1 to 2 lemons'
-        # pattern = regex_patterns.QUANTITY_TO_QUANTITY
+        # pattern = _regex_patterns.QUANTITY_TO_QUANTITY
 
         # ingredient = '1 - 2 apples and 1 - 45 orange slices 4 - 5 lemons or 1 or 2 oranges and use 1 - 2 lemons'
-        # pattern = regex_patterns.QUANTITY_OR_QUANTITY
+        # pattern = _regex_patterns.QUANTITY_OR_QUANTITY
         
         matched_ranges_iter = pattern.finditer(ingredient)
         offset = 0
@@ -224,8 +221,9 @@ def avg_ranges(ingredient: str) -> str:
     if not isinstance(ingredient, str):
         raise ValueError("Invalid input. Ingredient must be a string.")
 
-    regex_patterns = _regex_patterns.IngredientTools()
-    search_ranges = regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
+    # regex_patterns = _regex_patterns.IngredientTools()
+
+    search_ranges = _regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
     
     while search_ranges:
         start, end = search_ranges.start(), search_ranges.end()
@@ -245,7 +243,7 @@ def avg_ranges(ingredient: str) -> str:
         
         ingredient = ingredient[:start] + range_average + ingredient[end:]
         
-        search_ranges = regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
+        search_ranges = _regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
     
     ingredient = ingredient.strip()
     
@@ -267,13 +265,13 @@ def _replace_a_or_an_quantities(ingredient: str) -> str:
         if not isinstance(ingredient, str):
             raise ValueError("Invalid input. Ingredient must be a string.")
 
-        regex_patterns = _regex_patterns.IngredientTools()
+        # regex_patterns = _regex_patterns.IngredientTools()
 
         # lowercase and split the ingredient string
         ingredient = ingredient.lower()
         split_ingredient = ingredient.split()
 
-        quantity_matches = re.findall(regex_patterns.ALL_NUMBERS, ingredient)
+        quantity_matches = re.findall(_regex_patterns.ALL_NUMBERS, ingredient)
 
         # if no quantities are found in the ingredient string, 
         # look for and replace the first "a" or "an" with "1"
@@ -324,14 +322,13 @@ def _find_substring_indices(text: str, substring: str) -> list:
             
     return substring_indices
 
-def _find_and_remove_hyphens_around_substring(text: str, substring: str, debug=False) -> str:
+def _find_and_remove_hyphens_around_substring(text: str, substring: str) -> str:
 
     """Find instances of a substring surrounded by some number of hyphens on the left or right of the substring and remove these hyphens
     Case insensitive, and will return the updated string with the hyphens removed from around the substring and in lower case
     Args:
         text (str): The text to search for the substring
         substring (str): The substring to search for in the text
-        debug (bool, optional): Print debug information. Defaults to False.
     Returns:
         str: The updated text with the hyphens removed from around the substring
     """
@@ -354,11 +351,11 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str, debug=F
 
     for R in range(0, len(text)):
 
-        print(f"L: {L}") if debug else None
-        print(f"R: {R}") if debug else None
-        print(f"text[L:R]: {text[L:R]}") if debug else None
+        # print(f"L: {L}") if debug else None
+        # print(f"R: {R}") if debug else None
+        # print(f"text[L:R]: {text[L:R]}") if debug else None
         if R - L == substring_length:
-            print(f"Found window the size of substring!") if debug else None
+            # print(f"Found window the size of substring!") if debug else None
             if text[L:R] == substring:
                 substring_indices.append([L, R])
                 
@@ -377,11 +374,11 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str, debug=F
                 # character to the left or right of the substring is NOT a digit, hyphen, or whitespace 
                 # (i.e. the matched substring is part of a larger word)
                 if not valid_left_char or not valid_right_char:
-                    print(f"Substring is part of a larger word") if debug else None
-                    print(f" - char_to_left: '{char_to_left}'") if debug else None
-                    print(f" - char_to_right: '{char_to_right}'") if debug else None
-                    print(f"Still increment L from {L} to {L + 1}") if debug else None
-                    print() if debug else None
+                    # print(f"Substring is part of a larger word") if debug else None
+                    # print(f" - char_to_left: '{char_to_left}'") if debug else None
+                    # print(f" - char_to_right: '{char_to_right}'") if debug else None
+                    # print(f"Still increment L from {L} to {L + 1}") if debug else None
+                    # print() if debug else None
                     L += 1
                     continue
 
@@ -390,50 +387,49 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str, debug=F
 
                 print(f"Try to go LEFT of '{substring}' substring") if debug else None
                 while GO_LEFT_INDEX >= 0 and (text[GO_LEFT_INDEX] == " " or text[GO_LEFT_INDEX] == "-"):
-                    print(f"GO_LEFT_INDEX: '{GO_LEFT_INDEX}'") if debug else None
-                    print(f" - text[GO_LEFT_INDEX]: '{text[GO_LEFT_INDEX]}'") if debug else None
+                    # print(f"GO_LEFT_INDEX: '{GO_LEFT_INDEX}'") if debug else None
+                    # print(f" - text[GO_LEFT_INDEX]: '{text[GO_LEFT_INDEX]}'") if debug else None
                     if text[GO_LEFT_INDEX] == "-":
                         has_left_hyphen = True
                     GO_LEFT_INDEX -= 1
-                    print(f" --> Ending text[GO_LEFT_INDEX]: '{text[GO_LEFT_INDEX]}'") if debug else None
+                    # print(f" --> Ending text[GO_LEFT_INDEX]: '{text[GO_LEFT_INDEX]}'") if debug else None
                 
-                print() if debug else None
+                # print() if debug else None
 
                 # look RIGHT of the matched substring
-                print(f"Try to go RIGHT of '{substring}' substring") if debug else None
+                # print(f"Try to go RIGHT of '{substring}' substring") if debug else None
 
                 GO_RIGHT_INDEX = R
                 # GO_RIGHT_INDEX = R + 1 # NOTE: Bug fix, Setting the GO_RIGHT_INDEX to R + 1 will skip the first character after the substring
 
                 while GO_RIGHT_INDEX < len(text) and (text[GO_RIGHT_INDEX] == " " or text[GO_RIGHT_INDEX] == "-"):
-                    print(f"GO_RIGHT_INDEX: '{GO_RIGHT_INDEX}'") if debug else None
-                    print(f" - text[GO_RIGHT_INDEX]: '{text[GO_RIGHT_INDEX]}'") if debug else None
+                    # print(f"GO_RIGHT_INDEX: '{GO_RIGHT_INDEX}'") if debug else None
+                    # print(f" - text[GO_RIGHT_INDEX]: '{text[GO_RIGHT_INDEX]}'") if debug else None
                     if text[GO_RIGHT_INDEX] == "-":
                         has_right_hyphen = True
                     GO_RIGHT_INDEX += 1
-                    print(f" --> Ending text[GO_RIGHT_INDEX]: '{text[GO_RIGHT_INDEX]}'") if debug else None
+                    # print(f" --> Ending text[GO_RIGHT_INDEX]: '{text[GO_RIGHT_INDEX]}'") if debug else None
 
                 look_around_string = text[GO_LEFT_INDEX+1:GO_RIGHT_INDEX]
 
                 if has_left_hyphen or has_right_hyphen:
                     hypen_substrings.append(look_around_string)
-                    print(f"Added '{look_around_string}' to hypen_substrings:\n > '{hypen_substrings}'") if debug else None
+                    # print(f"Added '{look_around_string}' to hypen_substrings:\n > '{hypen_substrings}'") if debug else None
+                # print(f"FINAL --> GO_LEFT_INDEX: {GO_LEFT_INDEX} --> has LEFT hypen: {has_left_hyphen}") if debug else None
+                # print(f"FINAL --> GO_RIGHT_INDEX: {GO_RIGHT_INDEX} --> has RIGHT hypen: {has_right_hyphen}") if debug else None
+                # print(f"Final substring: '{look_around_string}'") if debug else None
 
-                print(f"FINAL --> GO_LEFT_INDEX: {GO_LEFT_INDEX} --> has LEFT hypen: {has_left_hyphen}") if debug else None
-                print(f"FINAL --> GO_RIGHT_INDEX: {GO_RIGHT_INDEX} --> has RIGHT hypen: {has_right_hyphen}") if debug else None
-                print(f"Final substring: '{look_around_string}'") if debug else None
-
-            print(f"Incrementing L from {L} to {L + 1}") if debug else None
+            # print(f"Incrementing L from {L} to {L + 1}") if debug else None
             L += 1
-        print(f"----" * 5) if debug else None
-        print() if debug else None
+        # print(f"----" * 5) if debug else None
+        # print() if debug else None
     
-    print(f"hypen_substrings: {hypen_substrings}") if debug else None
+    # print(f"hypen_substrings: {hypen_substrings}") if debug else None
     
     for hyphen_substring in hypen_substrings:
         replacement_string = f" {hyphen_substring.replace('-', '').replace(' ', '')} " 
         text = text.replace(hyphen_substring, replacement_string) 
-        print(f"Replacing '{hyphen_substring}' in 'text' with '{replacement_string}'\n") if debug else None
+        # print(f"Replacing '{hyphen_substring}' in 'text' with '{replacement_string}'\n") if debug else None
 
     text = text.strip()
 
@@ -503,9 +499,8 @@ def _remove_extra_whitespaces(input_string: str) -> str:
 # # parenthesis_content = ['(about tender and juicy ounces)']
 # parenthesis = parenthesis_content[0]
 
-# regex_patterns.EQUIV_QUANTITY_UNIT_GROUPS.findall(parenthesis)
+# _regex_patterns.EQUIV_QUANTITY_UNIT_GROUPS.findall(parenthesis)
 
-# regex_patterns = _regex_patterns.IngredientTools()
 def _extract_quantities_only(input_string: str) -> list:
 
     """From a string get all quantities if they exist WITHOUT units
@@ -525,21 +520,20 @@ def _extract_quantities_only(input_string: str) -> list:
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
-    regex_patterns = _regex_patterns.IngredientTools()
-
+    # regex_patterns = _regex_patterns.IngredientTools()
 
     # first check for units
-    unit_matches = regex_patterns.UNITS_PATTERN.findall(input_string)
+    unit_matches = _regex_patterns.UNITS_PATTERN.findall(input_string)
 
     # if we have units we just return because we only are looking for instances where quantities exist WITHOUT units
     if unit_matches:
         return []
 
     # regex_patterns.QUANTITY_UNIT_GROUPS.findall(input_string)
-    quantity_matches = regex_patterns.ALL_NUMBERS.finditer(input_string)
-    quantities = regex_patterns.ALL_NUMBERS.findall(input_string)
+    quantity_matches = _regex_patterns.ALL_NUMBERS.finditer(input_string)
+    quantities = _regex_patterns.ALL_NUMBERS.findall(input_string)
 
-    # quantity_matches = regex_patterns.ALL_NUMBERS.finditer(input_string)
+    # quantity_matches = _regex_patterns.ALL_NUMBERS.finditer(input_string)
     # quantities = []
     # for match in quantity_matches:
     #     match_string = match.group()
@@ -566,10 +560,10 @@ def _extract_quantity_unit_pairs(input_string: str) -> list[tuple]:
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
-    regex_patterns = _regex_patterns.IngredientTools()
+    # regex_patterns = _regex_patterns.IngredientTools()
 
     # regex_patterns.QUANTITY_UNIT_GROUPS.findall(input_string)
-    quantity_matches = regex_patterns.ALL_NUMBERS.finditer(input_string)
+    quantity_matches = _regex_patterns.ALL_NUMBERS.finditer(input_string)
 
     quantity_unit_pairs = []
 
@@ -583,8 +577,8 @@ def _extract_quantity_unit_pairs(input_string: str) -> list[tuple]:
         str_after_number_match = input_string[end:]
         # print(f"String after number match: '{str_after_number_match}'")
 
-        # regex_patterns.ALL_NUMBERS.findall(after_approx_match)
-        nearest_unit_search = regex_patterns.UNITS_PATTERN.search(str_after_number_match)
+        # _regex_patterns.ALL_NUMBERS.findall(after_approx_match)
+        nearest_unit_search = _regex_patterns.UNITS_PATTERN.search(str_after_number_match)
 
         if not nearest_unit_search:
             continue
@@ -618,9 +612,9 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
-    regex_patterns = _regex_patterns.IngredientTools()
+    # regex_patterns = _regex_patterns.IngredientTools()
 
-    approximate_string_matches = regex_patterns.APPROXIMATE_STRINGS_PATTERN.finditer(input_string)
+    approximate_string_matches = _regex_patterns.APPROXIMATE_STRINGS_PATTERN.finditer(input_string)
 
     approximate_triplets = []
 
@@ -637,8 +631,8 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
 
         str_after_approx_match = input_string[end:] # string after the approximate match
 
-        # regex_patterns.ALL_NUMBERS.findall(after_approx_match)
-        nearest_number_search = regex_patterns.ALL_NUMBERS.search(str_after_approx_match) # search for the nearest number after the approximate string
+        # _regex_patterns.ALL_NUMBERS.findall(after_approx_match)
+        nearest_number_search = _regex_patterns.ALL_NUMBERS.search(str_after_approx_match) # search for the nearest number after the approximate string
 
         if not nearest_number_search:
             # print(f"No number found after approximate match")
@@ -652,11 +646,11 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
         # string after the number 
         str_after_number_match = str_after_approx_match[nearest_number_search.end():] # string after the number match
 
-        nearest_unit_search = regex_patterns.UNITS_PATTERN.search(str_after_number_match) # search for the nearest unit after the number
+        nearest_unit_search = _regex_patterns.UNITS_PATTERN.search(str_after_number_match) # search for the nearest unit after the number
 
         if not nearest_unit_search: # if we don't find a unit after the number, we skip this triplet
-            print(f"No unit found after approximate match")
-            print()
+            # print(f"No unit found after approximate match")
+            # print()
             continue
 
         closest_unit = nearest_unit_search.group() # the actual matching unit string
@@ -669,7 +663,7 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
     
 
     # look for trailing approximate strings
-    trailing_approx_strings = regex_patterns.APPROXIMATE_STRINGS_PATTERN.findall(input_string)
+    trailing_approx_strings = _regex_patterns.APPROXIMATE_STRINGS_PATTERN.findall(input_string)
 
     # if we didn't get any [approximate, quantity, unit] triplets, but we did get a trailing approximate strings
     # check the string again for quantity unit pairs and 

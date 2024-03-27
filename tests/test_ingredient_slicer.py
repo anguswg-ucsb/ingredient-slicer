@@ -3,7 +3,7 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientTools, IngredientSlicer
+from ingredient_slicer import IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
@@ -338,44 +338,6 @@ def test_x_separator_3():
 #     print()
 
 
-# def find_and_remove(string: str, pattern: re.Pattern) -> str:
-#     """Find and remove all matches of a pattern from a string.
-#     Args:
-#         string (str): The string to search for matches in
-#         pattern (re.Pattern): The pattern to search for in the string
-#     Returns:
-#         str: The modified string with all matches removed
-#     """
-
-#     pattern_iter = pattern.finditer(string)
-
-#     offset = 0
-#     replacement_index = 0
-
-#     for match in pattern_iter:
-#         start, end = match.start(), match.end()
-
-#         match_string = match.group()
-#         replacement_str = ""
-
-#         # Calculate the start and end positions in the modified string
-#         modified_start = start + offset
-#         modified_end = end + offset
-
-#         # Construct the modified string with the replacement applied
-#         string = string[:modified_start] + str(replacement_str) + string[modified_end:]
-#         # self.standard_ingredient = self.standard_ingredient[:modified_start] + str(combined_value) + self.standard_ingredient[modified_end:]
-
-#         # Update the offset for subsequent removals # NOTE: this is always 0 because we're removing the match
-#         offset += len(str(replacement_str)) - (end - start)
-#         # print(f"""
-#         # Match string: {match_string}
-#         # -> Match: {match_string} at positions {start}-{end}
-#         # --> Modified start/end match positions: {modified_start}-{modified_end}
-#         # ---> Modified string: {string}""")
-
-#     return string
-
 
 # def _extract_foods2(ingredient: str) -> str:
 #     """Does a best effort attempt to extract foods from the ingredient by 
@@ -517,33 +479,7 @@ def test_x_separator_3():
 #     """
 #     return " ".join([i.strip() for i in string.split()])
 
-# def best_effort_food_match(ingredient_object):
-
-#     unit = ingredient_object["unit"]
-#     quantity = ingredient_object["quantity"]
-#     secondary_unit = ingredient_object["secondary_unit"]
-#     secondary_quantity = ingredient_object["secondary_quantity"]
-#     stashed_quantity = ingredient_object["stashed_quantity"]
-#     stashed_unit = ingredient_object["stashed_unit"]
-#     parenthesis_content = ingredient_object["parenthesis_content"]
-
-#     standard_ingredient = ingredient_object["standardized_ingredient"]
-
-#     strings_to_remove = [unit, quantity, secondary_unit, secondary_quantity, stashed_quantity, stashed_unit, parenthesis_content]
-#     strings_to_remove = [i for sublist in strings_to_remove for i in (sublist if isinstance(sublist, (list, tuple)) else [sublist])]
-
-#     # try and reduce the ingredient down to  a single food word if possible
-#     reduced_ingredient = reduce_ingredient(standard_ingredient, strings_to_remove)
-
-#     split_reduced_ingredient = reduced_ingredient.split() # split the reduced ingredient into words
-
-#     is_single_food_word = len(split_reduced_ingredient) == 1
-
-#     if is_single_food_word:
-#         return normalize_whitespace(reduce_ingredient)
-    
-
-### KEEP recursive function to remove certain strings from an ingredient and try to get it down to just food words #####
+### TODO: KEEP recursive function to remove certain strings from an ingredient and try to get it down to just food words #####
 # def reduce_ingredient(ingredient, strings_to_remove):
 
 #     ingredient = " ".join([i.strip() for i in ingredient.split()])
