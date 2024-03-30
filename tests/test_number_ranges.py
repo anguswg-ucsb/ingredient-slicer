@@ -147,7 +147,7 @@ def test_multiple_multinumber_ranges_1():
     parse = IngredientSlicer("3 - 12 1/2 cups of sugar (optional)")
     # parse.parse()
     parsed = parse.to_json()
-    assert parsed["standardized_ingredient"] == '7.75 cups of sugar (optional)'
+    assert parsed["standardized_ingredient"] == '7.75 cups of sugar'
     assert parsed['quantity'] == "7.75"
     assert parsed['unit'] == 'cups'
     assert parsed['is_required'] == False
@@ -157,7 +157,7 @@ def test_multiple_multinumber_ranges_2():
     # parse.parse()
     parsed = parse.to_json()
     # 15.5/2
-    assert parsed["standardized_ingredient"] == '7.75 cups of sugar (optional)'
+    assert parsed["standardized_ingredient"] == '7.75 cups of sugar'
     assert parsed['quantity'] == "7.75"
     assert parsed['unit'] == 'cups'
     assert parsed['standardized_unit'] == 'cup'
@@ -175,7 +175,7 @@ def test_multiple_multinumber_ranges_3():
     parse = IngredientSlicer("2 1/2 - 4  cups of sugar (optional)")
     # parse.parse()
     parsed = parse.to_json()
-    assert parsed["standardized_ingredient"] == '3.25 cups of sugar (optional)'
+    assert parsed["standardized_ingredient"] == '3.25 cups of sugar'
     assert parsed['quantity'] == "3.25"
     assert parsed['unit'] == 'cups'
     assert parsed['standardized_unit'] == 'cup'
@@ -234,7 +234,7 @@ def test_average_from_two_whole_numbers_with_quantity_multiplier_1():
     # parse.parse()
     parsed = parse.to_json()
 
-    assert parsed["standardized_ingredient"] == '17.5 oz large bananas, toasted (5)'
+    assert parsed["standardized_ingredient"] == '17.5 oz large bananas, toasted'
     assert parsed['quantity'] == "87.5"
     assert parsed['unit'] == 'oz'
     assert parsed['standardized_unit'] == 'ounce'
@@ -253,7 +253,7 @@ def test_average_from_two_whole_numbers_with_quantity_multiplier_2():
     # parse.parse()
     parsed = parse.to_json()
     
-    assert parsed["standardized_ingredient"] == '1.5 cherries, no pits, (2 ounces each)'
+    assert parsed["standardized_ingredient"] == '1.5 cherries, no pits,'
     assert parsed['quantity'] == "3"
     assert parsed['unit'] == "ounces"
     assert parsed['standardized_unit'] == "ounce"

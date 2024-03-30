@@ -176,6 +176,10 @@ QUANTITY_UNIT_ONLY_GROUPS = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*[-
 # (i.e. "about 1/2 cup", "about 3 tablespoons", "approximately 1/2 cup", "approximately 3 tablespoons")
 EQUIV_QUANTITY_UNIT_GROUPS = re.compile(r'\b(' + EQUIVALENT_ALT + r')\b\s*.*?\s*\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*.*?\s*\b(' + ANY_UNIT_ALT + r')\b')
 
+QUANTITY_WITH_DIMENSION_UNITS_MAP = {}
+for dimension_unit in _constants.DIMENSION_UNITS_SET:
+    QUANTITY_WITH_DIMENSION_UNITS_MAP[dimension_unit] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)[-\s]*' + dimension_unit + r'\b', re.IGNORECASE)
+
 # ----------------------------------------------------------------------------------------------------------------------
 # --------------------------- Generic number patterns and numbers w/ specific separators -----------------------------
 # Patterns for matching:
@@ -304,7 +308,8 @@ BETWEEN_QUANTITY_AND_QUANTITY = re.compile(r"\bbetween\b\s*\d+(?:/\d+|\.\d+)?\s*
 
 # Regex pattern for fraction parts, finds all the fraction parts in a string (e.g. 1/2, 1/4, 3/4). 
 # A number followed by 0+ white space characters followed by a number then a forward slash then another number.
-FRACTION_PATTERN = re.compile(r'\d*\s*/\s*\d+')
+# FRACTION_PATTERN = re.compile(r'\d*\s*/\s*\d+')
+FRACTION_PATTERN = re.compile(r'\d+\s*/\s*\d+') # TODO: Testing new fraction pattern, old pattern would match even if there was NOT a number in front of the forward slash...
 
 # Regex for capturing and splitting whitespace seperated numbers/decimals/fractions 
 # (e.g. 1 1/2 -> ["1", "1/2"], "2 2.3 -> ["2", "2.3"])
@@ -318,9 +323,37 @@ SPLIT_SPACED_NUMS   = re.compile(r'^(\d+(?:/\d+|\.\d+)?)\s+(\d+(?:/\d+|\.\d+)?)$
 # These regular expressions are used for removing the unit from the string if its repeated
 # -----------------------------------------------------------------------------
 
+# TODO: this needs an overhaul to be safer (maybe use QUANTITY_UNIT_DASH_QUANTITY_UNIT or QUANTITY_UNIT_X_QUANTITY_UNIT)
 # Regex pattern to match hypen seperated numbers/decimals/fractions followed by a unit
 REPEAT_UNIT_RANGES = re.compile(r'(\d+(?:\.\d+|/\d+)?)\s*([a-zA-Z]+)\s*-\s*(\d+(?:\.\d+|/\d+)?)\s*([a-zA-Z]+)')
 # REPEAT_UNIT_RANGES = re.compile(r'(\d+)\s*([a-zA-Z]+)\s*-\s*(\d+)\s*([a-zA-Z]+)')
+
+# TODO: Use the same logic in QUANTITY_UNIT_DASH_QUANTITY_UNIT in REPEAT_UNIT_RANGES
+# matches a number followed by a space and then a word and then an "-" followed by a another number or then a word
+QUANTITY_UNIT_DASH_QUANTITY_UNIT = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))(?:\s*(?:-))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))\b', re.IGNORECASE)
+# QUANTITY_UNIT_DASH_QUANTITY_UNIT = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:[a-zA-Z]+))(?:\s*(?:-))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:[a-zA-Z]+))\b', re.IGNORECASE)
+
+# matches a number followed by a space and then a word and then an "x" or an "X" followed by a another number or then a word
+QUANTITY_UNIT_X_QUANTITY_UNIT = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))(?:\s*(?:x|X))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))\b', re.IGNORECASE)
+# QUANTITY_UNIT_X_QUANTITY_UNIT = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:[a-zA-Z]+))(?:\s*(?:x|X))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:[a-zA-Z]+))\b', re.IGNORECASE)
+
+# matches a number followed by a space and then a word and then an "by followed by a another number or then a word
+QUANTITY_UNIT_BY_QUANTITY_UNIT = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))(?:\s*(?:by))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))\b', re.IGNORECASE)
+# QUANTITY_UNIT_BY_QUANTITY_UNIT = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:[a-zA-Z]+))(?:\s*(?:by))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*(?:[a-zA-Z]+))\b', re.IGNORECASE)
+
+# TODO: This is "QUANTITY_UNIT_X_QUANTITY_UNIT" combined with "QUANTITY_UNIT_BY_QUANTITY_UNIT", probably can just use this versions instead
+# Matches a number followed by a space and then a word and then an "x", "X", or "by" followed by a another number or then a word (i.e. "salmon steak, 1 inch by 2 inch")
+DIMENSION_RANGES = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))(?:\s*(?:x|X|by))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))\b', re.IGNORECASE)
+
+# matches a number followed by a space and then an "x", "X", or "by" followed by a another number or then a word 
+SINGLE_DIMENSION_UNIT_RANGES = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*(?:\s*(?:x|X|by))\s*((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))\s*((?:[a-zA-Z]+))\b', re.IGNORECASE)
+
+# number separated by 0+ whitespace and then an "x" or "X" and then another number
+NUMBER_X_NUMBER = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*(?:x|X))\s*(\d*\.\d+|\d+\s*/\s*\d+|\d+)\b', re.IGNORECASE)
+
+# number separated by 0+ whitespace and then "by" and then another number
+NUMBER_BY_NUMBER = re.compile(r'\b((?:\d*\.\d+|\d+\s*/\s*\d+|\d+))(?:\s*(?:by))\s*(\d*\.\d+|\d+\s*/\s*\d+|\d+)\b', re.IGNORECASE)
+
 
 # -----------------------------------------------------------------------------
 # --------------------------- Parenthesis patterns -----------------------------

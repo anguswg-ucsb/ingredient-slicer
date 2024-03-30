@@ -324,8 +324,9 @@ for key, pattern in WEIGHT_UNITS.items():
 DIMENSION_UNITS = {
     'centimeter': ('centimeter', 'centimeters', 'cm', 'cms'),
     'foot': ('foot', 'feet', 'ft', 'fts'),
-    'inch': ('inch', 'inches', 'in', 'ins'),
-    # 'inch': ('inch', 'inches', 'ins'), # TODO: Removing unit "in" for now, unit "in" needs to be dealt with separately somehow, "in" is used for both the unit "inch" and the standard usage of the word "in" (i.e. "I am in a house")
+    'inch': ('inch', 'inches'), # TODO: Removing unit "in" for now, unit "in" needs to be dealt with separately somehow, "in" is used for both the unit "inch" and the standard usage of the word "in" (i.e. "I am in a house")
+    # 'inch': ('inch', 'inches', 'in', 'ins'),
+    # 'inch': ('inch', 'inches', 'ins'), 
     'meter': ('meter', 'meters', 'm', 'ms'),
     'millimeter': ('millimeter', 'millimeters', 'mm', 'mms')
 }
@@ -645,8 +646,9 @@ STOP_WORDS = set((
     "certainly", "cf", "cg", "ch", "changes", "ci", "cit", "cj", "cl", "clearly",
     "c'mon", "cn", "co", "com", "come", "comes", "con", "concerning", "consequently", "consider", "considering", "contain", "containing", 
     "contains", "corresponding", "could", "couldn", "couldnt", "couldn't", "course", "cp", "cq", "cr", "cry", "cs", 
-    "c's", "ct", "cu", "currently", "cv", "cx", "cy", "cz", "d", "d2", "da", "date", "dc", "dd", "de", "definitely", 
-    "describe", "described", "despite", "detail", "df", "di", "did", "didn", "didn't", "different", "dj", "dk", "dl", 
+    "c's", "ct", "cu", "currently", "cv", "cx", "cy", "cz",
+    "d", "d2", "da", "date", "dc", "dd", "de", "definitely", 
+    "describe", "described", "despite", "detail", "df", "di", "dia", "diameter", "did", "didn", "didn't", "different", "dj", "dk", "dl", 
     "do", "does", "doesn", "doesn't", "doing", "don", "done", "don't", "down", "downwards", "dp", "dr", "ds", "dt", 
     "du", "due", "during", "dx", "dy", 
     "e", "e2", "e3", "ea", "each", "ec", "ed", "edu", "ee", "ef", "effect", "eg", "ei", "eight", "eighty", "either", 
@@ -678,7 +680,7 @@ STOP_WORDS = set((
     # "lb", 
     "lc", "le", "least", "les", "less", "lest", 
     "let", "lets", "let's", "lf", "like", "liked", "likely", "line", "little", "lj", "ll", "ln", "lo", "lol", "look", 
-    "looking", "looks", "los", "lr", "ls", "love", "loved", "loving", "lovingly",
+    "looking", "looks", "los", "lr", "ls", "long", "love", "loved", "loving", "lovingly",
     # "lt", # "ltd", 
     "m2", "ma", "made", "mainly", "make", "makes", "many", "may", "maybe", "me", "mean", "means", "meantime", 
     "meanwhile", "merely", "mg", "might", "mightn", "mightn't", 

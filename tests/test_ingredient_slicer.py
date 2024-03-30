@@ -149,7 +149,7 @@ def test_multiple_multinumber_4():
     parse = IngredientSlicer("3 12 cups of sugar (optional)")
     # parse.parse()
     parsed = parse.to_json()
-    assert parsed["standardized_ingredient"] == '36 cups of sugar (optional)'
+    assert parsed["standardized_ingredient"] == '36 cups of sugar'
     assert parsed['quantity'] == "36"
     assert parsed['unit'] == 'cups'
     assert parsed['is_required'] == False
