@@ -40,6 +40,26 @@ def test_whitespace_padded_fraction_2():
 def test_whitespace_padded_fraction_3():
     assert _utils._fraction_str_to_decimal("  3 / 4  ") == '0.75'
 
+def test_decimals_in_fraction():
+    assert  _utils._fraction_str_to_decimal("2.0/4.0") == '0.5'
+
+def test_fraction_in_numerator_only():
+    assert _utils._fraction_str_to_decimal("3.0/4") == '0.75'
+
+def test_fraction_in_denominator_only():
+    assert _utils._fraction_str_to_decimal("3/4.0") == '0.75'
+
+def test_fraction_with_trailing_period():
+    assert _utils._fraction_str_to_decimal("3/4.") == '0.75'
+
+def test_fraction_with_leading_period():
+    # assert _utils._fraction_str_to_decimal(".3/4") == '0' # NOTE: this should be 0.075 not 0
+    assert _utils._fraction_str_to_decimal(".3/4") == '0.075' # NOTE: this should be 0.075 not 0
+
+def test_fraction_with_leading_and_trailing_periods():
+    # assert _utils._fraction_str_to_decimal(".3/4.") == '0' # NOTE: this should be 0.075 not 0
+    assert _utils._fraction_str_to_decimal(".3/4.") == '0.075' # NOTE: this should be 0.075 not 0
+
 # Error cases
 def test_number_input_error():
     with pytest.raises(ValueError):
@@ -53,13 +73,9 @@ def test_boolean_input_error():
     with pytest.raises(ValueError):
         _utils._fraction_str_to_decimal(True)
 
-def test_invalid_characters_in_fraction():
+def test_invalid_characters_in_fraction_1():
     with pytest.raises(ValueError):
         _utils._fraction_str_to_decimal("43/aaaaa4")
-
-def test_invalid_characters_in_fraction():
-    with pytest.raises(ValueError):
-        _utils._fraction_str_to_decimal("2.0/4.0")
 
 def test_fraction_str_to_decimal_zero_denominator():
     with pytest.raises(ZeroDivisionError):

@@ -179,7 +179,7 @@ class IngredientSlicer:
 
                 number_word = split_match[0]
                 fraction_word = split_match[1]
-                
+
                 fraction_value, decimal = _constants.FRACTION_WORDS[fraction_word.lower()]
 
                 updated_value = str(float(number_word) * float(decimal))
@@ -359,65 +359,33 @@ class IngredientSlicer:
 
         # replace consecutive sequences of letters or digits with whitespace-separated sequences
         self.standardized_ingredient = re.sub(pattern, r'\1 \2\3 \4', self.standardized_ingredient)
+
+    # # TODO: !!!!! Deprecated, DELETE once _utils.py implementation is done and tested !!!!!!!
+    # def _convert_fractions_to_decimals(self) -> None:
+    #     """
+    #     Convert fractions in the parsed ingredient to their decimal equivalents.
+    #     """
+
+    #     # fraction_str = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
+    #     matches = _regex_patterns.FRACTION_PATTERN.findall(self.standardized_ingredient)
+    #     # matches = regex.FRACTION_PATTERN.findall(fraction_str)
+
+    #     # Replace fractions with their decimal equivalents
+    #     for match in matches:
+    #         # print(f"Match: {match}")
+
+    #         fraction_decimal = _utils._fraction_str_to_decimal(match)
+    #         # print(f"Fraction Decimal: {fraction_decimal}") if self.debug else None
+    #         self.standardized_ingredient = self.standardized_ingredient.replace(match, str(fraction_decimal))
     
-    # # TODO: Deprecated, DELETE
-    # def _fractions_to_decimals(self) -> None:
-    #     """
-    #     Replace fractions with their decimal equivalents in the parsed ingredient.
-    #     """
-    #     # print("Parsing fractions")
-    #     fractions = re.findall(IngredientSlicer.regex.FRACTION_PATTERN, self.standardized_ingredient)
-
-    #     split_frac = [i.replace(" ", "").split("/") for i in fractions]
-    #     split_frac = [(int(f[0]), int(f[1])) for f in split_frac]
-    #     fraction_decimal = [round(float(Fraction(f[0], f[1])), 3) for f in split_frac]
-
-    #     # replace fractions in original string with decimal equivalents
-    #     for i, f in enumerate(fractions):
-    #         self.standardized_ingredient = self.standardized_ingredient.replace(f, str(fraction_decimal[i]))
-    
-    # # TODO: Get rid of this (Deprecated, use the one in _utils.py)
-    # def _fraction_str_to_decimal(self, fraction_str: str) -> float:
-    #     """
-    #     Convert a string representation of a fraction to its decimal equivalent.
-    #     """
-    #     # Split the fraction string into its numerator and denominator
-    #     split_fraction = [i.strip() for i in fraction_str.split("/")]
-    #     # print(f"Split Fraction: {split_fraction}") if self.debug else None
-
-    #     # If the fraction is a whole number, return the number
-    #     if len(split_fraction) == 1:
-    #         # print(f"---> Only one part: {split_fraction[0]}")
-
-    #         converted_number = _utils._make_int_or_float_str(split_fraction[0])
-
-    #         # print(f"---> OLD Output: {round(float(split_fraction[0]), 3)}")
-    #         # print(f"---> NEW Output: {converted_number}")
-    #         return converted_number
-
-    #     numerator = int(split_fraction[0])
-    #     denominator = int(split_fraction[1])
-
-    #     # Convert the fraction to a decimal
-    #     # return round(float(Fraction(numerator, denominator)), 3)
-    #     return _utils._make_int_or_float_str(str(round(float(Fraction(numerator, denominator)), 3)))
-
+    # TODO: NEW implementation that uses the _utils.py function instead of the one in this class
     def _convert_fractions_to_decimals(self) -> None:
         """
         Convert fractions in the parsed ingredient to their decimal equivalents.
         """
-
-        # fraction_str = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
-        matches = _regex_patterns.FRACTION_PATTERN.findall(self.standardized_ingredient)
-        # matches = regex.FRACTION_PATTERN.findall(fraction_str)
-
-        # Replace fractions with their decimal equivalents
-        for match in matches:
-            # print(f"Match: {match}")
-
-            fraction_decimal = _utils._fraction_str_to_decimal(match)
-            # print(f"Fraction Decimal: {fraction_decimal}") if self.debug else None
-            self.standardized_ingredient = self.standardized_ingredient.replace(match, str(fraction_decimal))
+        self.standardized_ingredient = _utils._convert_fractions_to_decimals(self.standardized_ingredient)
+        
+        return
 
     def _force_ws(self):
         

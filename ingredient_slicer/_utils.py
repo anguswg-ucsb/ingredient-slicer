@@ -25,7 +25,18 @@ def _make_int_or_float_str(number_str: str) -> str:
         "0.25"
         """
 
+        # convert integer/float to string if it's not already a string
+        if isinstance(number_str, (int, float)):
+            number_str = str(number_str)
+
         number_str = number_str.replace(" ", "")
+
+        # # NOTE: remove negative sign if it exists and replace whitespace
+        # is_negative = False
+        # if number_str[0] == "-":
+        #     is_negative = True
+        #     number_str = number_str[1:]
+        #     number_str = number_str.replace(" ", "")
 
         period_count = 0
 
@@ -37,14 +48,19 @@ def _make_int_or_float_str(number_str: str) -> str:
             
         if period_count > 1:
             raise ValueError("Invalid number format. Only one period is allowed in a number.")
-
+        
         number = float(number_str.strip())  # Convert string to float
 
         if number == int(number):  # Check if float is equal to its integer value
+
+            # f"-{str(int(number))}" if is_negative else str(int(number))
+
             return str(int(number))  # Return integer value if it's a whole number
         else:
-            return str(number)  # Return float if it's a decimal
+            # f"-{str(number)}" if is_negative else str(number)
 
+            return str(number)  # Return float if it's a decimal
+        
 def _fraction_str_to_decimal(fraction_str: str) -> str:
         """
         Convert a string representation of a fraction to its decimal equivalent.
@@ -55,6 +71,12 @@ def _fraction_str_to_decimal(fraction_str: str) -> str:
         Returns:
             str: The decimal value of the fraction as a string. 
         """
+        # FRACTION_PATTERN2 = re.compile(r'\d+(?:\.\d+|/\d+)')
+
+        # fraction_str = "4/0.48"
+        # fraction_str = "4/0.48"
+        # FRACTION_PATTERN2.findall(fraction_str)
+        # 4/0.48
 
         if not isinstance(fraction_str, str):
             raise ValueError("Invalid input. Fraction string must be a string.")
@@ -75,13 +97,126 @@ def _fraction_str_to_decimal(fraction_str: str) -> str:
         
         # after returning cases of just a whole number or decimal number and returning that, 
         # we make sure all of our characters are valid 
-        has_only_valid_chars = all([i.isdigit() or i in {"-", "/", " "} for i in fraction_str])
+        has_only_valid_chars = all([i.isdigit() or i in {"-", "/", " ", "."} for i in fraction_str])
+        # has_only_valid_chars = all([i.isdigit() or i in {"-", "/", " "} for i in fraction_str])
+
+        if not has_only_valid_chars:
+            raise ValueError("Invalid input. Fraction string must contain only digits, hyphens, and a forward slash (possible invalid characters and/or periods?)")
+
+        # # numerator = int(split_fraction[0])
+        # # denominator = int(split_fraction[1])
+        # numerator = int(float(split_fraction[0])) # TODO: This is being tested out
+        # denominator = int(float(split_fraction[1]))
+        # is_negative = True if (numerator < 0 and denominator >= 0) or (numerator >= 0 and denominator < 0) else False
+
+        # Convert the fraction to a decimal
+        # return round(float(Fraction(numerator, denominator)), 3)
+
+        # decimal_value = round(float(Fraction(numerator, denominator)), 3)
+        
+        # converts the split up fraction list to a float
+        decimal_value = round(_split_fraction_to_float(split_fraction), 3)
+
+        is_negative   = True if decimal_value < 0 else False
+
+        if is_negative:
+            decimal_value = decimal_value * -1
+            # decimal_value = decimal_value.replace("-", "")
+        
+        decimal_str = f"-{_make_int_or_float_str(str(decimal_value))}" if is_negative else _make_int_or_float_str(str(decimal_value))
+
+        # return _make_int_or_float_str(str(round(float(Fraction(numerator, denominator)), 3)))
+        return decimal_str
+
+def _split_fraction_to_float(split_fraction: list) -> float:
+    """
+    Convert a split fraction to a float.
+    Args:
+        split_fraction (list): A list containing the numerator and denominator of a fraction.
+    Returns:
+        float: The float value of the fraction.
+    """
+
+    numerator_fraction =  Fraction(split_fraction[0])
+    denominator_fraction = Fraction(split_fraction[1])
+
+    return float(Fraction(numerator_fraction, denominator_fraction))
+
+# 0.01/10
+# split_fraction_to_float(['4', '0.48'])
+# split_fraction_to_float(["-2", 10])
+# split_fraction = ['10', '10']
+# split_fraction = ['4', '0.48']
+# split_fraction = ['0.5', '2']
+# split_fraction = ['0.4', '0.1']
+# split_fraction = ['0.4', '0.1']
+
+# numerator_fraction =  Fraction(split_fraction[0])
+# denominator_fraction = Fraction(split_fraction[1])
+# # Fraction(numerator_fraction, denominator_fraction)
+# _make_int_or_float_str(str(float(Fraction(numerator_fraction, denominator_fraction))))
+
+# def float_to_ratio(flt):
+#     if int(flt) == flt:        # to prevent 3.0 -> 30/10
+#         return int(flt), 1
+#     flt_str = str(flt)
+#     flt_split = flt_str.split('.')
+#     numerator = int(''.join(flt_split))
+#     denominator = 10 ** len(flt_split[1])
+#     return numerator, denominator
+
+# TODO: Delete/Deprecated, this is the old version of the _fraction_str_to_decimal function above
+def _fraction_str_to_decimal2(fraction_str: str) -> str:
+        """
+        Convert a string representation of a fraction to its decimal equivalent.
+        Args:
+            fraction_str (str): The string representation of the fraction. Must only contain digits, a forward slash, and possible whitespace. 
+                                    Numbers must be separated by a forward slash. If a whole number string or a decimal string is passed, it will be returned as a string, 
+                                    and converted to a whole number if values after the decimal point are only zeros (i.e. 1.0 -> 1, 2.0 -> 2, 3.00 -> 3).
+        Returns:
+            str: The decimal value of the fraction as a string. 
+        """
+        # FRACTION_PATTERN2 = re.compile(r'\d+(?:\.\d+|/\d+)')
+
+        # fraction_str = "4/0.48"
+        # fraction_str = "4/0.48."
+        # fraction_str = ".3/4"
+        # FRACTION_PATTERN2.findall(fraction_str)
+        # 4/0.48
+        
+        if not isinstance(fraction_str, str):
+            raise ValueError("Invalid input. Fraction string must be a string.")
+
+        # Split the fraction string into its numerator and denominator
+        split_fraction = [i.strip() for i in fraction_str.split("/")]
+        # print(f"Split Fraction: {split_fraction}") if self.debug else None
+
+        # If the fraction is a whole number, return the number
+        if len(split_fraction) == 1:
+            # print(f"---> Only one part: {split_fraction[0]}")
+
+            converted_number = _make_int_or_float_str(split_fraction[0])
+
+            # print(f"---> OLD Output: {round(float(split_fraction[0]), 3)}")
+            # print(f"---> NEW Output: {converted_number}")
+            return converted_number
+        
+        # remove trailing period if it exists
+        if split_fraction[1][-1] == ".":
+            split_fraction[1] = split_fraction[1][:-1]
+
+        # after returning cases of just a whole number or decimal number and returning that, 
+        # we make sure all of our characters are valid 
+        has_only_valid_chars = all([i.isdigit() or i in {"-", "/", " ", "."} for i in fraction_str])
+        # has_only_valid_chars = all([i.isdigit() or i in {"-", "/", " "} for i in fraction_str])
 
         if not has_only_valid_chars:
             raise ValueError("Invalid input. Fraction string must contain only digits, hyphens, and a forward slash (possible invalid characters and/or periods?)")
 
         numerator = int(split_fraction[0])
         denominator = int(split_fraction[1])
+        # numerator = int(float(split_fraction[0])) # TODO: This is being tested out
+        # denominator = int(float(split_fraction[1]))
 
         is_negative = True if (numerator < 0 and denominator >= 0) or (numerator >= 0 and denominator < 0) else False
 
@@ -98,19 +233,63 @@ def _fraction_str_to_decimal(fraction_str: str) -> str:
         # return _make_int_or_float_str(str(round(float(Fraction(numerator, denominator)), 3)))
         return decimal_str
 
+# -----------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------
+# _regex_patterns.FRACTION_TYPE_MAP.keys()
 
-# ingredient = "2 oz (56g / 1/8 package) dry"
+# TODO: Replace the _convert_fractions_to_decimals function defined in the IngredientSlicer class with this version
+# NOTE: This is the NEW implementation of _convert_fractions_to_decimals and specifically deals with each fraction type
+# NOTE: in a specific order and with a specific regex pattern to ensure the most accurate conversion
+def _convert_fractions_to_decimals(ingredient: str) -> list:
+        """
+        Find all fractions in the parsed ingredient string.
+        Args:
+            ingredient (str): The ingredient string to parse.
+        Returns:
+            list: A list of all fractions found in the ingredient string.
+        """
 
-# def _convert_fractions_to_decimals(ingredient) -> None:
+        if not isinstance(ingredient, str):
+            raise ValueError("Invalid input. Ingredient must be a string.")
+
+        # use the predefined order of FRACTION_TYPE_ORDER to iterate through the patterns in 
+        # an order that will allow for the most accurate conversion (deals with decimal fractions first if they exist)
+        for pattern_key in _regex_patterns.FRACTION_TYPE_ORDER:
+        # for key, pattern in _regex_patterns.FRACTION_TYPE_MAP.items():
+        # # for key, pattern in list(_regex_patterns.FRACTION_TYPE_MAP.items())[::-1]:
+            pattern = _regex_patterns.FRACTION_TYPE_MAP[pattern_key]
+
+            # match_fraction = pattern.findall(ingredient)
+            match_fraction_iter = pattern.finditer(ingredient)
+
+            offset = 0
+
+            for match in match_fraction_iter:
+                match_string    = match.group()
+                start, end = match.start(), match.end()
+                modified_start = start + offset
+                modified_end = end + offset
+
+                fraction_decimal = _fraction_str_to_decimal(match_string)
+
+                ingredient = ingredient[:modified_start] + str(fraction_decimal) + ingredient[modified_end:]
+                offset += len(str(fraction_decimal)) - (end - start)
+
+        # # NOTE: trying the second loop implementation below will show why the order matters 
+        # for key, pattern in _regex_patterns.FRACTION_TYPE_MAP.items():
+        # # for key, pattern in list(_regex_patterns.FRACTION_TYPE_MAP.items())[::-1]: # NOTE: SHOWS WHY ORDER MATTERS
+
+        return ingredient
+
+# # NOTE: Old implementation of _convert_fractions_to_decimals 
+# # NOTE: (this is roughly what was used in the IngredientSlicer class, relies mainly on correct matching from the FRACTION_PATTERN)
+# def _convert_fractions_to_decimals2(ingredient: str) -> str:
 #     """
 #     Convert fractions in the parsed ingredient to their decimal equivalents.
 #     """
-#     ingredient = "large (7-1/4inch to 8-/1/2inch long)"
-#     FRACTION_PATTERN = re.compile(r'\d+\s*/\s*\d+')
-#     FRAC_PAT.findall(ingredient)
+
 #     # fraction_str = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
 #     matches = _regex_patterns.FRACTION_PATTERN.findall(ingredient)
-#     matches = FRAC_PAT.findall(ingredient)
 #     # matches = regex.FRACTION_PATTERN.findall(fraction_str)
 
 #     # Replace fractions with their decimal equivalents
@@ -121,16 +300,24 @@ def _fraction_str_to_decimal(fraction_str: str) -> str:
 #         # print(f"Fraction Decimal: {fraction_decimal}") if self.debug else None
 #         ingredient = ingredient.replace(match, str(fraction_decimal))
 
-# ingredient = "large (7-1/4inch to 8-/1/2inch long)"
+#     return ingredient
 
-# regex_patterns = _regex_patterns.IngredientTools()
+# TODO: USE these as a basis for tests
+# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
+# _convert_fractions_to_decimals(ingredient)
+# _convert_fractions_to_decimals2(ingredient)
 
-# ingredient = "1-2 apples and 1- 45 orange slices (2)"
-# pattern = regex_patterns.QUANTITY_DASH_QUANTITY
-# replacement_function=None
+# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon, 2.0/4"
+# _convert_fractions_to_decimals(ingredient)
+# _convert_fractions_to_decimals2(ingredient)
 
+# 2/4
 
-# BETWEEN_QUANTITY_AND_QUANTITY 
+# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
+# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon, 2.0/4"
+# fraction_str = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
+# matches = _regex_patterns.FRACTION_PATTERN.findall(self.standardized_ingredient)
+
 # # _replace_and_with_hyphen
 # def _update_ranges(ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
 #         """Update the ranges in the ingredient string with the updated ranges

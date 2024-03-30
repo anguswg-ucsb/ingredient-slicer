@@ -199,6 +199,7 @@ def test_fraction_as_quantity_2():
 # -------------------------------------------------------------------------------
 def test_single_unicode_fractions_1():
     parse = IngredientSlicer("½cup of sugar")
+    # IngredientSlicer("½cup of sugar", debug=True)
     # parse.parse()
     parsed = parse.to_json()
 

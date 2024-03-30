@@ -309,12 +309,71 @@ BETWEEN_QUANTITY_AND_QUANTITY = re.compile(r"\bbetween\b\s*\d+(?:/\d+|\.\d+)?\s*
 # Regex pattern for fraction parts, finds all the fraction parts in a string (e.g. 1/2, 1/4, 3/4). 
 # A number followed by 0+ white space characters followed by a number then a forward slash then another number.
 # FRACTION_PATTERN = re.compile(r'\d*\s*/\s*\d+')
-FRACTION_PATTERN = re.compile(r'\d+\s*/\s*\d+') # TODO: Testing new fraction pattern, old pattern would match even if there was NOT a number in front of the forward slash...
+
+# NOTE: THIS is the working one
+FRACTION_PATTERN = re.compile(r'\d+\s*/\s*\d+') # TODO: Current good to go basic fraction matter, below are some alternatives, not sure how safe they are though....
+# FRACTION_PATTERN = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)?\s*/\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)?', re.IGNORECASE) # TODO: runner up, not sure if its completly safe though....
+# FRACTION_PATTERN = re.compile(r'\b(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*/\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\b', re.IGNORECASE) # TODO: Version 3 test
 
 # Regex for capturing and splitting whitespace seperated numbers/decimals/fractions 
 # (e.g. 1 1/2 -> ["1", "1/2"], "2 2.3 -> ["2", "2.3"])
 SPLIT_SPACED_NUMS   = re.compile(r'^(\d+(?:/\d+|\.\d+)?)\s+(\d+(?:/\d+|\.\d+)?)$')
 # NUMS_SPLIT_BY_SPACES = re.compile(r'^(\d+(?:/\d+|\.\d+)?)\s+(\d+(?:/\d+|\.\d+)?)$')
+
+
+# the 9 types of fractions are:
+# - Whole number / Whole number
+# - Whole number / Decimal
+# - Whole number / Fraction
+# - Decimal / Decimal
+# - Decimal / Whole number
+# - Decimal / Fraction
+# - Fraction / Fraction
+# - Fraction / Decimal
+# - Fraction / Whole number
+FRACTION_TYPE_MAP = {
+    # Put the decimal based patterns first (order matters)
+    "DECIMAL_SLASH_DECIMAL": re.compile(r"\d+\.\d+\s*/\s*\d+\.\d+"),
+    "DECIMAL_SLASH_NUMBER": re.compile(r"\d+\.\d+\s*/\s*\d+"),
+    "DECIMAL_SLASH_FRACTION": re.compile(r"\d+\.\d+\s*/\s*\d+/\d+"),
+    "FRACTION_SLASH_DECIMAL": re.compile(r"\d+/\d+\s*/\s*\d+\.\d+"),
+    "NUMBER_SLASH_DECIMAL": re.compile(r"\d+\s*/\s*\d+\.\d+"),
+
+    # the rest of the patterns without decimals
+    "NUMBER_SLASH_NUMBER": re.compile(r"\d+\s*/\s*\d+"),
+    "NUMBER_SLASH_FRACTION": re.compile(r"\d+\s*/\s*\d+/\d+"),
+    "FRACTION_SLASH_FRACTION": re.compile(r"\d+/\d+\s*/\s*\d+/\d+"),
+    "FRACTION_SLASH_NUMBER": re.compile(r"\d+/\d+\s*/\s*\d+")
+}
+
+# Any fractions with decimals, need to be handled first, hence the order definition here, if you want to find and 
+# convert the fraction patterns in the FRACTION_TYPE_MAP, this is the recommended order to do so
+FRACTION_TYPE_ORDER = ("DECIMAL_SLASH_DECIMAL", "DECIMAL_SLASH_NUMBER", "DECIMAL_SLASH_FRACTION", 
+                           "FRACTION_SLASH_DECIMAL", "NUMBER_SLASH_DECIMAL", 
+                           "NUMBER_SLASH_NUMBER", "NUMBER_SLASH_FRACTION", "FRACTION_SLASH_FRACTION", 
+                           "FRACTION_SLASH_NUMBER")
+# FRACTION_TYPE_MAP = {
+#     # Starts with a decimal:
+#     "DECIMAL_SLASH_DECIMAL": re.compile(r"\d+\.\d+\s*/\s*\d+\.\d+"),
+#     "DECIMAL_SLASH_NUMBER": re.compile(r"\d+\.\d+\s*/\s*\d+"),
+#     "DECIMAL_SLASH_FRACTION": re.compile(r"\d+\.\d+\s*/\s*\d+/\d+"),
+
+#     # Starts with a whole number:
+#     "NUMBER_SLASH_DECIMAL": re.compile(r"\d+\s*/\s*\d+\.\d+"),
+#     "NUMBER_SLASH_NUMBER": re.compile(r"\d+\s*/\s*\d+"),
+#     "NUMBER_SLASH_FRACTION": re.compile(r"\d+\s*/\s*\d+/\d+"),
+
+#     # Starts with a fraction:
+#     "FRACTION_SLASH_FRACTION": re.compile(r"\d+/\d+\s*/\s*\d+/\d+"),
+#     "FRACTION_SLASH_DECIMAL": re.compile(r"\d+/\d+\s*/\s*\d+\.\d+"),
+#     "FRACTION_SLASH_NUMBER": re.compile(r"\d+/\d+\s*/\s*\d+")
+# }
+
+# FRACTION_PATTERN = re.compile(r'\d+\s*/\s*\d+') # TODO: Testing new fraction pattern, old pattern would match even if there was NOT a number in front of the forward slash...
+# FRACTION_PATTERN2 = re.compile(r'\b(\d*\.\d+|\d+)\s*/\s*(\d*\.\d+|\d+)\b')
+# NUMBER_SLASH_NUMBER = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)?\s*/\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)?', re.IGNORECASE)
+# NUMBER_SLASH_NUMBER = re.compile(r"\d+(?:/\d+|\.\d+)?\s*/\s*\d+(?:/\d+|\.\d+)?", re.IGNORECASE) # NOTE: NEW version (SAFE)
+
 
 # -----------------------------------------------------------------------------
 # --------------------------- Repeated strings PATTERNS -----------------------
