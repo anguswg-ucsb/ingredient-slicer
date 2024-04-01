@@ -3,6 +3,7 @@ from fractions import Fraction
 import re
 
 from ingredient_slicer import _constants, _regex_patterns
+from typing import Union
 
 # -----------------------------------------------------------------------------------------------
 # ---- Utility functions for handling numbers, decimals, and fractions in strings ----
@@ -1374,7 +1375,62 @@ def _remove_repeat_units_in_ranges(ingredient) -> str:
 # QUANTITY_UNIT_X_QUANTITY_UNIT
 # QUANTITY_UNIT_BY_QUANTITY_UNIT
 
+def _convert_weights_to_grams(quantity: Union[str, int, float], unit:str) -> str:
+    """
+    Get the weight of a given quantity of units in grams
+    Examples:
+    "2 cups of flour" -> "2 cups of flour (240 grams)"
+    "1 cup of sugar" -> "1 cup of sugar (200 grams)"
+    """
+    # quantity = slicer.quantity
+    # unit = slicer.unit
 
+    if not isinstance(quantity, (str, int, float)):
+        raise ValueError("Quantity must be a string, integer, or float")
+    
+    if not isinstance(unit, str):
+        raise ValueError("Unit must be a string")
+    
+    if isinstance(quantity, str):
+        quantity = float(quantity)
+
+
+    if unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT:
+        
+        standard_unit     = _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT[unit]
+        conversion_factor = _constants.GRAM_CONVERSION_FACTORS[standard_unit]
+
+        gram_weight = quantity * conversion_factor
+
+        return gram_weight
+
+def _convert_volumes_to_milliliters(quantity: Union[str, int, float], unit:str) -> str:
+    """
+    Get the volume of a given quantity of units in milliliters
+    Examples:
+    "2 cups of water" -> "2 cups of water (480 milliliters)"
+    "1 cup of milk" -> "1 cup of milk (240 milliliters)"
+    """
+    # quantity = "0.5"
+    # unit = "cups"
+
+    if not isinstance(quantity, (str, int, float)):
+        raise ValueError("Quantity must be a string, integer, or float")
+    
+    if not isinstance(unit, str):
+        raise ValueError("Unit must be a string")
+    
+    if isinstance(quantity, str):
+        quantity = float(quantity)
+
+    if unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT:
+        
+        standard_unit     = _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT[unit]
+        conversion_factor = _constants.MILLILITER_CONVERSION_FACTORS[standard_unit]
+
+        milliliter_volume = quantity * conversion_factor
+
+        return milliliter_volume
 
 
 # def _split_dimension_unit_x_ranges(ingredient: str) -> tuple[str]:
