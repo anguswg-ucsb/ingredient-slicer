@@ -21,14 +21,14 @@ def test_standard_formatted_ingredients():
     assert parsed['is_required'] == True
 
     parse2 = IngredientSlicer("1/2 cup of sugar")
-    parse2.parse()
+    # parse2.parse()
     parsed = parse2.to_json()
     assert parsed['quantity'] == "0.5"
     assert parsed['unit'] == 'cup'
     assert parsed['is_required'] == True
 
     parse3 = IngredientSlicer("1 1/2 cups of sugar")
-    parse3.parse()
+    # parse3.parse()
     parsed = parse3.to_json()
     assert parsed['quantity'] == "1.5"
     assert parsed['unit'] == 'cups'

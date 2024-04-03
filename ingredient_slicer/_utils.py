@@ -1221,16 +1221,6 @@ def _split_dimension_ranges(ingredient: str) -> list[str, list[str]]:
         unit1_is_dimension = unit1 in _constants.DIMENSION_UNITS_SET
         unit2_is_dimension = unit2 in _constants.DIMENSION_UNITS_SET
 
-        # print(f"Original String: {original_string}")
-        # print("First Quantity/Unit Pair")
-        # print(f"- Quantity 1: {quantity1}")
-        # print(f"- Unit 1: {unit1}")
-        # print(f" >> '{unit1}' is dimension? {unit1_is_dimension}")
-        # print("Second Quantity/Unit Pair")
-        # print(f"- Quantity 2: {quantity2}")
-        # print(f"- Unit 2: {unit2}")
-        # print(f" >> '{unit2}' is dimension? {unit2_is_dimension}")
-
         if unit1_is_dimension and unit2_is_dimension:
             # print(f"Both units are dimensions")
             # ingredient = _find_and_remove(ingredient, pattern)
@@ -1270,14 +1260,6 @@ def _split_single_unit_dimension_ranges(ingredient: str) -> list[str]:
         # unit1_is_dimension = unit1 in _constants.DIMENSION_UNITS_SET
         unit2_is_dimension = unit2 in _constants.DIMENSION_UNITS_SET
 
-        # print(f"Original String: {original_string}")
-        # print("First Quantity Pair")
-        # print(f"- Quantity 1: {quantity1}")
-        # print("Second Quantity/Unit Pair")
-        # print(f"- Quantity 2: {quantity2}")
-        # print(f"- Unit 2: {unit2}")
-        # print(f" >> '{unit2}' is dimension? {unit2_is_dimension}")
-
         if unit2_is_dimension:
             # print(f"---> Second unit is dimension!!!")
             # ingredient = _find_and_remove(ingredient, pattern)
@@ -1304,14 +1286,6 @@ def _separate_dimensions(ingredient: str) -> str:
     ingredient = _remove_extra_whitespaces(ingredient)
 
     return [ingredient, dimensions]
-
-# ingredient = "2 steaks, 3 inches x 4 inches thick"
-# ingredient = "2 steaks, 3 inches x 4 inches thick"
-# ingredient = "2 steaks, 3 cm x 4 inches thick"
-# ingredient = "2 steaks, 3 cm x 4 inches thick"
-# ingredient = "2 steaks, (3 cm x 4 inches) thick"
-# ingredient = "2 steaks, (3 cm by 4 inches) thick"
-# ingredient = "2 steaks, (4 oz, but 3 cm x 4 inches thick), or cut 1 inch slices, (1 x 2 inch)"
 
 def _remove_x_separators(ingredient: str) -> str:
     """
@@ -1403,6 +1377,9 @@ def _convert_weights_to_grams(quantity: Union[str, int, float], unit:str) -> str
         gram_weight = quantity * conversion_factor
 
         return gram_weight
+    
+    return None
+
 
 def _convert_volumes_to_milliliters(quantity: Union[str, int, float], unit:str) -> str:
     """
@@ -1431,7 +1408,228 @@ def _convert_volumes_to_milliliters(quantity: Union[str, int, float], unit:str) 
         milliliter_volume = quantity * conversion_factor
 
         return milliliter_volume
+    
+    return None
+def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: str, method:str = "levenshtein") -> dict:
 
+    """
+    Convert a volume measurement to a weight measurement in grams.
+    Args:
+        food (str): The food item to convert.
+        quantity (Union[str, int, float]): The quantity of the food item.
+        unit (str): The unit of measurement for the quantity.
+        method (str): The method to use for fuzzy string matching. Options are "levenshtein", "jaccard", or "dice". Defaults to "levenshtein".
+    Returns:
+        dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
+    """
+
+    # ############################################################
+    # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
+    # ingredient = "1 1/2 cups of chick nuggets, grounded"
+    # ingredient = "1 1/2 cups of White whole wheat flour, grounded"
+
+    # slicer = IngredientSlicer(ingredient)
+    # food = slicer.food
+    # # food = "112"
+    # unit = slicer.standardized_unit if slicer.standardized_unit else slicer.unit
+    # quantity = slicer.quantity
+    # ############################################################
+    # method = "jaccard"
+    method = method.lower()
+
+    if method not in ["levenshtein", "jaccard", "dice"]:
+        raise ValueError("Invalid method. Options are 'levenshtein', 'jaccard', or 'dice'.")
+
+    # method = "jaccard" 
+    fuzzy_matchers = {
+        "levenshtein" : _levenshtein_similarity,
+        "jaccard" : _jaccard_similarity,
+        "dice" : _score_sentence_similarity
+        }
+    
+    fuzzy_matcher = fuzzy_matchers[method]
+
+    milliliter_quantity = _convert_volumes_to_milliliters(quantity, unit)
+
+    no_match_string = "no match found in FOOD_CATALOG"
+
+    print(f"Looking for categories and densities for:\n > '{food}'")
+
+    food_groups = _constants.FOOD_CATALOG.get(food, no_match_string)
+
+    # food_groups = _constants.FOOD_CATALOG.get(food, None)
+
+    print(f"Categories for '{food}':\n--> '{food_groups}'")
+
+    if food_groups != no_match_string:
+    # if food_groups:
+        print(f"Found exact category match:\n '{food}' >>> '{food_groups}'")
+        primary_category, secondary_category = food_groups
+
+        primary_density_map    = _constants.FOOD_DENSITY_BY_GROUP.get(primary_category, None)
+        secondary_density_map  = _constants.FOOD_DENSITY_BY_GROUP.get(secondary_category, None)
+
+        primary_density = primary_density_map["density_g_per_ml"] if primary_density_map else None
+        secondary_density = secondary_density_map["density_g_per_ml"] if secondary_density_map else None
+
+        # if primary_density and secondary_density:
+            # print(" > Both densities are available")
+        # primary_density_map["density_g_per_ml"]
+        # print(f"Primary density: {primary_density}")
+        # print(f"Secondary density: {secondary_density}")
+
+        gram_weight = milliliter_quantity * primary_density
+
+        return gram_weight
+
+    similarity_scores = {}
+    top_scoring_foods = {}
+    # closest_categories = {}
+
+    for category in _constants.FOOD_DENSITY_BY_GROUP:
+        food_set = _constants.FOODS_BY_CATEGORY[category]
+        # print(f"Category: {category}\nFood set: {food_set}")
+
+        scores =  {i: round(fuzzy_matcher(food, i), 2) for i in food_set}
+        # scores =  {i: round(_utils.score_sentence_similarity(food, i), 2) for i in food_set}
+        # scores =  {i: round(_utils._levenshtein_similarity(food, i), 2) for i in food_set}
+        # scores =  {i: round(_utils._jaccard_similarity(food, i), 2) for i in food_set}
+
+        top_score_key = max(scores, key=scores.get)
+        top_score_value = scores[top_score_key] if top_score_key else 0
+
+        max_similarity = max([round(fuzzy_matcher(food, i), 2) for i in food_set])
+        # max_similarity = max([round(_utils.score_sentence_similarity(food, i), 2) for i in food_set])
+        # max_similarity = max([round(_utils._levenshtein_similarity(food, i), 2) for i in food_set])
+        # max_similarity = max([round(_utils._jaccard_similarity(food, i), 2) for i in food_set])
+
+        similarity_scores[category] = max_similarity
+
+        # NOTE: keep track of the food with the highest similarity score for each category
+        top_scoring_foods[category] = [top_score_key, top_score_value]
+        # print(f" - Top score key/value:\n ----> '{top_score_key} ({scores[top_score_key]})'\n")
+
+    max_score_key = max(similarity_scores, key=similarity_scores.get)
+
+    # print(f"Key with max similarity score:\n > '{max_score_key}'")
+
+    density = 1
+    max_density = 1
+    min_density = 1
+
+    try: 
+        # print(f"Successful best effort category match: \n '{food}' >>> '{max_score_key}'")
+
+        density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["density_g_per_ml"]
+        max_density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["max_density_g_per_ml"]
+        min_density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["min_density_g_per_ml"]
+        # print(f"Using density value of:\n > '{density} g/ml'")
+    except:
+        print("No good match was found")
+
+    # # NOTE: old way of catching if no good match was made or the matched category does not exist / density is <= 0
+    # if (
+    #     (max_score_key not in _constants.FOOD_DENSITY_BY_GROUP) or \
+    #     (max_score_key in _constants.FOOD_DENSITY_BY_GROUP and _constants.FOOD_DENSITY_BY_GROUP[max_score_key]['density_g_per_ml'] <= 0)
+    #     ):
+    #     print("No good match was found")
+    #     density = 1
+    # else:
+    #     density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["density_g_per_ml"]
+    #     print(f"Best effort category match for '{food}'\n > '{max_score_key}'\nUsing density value of:\n > '{density} g/ml'")
+
+    gram_weight = density * milliliter_quantity
+    max_gram_weight = max_density * milliliter_quantity
+    min_gram_weight = min_density * milliliter_quantity
+
+    return {
+        "gram_weight" : gram_weight, 
+        "max_gram_weight" : max_gram_weight, 
+        "min_gram_weight" : min_gram_weight
+        }
+# # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
+# ingredient = "1 1/2 cups of chick nuggets, grounded"
+
+# # ingredient = "1 1/2 cups of chicken nuggets, grounded"
+# # ingredient = "1 1/2 cups of White whole wheat flour, grounded"
+
+# slicer = IngredientSlicer(ingredient)
+# food = slicer.food
+# # food = "112"
+# unit = slicer.standardized_unit if slicer.standardized_unit else slicer.unit
+# quantity = slicer.quantity
+
+# _convert_volume_to_grams(food, quantity, unit)
+def _levenshtein_dist(str1, str2):
+    # set up a matrix with the dimensions of the two strings
+    matrix = [[0] * (len(str2) + 1) for _ in range(len(str1) + 1)]
+    
+    # initialize the matrix with the values of the first row and column
+    for i in range(len(str1) + 1):
+        matrix[i][0] = i
+    for j in range(len(str2) + 1):
+        matrix[0][j] = j
+
+    for i in range(1, len(str1) + 1):
+        for j in range(1, len(str2) + 1):
+            substitute = 0 if str1[i - 1] == str2[j - 1] else 1
+            matrix[i][j] = min(
+                matrix[i - 1][j] + 1,              # delete
+                matrix[i][j - 1] + 1,               # isert
+                matrix[i - 1][j - 1] + substitute  # substitute
+            )
+
+    # levenstein distance == bottom right corner of matrix
+    return matrix[len(str1)][len(str2)]
+
+def _levenshtein_similarity(str1, str2):
+    distance = _levenshtein_dist(str1, str2)
+    max_len = max(len(str1), len(str2))
+    return 1 - (distance / max_len)
+
+def _jaccard_similarity(str1, str2):
+    set1 = set(str1)
+    set2 = set(str2)
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    return intersection / union
+
+def _score_sentence_similarity(first: str, second: str) -> float:
+    """Calculate Dice coefficient for two strings.
+
+    The dice coefficient is a measure of similarity determined by calculating
+    the proportion of shared bigrams.
+
+    Parameters
+    ----------
+    first : str
+        First string
+    second : str
+        Second string
+
+    Returns
+    -------
+    float
+        Similarity score between 0 and 1.
+        0 means the two strings do not share any bigrams.
+        1 means the two strings are identical.
+    """
+
+    if first == second:
+        # Indentical sentences have maximum score of 1
+        return 1
+
+    if len(first) < 2 or len(second) < 2:
+        # If either sentence has 0 or 1 character we can't generate bigrams,
+        # so the score is 0
+        return 0
+
+    first_bigrams = {first[i : i + 2] for i in range(len(first) - 1)}
+    second_bigrams = {second[i : i + 2] for i in range(len(second) - 1)}
+
+    intersection = first_bigrams & second_bigrams
+
+    return 2.0 * len(intersection) / (len(first_bigrams) + len(second_bigrams))
 
 # def _split_dimension_unit_x_ranges(ingredient: str) -> tuple[str]:
 #     """Split an ingredient string by any quantity dimension unit separated by an 'x' character.

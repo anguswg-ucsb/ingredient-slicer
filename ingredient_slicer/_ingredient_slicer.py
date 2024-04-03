@@ -67,17 +67,11 @@ class IngredientSlicer:
         self.debug = debug
         # self.extract_version = extract_version
 
-        self.parse()
+        self._parse()
 
         self.parsed_ingredient = self.to_json()
 
         # self.found_units         = None    # where units will get stored after being parsed (temporarily)
-        # self.parenthesis_obj = {
-        #     "raw_ingredient": "",
-        #     "standard_ingredient": "",
-        #     "reduced_ingredient": self.reduced_ingredient,
-        #     "parenthesis_content": ""
-        #     }
 
     def _standardized_ingredient(self):
         
@@ -359,24 +353,6 @@ class IngredientSlicer:
 
         # replace consecutive sequences of letters or digits with whitespace-separated sequences
         self.standardized_ingredient = re.sub(pattern, r'\1 \2\3 \4', self.standardized_ingredient)
-
-    # # TODO: !!!!! Deprecated, DELETE once _utils.py implementation is done and tested !!!!!!!
-    # def _convert_fractions_to_decimals(self) -> None:
-    #     """
-    #     Convert fractions in the parsed ingredient to their decimal equivalents.
-    #     """
-
-    #     # fraction_str = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
-    #     matches = _regex_patterns.FRACTION_PATTERN.findall(self.standardized_ingredient)
-    #     # matches = regex.FRACTION_PATTERN.findall(fraction_str)
-
-    #     # Replace fractions with their decimal equivalents
-    #     for match in matches:
-    #         # print(f"Match: {match}")
-
-    #         fraction_decimal = _utils._fraction_str_to_decimal(match)
-    #         # print(f"Fraction Decimal: {fraction_decimal}") if self.debug else None
-    #         self.standardized_ingredient = self.standardized_ingredient.replace(match, str(fraction_decimal))
     
     # TODO: NEW implementation that uses the _utils.py function instead of the one in this class
     def _convert_fractions_to_decimals(self) -> None:
@@ -842,7 +818,7 @@ class IngredientSlicer:
     #                 "volumetric_units" : volumetric_units,
     #                 "has_unit" : has_unit}
     
-    def standardize(self):
+    def _standardize(self):
         
         # TODO: make sure to reset the standardized_ingredient to the original ingredient 
         # TODO: string before starting the standardization process
@@ -1717,10 +1693,8 @@ class IngredientSlicer:
     # def _extract_dimension_units(self, ingredient: str) -> str:
     #     """Add sometimes units to the units variables if they are the only possible units after the ingredient has been parsed."""
     #     # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
-
     #     dimension_units = _regex_patterns.QUANTITY_DIMENSION_UNIT_GROUPS.findall(ingredient)
     #     dimension_units.sort()
-
     #     return dimension_units
 
     def _address_parenthesis(self) -> None:
@@ -1746,7 +1720,7 @@ class IngredientSlicer:
 
         return
 
-    def parse(self):
+    def _parse(self):
         # TODO: process parenthesis content
 
         print(f"Standardizing ingredient: \n > '{self.ingredient}'") if self.debug else None
@@ -1757,7 +1731,7 @@ class IngredientSlicer:
         # -------------------------------------------------------------------------------------
 
         # run the standardization method to cleanup raw ingredient and create the "standard_ingredient" and "reduced_ingredient" member variables 
-        self.standardize()
+        self._standardize()
 
         print(f"Standardized ingredient: \n > '{self.standardized_ingredient}'") if self.debug else None
         print(f"Reduced ingredient: \n > '{self.reduced_ingredient}'") if self.debug else None
@@ -1789,20 +1763,6 @@ class IngredientSlicer:
                 > Standard ingredient: '{self.standardized_ingredient}'
                 > Parenthesis content: '{self.parenthesis_content}'
             """) if self.debug else None
-        
-        # # loop through each of the parenthesis in the parenthesis content and apply address_parenthesis functions 
-        # for parenthesis in self.parenthesis_content:
-        #     print(f"Addressing parenthesis: '{parenthesis}'") if self.debug else None
-
-        #     # address the case where the parenthesis content only contains a quantity
-        #     print(f"> Apply QUANTITY Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
-        #     self._address_quantity_only_parenthesis(parenthesis)
-            
-        #     print(f"> Apply EQUIVALENCE Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
-        #     self._address_equivalence_parenthesis(parenthesis)
-
-        #     print(f"> Apply QUANTITY UNIT Parenthesis to: '{self.quantity} {self.unit}'") if self.debug else None
-        #     self._address_quantity_unit_only_parenthesis(parenthesis)
 
         self._address_parenthesis()
 
@@ -1845,8 +1805,103 @@ class IngredientSlicer:
         # self.prep = self._extract_prep_words(self.standardized_ingredient) 
         # self.size_modifiers = self._extract_size_modifiers(self.standardized_ingredient)
 
+    def standardized_ingredient(self) -> str:
+        """
+        Return the standardized ingredient string.
+        Returns:
+            str: The standardized ingredient string.
+        """
+        return self.standardized_ingredient
 
+    def food(self) -> str:
+        """
+        Return the food string.
+        Returns:
+            str: The food string.
+        """
+        return self.food
+    
+    def quantity(self) -> str:
+        """
+        Return the quantity string.
+        Returns:
+            str: The quantity string.
+        """
+        return self.quantity
+    
+    def unit(self) -> str:
+        """
+        Return the unit string.
+        Returns:
+            str: The unit string.
+        """
+        return self.unit
+    
+    def standardized_unit(self) -> str:
+        """
+        Return the standardized unit string.
+        Returns:
+            str: The standardized unit string.
+        """
+        return self.standardized_unit
+    
+    def secondary_quantity(self) -> str:
+        """
+        Return the secondary quantity string.
+        Returns:
+            str: The secondary quantity string.
+        """
+        return self.secondary_quantity
+    
+    def secondary_unit(self) -> str:
+        """
+        Return the secondary unit string.
+        Returns:
+            str: The secondary unit string.
+        """
+        return self.secondary_unit
+    
+    def standardized_secondary_unit(self) -> str:
+        """
+        Return the standardized secondary unit string.
+        Returns:
+            str: The standardized secondary unit string.
+        """
+        return self.standardized_secondary_unit
+    
+    def prep(self) -> list:
+        """
+        Return the prep list.
+        Returns:
+            list: The prep list.
+        """
+        return self.prep
+    
+    def size_modifiers(self) -> list:
+        """
+        Return the size modifiers list.
+        Returns:
+            list: The size modifiers list.
+        """
+        return self.size_modifiers
+    
+    def dimensions(self) -> list:
+        """
+        Return the dimensions list.
+        Returns:
+            list: The dimensions list.
+        """
+        return self.dimensions
+    
+    def is_required(self) -> bool:
+        """
+        Check if the ingredient is required or optional.
+        Returns:
+            bool: True if the ingredient is required, False if the ingredient is optional.
+        """
 
+        return self.is_required
+    
     def to_json(self) -> dict:
         """
         Convert the IngredientSlicer object to a dictionary.
@@ -1877,6 +1932,29 @@ class IngredientSlicer:
             # "parenthesis_notes": self.parenthesis_notes,
             # "reduced_ingredient": self.reduced_ingredient, 
         }
+    
+    def __str__(self) -> str:
+        """
+        Return a string representation of the IngredientSlicer object.
+        Returns:
+            str: A string representation of the IngredientSlicer object.
+        """
+        return f"""IngredientSlicer Object:
+            Ingredient: '{self.ingredient}'
+            Standardized Ingredient: '{self.standardized_ingredient}'
+            Food: '{self.food}'
+            Quantity: '{self.quantity}'
+            Unit: '{self.unit}'
+            Standardized Unit: '{self.standardized_unit}'
+            Secondary Quantity: '{self.secondary_quantity}'
+            Secondary Unit: '{self.secondary_unit}'
+            Standardized Secondary Unit: '{self.standardized_secondary_unit}'
+            Prep: '{self.prep}'
+            Size Modifiers: '{self.size_modifiers}'
+            Dimensions: '{self.dimensions}'
+            Is Required: '{self.is_required}'
+            Parenthesis Content: '{self.parenthesis_content}'
+        """
 
 
 # # ####### Deprecated ####### 
