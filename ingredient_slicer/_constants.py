@@ -1511,8 +1511,10 @@ FOOD_CATALOG = {
 
             # Flours
             "flour": ("cereal_and_cereal_products", "flour"),
+            "white flour": ("cereal_and_cereal_products", "flour"),
             "all-purpose flour": ("cereal_and_cereal_products", "flour"),
             "whole wheat flour": ("cereal_and_cereal_products", "flour"),
+            "whole wheat white flour": ("cereal_and_cereal_products", "flour"),
             "whole grain flour": ("cereal_and_cereal_products", "flour"),
             "bread flour": ("cereal_and_cereal_products", "flour"),
             "semolina flour": ("cereal_and_cereal_products", "flour"),
@@ -1523,6 +1525,8 @@ FOOD_CATALOG = {
             "corn starch": ("cereal_and_cereal_products", "flour"),
             "cornmeal": ("cereal_and_cereal_products", "flour"),
             "corn meal": ("cereal_and_cereal_products", "flour"),
+            "oat flour": ("cereal_and_cereal_products", "flour"),
+            "oat bran": ("cereal_and_cereal_products", "flour"),
             "almond flour": ("cereal_and_cereal_products", "flour"),
             "cake": ("cereal_and_cereal_products", "miscellaneous_foods"),
             "cake mix": ("cereal_and_cereal_products", "flour"),
@@ -2281,7 +2285,7 @@ FOOD_DENSITY_BY_GROUP = {
     "cereal_and_cereal_products": {
         "category": "cereal_and_cereal_products",
         "density_g_per_ml": 0.5781,
-        "min_density_g_per_ml": 0.1,
+        "min_density_g_per_ml": 0.35,
         "max_density_g_per_ml": 1.07
     },
     "herbes_and_spices": {
@@ -2316,6 +2320,13 @@ FOOD_DENSITY_BY_GROUP = {
     }
 }
 
+# A default set of density values, with the main value being the density of water
+DEFAULT_DENSITY_MAP = {
+    "category": "default",
+    "density_g_per_ml" : 1.0,
+    "min_density_g_per_ml" : 0.9,
+    "max_density_g_per_ml" : 1.1
+    }
 # These approximate food density values are taken from the following paper:
 # Credit: 
     # "Using database values to determine food density" by Phyllis J. Stumbo a, Rick Weiss b
@@ -2333,6 +2344,51 @@ FOOD_DENSITY = {
     "aerated": 0.5
 }
 
+# ----------------------------------------------------------------------------
+# ---- Strings that obviously point to a food being a specific category ----
+# ----------------------------------------------------------------------------
+
+# INDICATES_A_CEREAL = {"flour", "flours", "bread", "breads"}
+# INDICATES_AN_OIL   = {"oil", "oils"}
+# INDICATES_A_MILK   = {"milk", "milks"}
+# INDICATES_A_SYRUP  = {"syrup", "syrups"}
+# INDICATES_A_SUGAR  = {"sugar", "sugars"}
+# INDICATES_AN_EGG   = {"egg", "eggs"}
+# INDICATES_A_WINE   = {"wine", "wines"}
+# INDICATES_A_BEER   = {"beer", "beers"}
+
+# Words that are so obviously pointing to a specific category that they can be used to determine the category of a food
+# (i.e. if a food contains the word "flour", it is most likely a cereal product)
+INDICATOR_STRINGS_MAP = {
+    "flour" : "cereal_and_cereal_products",
+    "flours" : "cereal_and_cereal_products",
+    "bread" : "cereal_and_cereal_products",
+    "breads" : "cereal_and_cereal_products",
+    "oil" : "oils",
+    "oils" : "oils",
+    "milk" : "milk",
+    "milks" : "milk",
+    "syrup" : "syrups",
+    "syrups" : "syrups",
+    "sugar" : "sweets",
+    "sugars" : "sweets",
+    "egg" : "egg_and_egg_products",
+    "eggs" : "egg_and_egg_products",
+    "wine" : "wine_and_cider",
+    "wines" : "wine_and_cider",
+    "beer" : "beer",
+    "beers" : "beer"
+}
+
+# # Categories that indicators point to:
+# cereal_and_cereal_products
+# egg_and_egg_products
+# oils 
+# milk
+# syrups
+# sweets
+# wine_and_cider
+# beer
 # ----------------------------------------------------------------------------
 # ---- Unused constants ----
 # ----------------------------------------------------------------------------

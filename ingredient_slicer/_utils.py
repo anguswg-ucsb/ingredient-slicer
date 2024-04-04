@@ -3,7 +3,7 @@ from fractions import Fraction
 import re
 
 from ingredient_slicer import _constants, _regex_patterns
-from typing import Union
+from typing import Union, Callable
 
 # -----------------------------------------------------------------------------------------------
 # ---- Utility functions for handling numbers, decimals, and fractions in strings ----
@@ -1346,28 +1346,91 @@ def _remove_repeat_units_in_ranges(ingredient) -> str:
 
     return ingredient 
 
-# QUANTITY_UNIT_X_QUANTITY_UNIT
-# QUANTITY_UNIT_BY_QUANTITY_UNIT
+
+def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "levenshtein") -> dict:
+
+    """ Get the gram weight of a given quantity of food item.
+    Args:
+        food (str): The food item to convert.
+        quantity (Union[str, int, float]): The quantity of the food item.
+        unit (str): The unit of measurement for the quantity.
+    Returns:
+        dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
+    """
+    # food = "olive oil"
+    # quantity = "1"
+    # unit = "teaspoon"
+
+    if not isinstance(method, str):
+        raise ValueError("'method' must be a string")
+
+    method = method.lower()
+
+    if method not in ["levenshtein", "jaccard", "dice"]:
+        raise ValueError("Invalid 'method'. Options are 'levenshtein', 'jaccard', or 'dice'.")
+    
+    if not isinstance(quantity, (str, int, float)):
+        raise ValueError("'quantity' must be a string, integer, or float")
+    
+    if not isinstance(unit, str):
+        raise ValueError("'unit' must be a string")
+
+    quantity = float(quantity)
+    
+    gram_weight     = None
+    min_gram_weight = None
+    max_gram_weight = None
+    
+    unit = unit.lower()
+
+    # weight check
+    if unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT:
+        gram_weight = _convert_weights_to_grams(quantity, unit)
+
+        return {
+            "gram_weight" : str(round(gram_weight, 2)) if gram_weight else None,
+            "min_gram_weight" : str(round(min_gram_weight, 2)) if min_gram_weight else None,
+            "max_gram_weight" : str(round(max_gram_weight, 2)) if max_gram_weight else None
+            }
+    
+    # volume check
+    if unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT:
+        gram_values_map = _convert_volume_to_grams(food, quantity, unit, method)  
+
+        return {
+            "gram_weight" : str(round(gram_values_map["gram_weight"], 2)) if gram_values_map["gram_weight"] else None,
+            "min_gram_weight" : str(round(gram_values_map["min_gram_weight"], 2)) if gram_values_map["min_gram_weight"] else None,
+            "max_gram_weight" : str(round(gram_values_map["max_gram_weight"], 2)) if gram_values_map["max_gram_weight"] else None
+            }
+
+    # if the given unit was not a weight or volume unit, return None for all of the gram weights
+    return {
+        "gram_weight" : str(round(gram_weight, 2)) if gram_weight else None,
+        "min_gram_weight" : str(round(min_gram_weight, 2)) if min_gram_weight else None,
+        "max_gram_weight" : str(round(max_gram_weight, 2)) if max_gram_weight else None
+        }
+    
 
 def _convert_weights_to_grams(quantity: Union[str, int, float], unit:str) -> str:
     """
     Get the weight of a given quantity of units in grams
-    Examples:
-    "2 cups of flour" -> "2 cups of flour (240 grams)"
-    "1 cup of sugar" -> "1 cup of sugar (200 grams)"
+    If the given unit is not in the set of standard weight units (e.g. "pounds", "ounces", "grams", "kilograms", "milligrams", "micrograms") or an abbreviated form,
+    the function returns None.
+    Args:
+        quantity (Union[str, int, float]): The quantity of the food item.
+        unit (str): The unit of measurement for the quantity.
+    Returns:
+        str: The weight of the quantity in grams.
     """
-    # quantity = slicer.quantity
-    # unit = slicer.unit
 
     if not isinstance(quantity, (str, int, float)):
-        raise ValueError("Quantity must be a string, integer, or float")
+        raise ValueError("'quantity' must be a string, integer, or float")
     
     if not isinstance(unit, str):
-        raise ValueError("Unit must be a string")
+        raise ValueError("'unit' must be a string")
     
     if isinstance(quantity, str):
         quantity = float(quantity)
-
 
     if unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT:
         
@@ -1384,18 +1447,22 @@ def _convert_weights_to_grams(quantity: Union[str, int, float], unit:str) -> str
 def _convert_volumes_to_milliliters(quantity: Union[str, int, float], unit:str) -> str:
     """
     Get the volume of a given quantity of units in milliliters
-    Examples:
-    "2 cups of water" -> "2 cups of water (480 milliliters)"
-    "1 cup of milk" -> "1 cup of milk (240 milliliters)"
+    If the given unit is not in the set of standard volume units (e.g. "teaspoons", "tablespoons", 
+    "fluid ounces", "cups", "pints", "quarts", "gallons", "milliliters", "liters") or an abbreviated form, 
+    then the function returns None.
+    Args:
+        quantity (Union[str, int, float]): The quantity of the food item. Can be a string, float, or integer (e.g. "1.0", 1, 1.0)
+        unit (str): The unit of measurement for the quantity. (e.g. "cups", "teaspoons", "tablespoons", "fluid ounces", "milliliters", "liters")
+    Returns:
+        str: The volume of the quantity in milliliters.
+
     """
-    # quantity = "0.5"
-    # unit = "cups"
 
     if not isinstance(quantity, (str, int, float)):
-        raise ValueError("Quantity must be a string, integer, or float")
+        raise ValueError("'quantity' must be a string, integer, or float")
     
     if not isinstance(unit, str):
-        raise ValueError("Unit must be a string")
+        raise ValueError("'unit' must be a string")
     
     if isinstance(quantity, str):
         quantity = float(quantity)
@@ -1410,6 +1477,7 @@ def _convert_volumes_to_milliliters(quantity: Union[str, int, float], unit:str) 
         return milliliter_volume
     
     return None
+
 def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: str, method:str = "levenshtein") -> dict:
 
     """
@@ -1434,119 +1502,142 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
     # unit = slicer.standardized_unit if slicer.standardized_unit else slicer.unit
     # quantity = slicer.quantity
     # ############################################################
+
     # method = "jaccard"
+    # method = "levenshtein"
+
+    if not isinstance(method, str):
+        raise ValueError("'method' must be a string")
+    
     method = method.lower()
 
     if method not in ["levenshtein", "jaccard", "dice"]:
-        raise ValueError("Invalid method. Options are 'levenshtein', 'jaccard', or 'dice'.")
+        raise ValueError("Invalid 'method'. Options are 'levenshtein', 'jaccard', or 'dice'.")
 
-    # method = "jaccard" 
-    fuzzy_matchers = {
-        "levenshtein" : _levenshtein_similarity,
-        "jaccard" : _jaccard_similarity,
-        "dice" : _score_sentence_similarity
-        }
-    
-    fuzzy_matcher = fuzzy_matchers[method]
+    fuzzy_matcher =  _get_fuzzy_matcher(method)
 
     milliliter_quantity = _convert_volumes_to_milliliters(quantity, unit)
 
-    no_match_string = "no match found in FOOD_CATALOG"
-
     print(f"Looking for categories and densities for:\n > '{food}'")
-
-    food_groups = _constants.FOOD_CATALOG.get(food, no_match_string)
-
-    # food_groups = _constants.FOOD_CATALOG.get(food, None)
+    # no_match_string = "no match found in FOOD_CATALOG"
+    
+    # try to get the food groups for the given food...
+    food_groups = _constants.FOOD_CATALOG.get(food, None)
+    # food_groups = _constants.FOOD_CATALOG.get(food, no_match_string)
 
     print(f"Categories for '{food}':\n--> '{food_groups}'")
+    if not food_groups:
+        print(f"Going for the layup classification for '{food}'...")
+        food_group = _check_food_for_easy_categorization(food)
+        print(f"Easily classified as '{food_group}'")
+        if food_group:
+            print(f"Setting previously None 'food_groups' to '{[food_group, food_group]}'")
+            food_groups = [food_group, food_group]
 
-    if food_groups != no_match_string:
-    # if food_groups:
+    print(f"Categories for '{food}':\n--> '{food_groups}'")
+    # Case when we get a real match in the FOOD_CATALOG, 
+    # then we can just use the corresponding densities for the matched food
+    if food_groups:
+    # if food_groups != no_match_string:
         print(f"Found exact category match:\n '{food}' >>> '{food_groups}'")
         primary_category, secondary_category = food_groups
 
-        primary_density_map    = _constants.FOOD_DENSITY_BY_GROUP.get(primary_category, None)
-        secondary_density_map  = _constants.FOOD_DENSITY_BY_GROUP.get(secondary_category, None)
+        # try to get the density values for the given primary category food group, 
+        # if that fails try to get the density values for the secondary category food group
+        # and all else fails, use the default density map
+        if primary_category in _constants.FOOD_DENSITY_BY_GROUP:
+            density_map = _constants.FOOD_DENSITY_BY_GROUP.get(primary_category, _constants.DEFAULT_DENSITY_MAP)
+        elif secondary_category in _constants.FOOD_DENSITY_BY_GROUP:
+            density_map = _constants.FOOD_DENSITY_BY_GROUP.get(secondary_category, _constants.DEFAULT_DENSITY_MAP)
+        else:
+            density_map = _constants.DEFAULT_DENSITY_MAP
+            
+        # try to get the density values for the given primary category food group, 
 
-        primary_density = primary_density_map["density_g_per_ml"] if primary_density_map else None
-        secondary_density = secondary_density_map["density_g_per_ml"] if secondary_density_map else None
+        print(f"Using density values for category:\n > '{density_map['category']}'")
+
+        density     = density_map.get("density_g_per_ml", 1)
+        min_density = density_map.get("min_density_g_per_ml", 0.9)
+        max_density = density_map.get("max_density_g_per_ml", 1.1)
 
         # if primary_density and secondary_density:
             # print(" > Both densities are available")
-        # primary_density_map["density_g_per_ml"]
-        # print(f"Primary density: {primary_density}")
-        # print(f"Secondary density: {secondary_density}")
+        # print(f"Primary density: {primary_density}\nSecondary density: {secondary_density}")
 
-        gram_weight = milliliter_quantity * primary_density
+        gram_weight     = milliliter_quantity * density
+        min_gram_weight = milliliter_quantity * min_density
+        max_gram_weight = milliliter_quantity * max_density
+        
+        return {
+            "gram_weight" : gram_weight, 
+            "min_gram_weight" : min_gram_weight,
+            "max_gram_weight" : max_gram_weight
+            }
 
-        return gram_weight
+    # However, if we do NOT get a match in the FOOD_CATALOG, we will have to do a fuzzy match between our given food
+    # and all of the foods and determine the closet match and use the density of that food group (FOOD_DENSITY_BY_GROUP)
 
     similarity_scores = {}
     top_scoring_foods = {}
-    # closest_categories = {}
 
     for category in _constants.FOOD_DENSITY_BY_GROUP:
         food_set = _constants.FOODS_BY_CATEGORY[category]
         # print(f"Category: {category}\nFood set: {food_set}")
 
+        # find the closeness from the given food to each food in the current category
+        # and extract that food and its value, to stash the top matched food and its score for each category
         scores =  {i: round(fuzzy_matcher(food, i), 2) for i in food_set}
-        # scores =  {i: round(_utils.score_sentence_similarity(food, i), 2) for i in food_set}
-        # scores =  {i: round(_utils._levenshtein_similarity(food, i), 2) for i in food_set}
-        # scores =  {i: round(_utils._jaccard_similarity(food, i), 2) for i in food_set}
-
-        top_score_key = max(scores, key=scores.get)
+        top_score_key = max(scores, key=scores.get) 
         top_score_value = scores[top_score_key] if top_score_key else 0
-
-        max_similarity = max([round(fuzzy_matcher(food, i), 2) for i in food_set])
-        # max_similarity = max([round(_utils.score_sentence_similarity(food, i), 2) for i in food_set])
-        # max_similarity = max([round(_utils._levenshtein_similarity(food, i), 2) for i in food_set])
-        # max_similarity = max([round(_utils._jaccard_similarity(food, i), 2) for i in food_set])
-
-        similarity_scores[category] = max_similarity
-
+        
         # NOTE: keep track of the food with the highest similarity score for each category
         top_scoring_foods[category] = [top_score_key, top_score_value]
         # print(f" - Top score key/value:\n ----> '{top_score_key} ({scores[top_score_key]})'\n")
 
-    max_score_key = max(similarity_scores, key=similarity_scores.get)
+        max_similarity = max([round(fuzzy_matcher(food, i), 2) for i in food_set])
+        # max_similarity = max([round(_utils.score_sentence_similarity(food, i), 2) for i in food_set])
 
-    # print(f"Key with max similarity score:\n > '{max_score_key}'")
+        similarity_scores[category] = max_similarity
+        
+    # get the key that has the highest similarity score in the dictionary of similarity scores
+    best_category_match = max(similarity_scores, key=similarity_scores.get)
+
+    print(f"Key with max similarity score:\n > '{best_category_match}'")
+    print(f"Top score: {similarity_scores[best_category_match]}")
+    print(f"Top scoring food:\n > {top_scoring_foods[best_category_match]}")
 
     density = 1
-    max_density = 1
-    min_density = 1
+    min_density = 0.9
+    max_density = 1.1
 
     try: 
-        # print(f"Successful best effort category match: \n '{food}' >>> '{max_score_key}'")
+        # print(f"Successful best effort category match: \n '{food}' >>> '{best_category_match}'")
 
-        density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["density_g_per_ml"]
-        max_density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["max_density_g_per_ml"]
-        min_density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["min_density_g_per_ml"]
+        density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["density_g_per_ml"]
+        max_density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["max_density_g_per_ml"]
+        min_density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["min_density_g_per_ml"]
         # print(f"Using density value of:\n > '{density} g/ml'")
     except:
-        print("No good match was found")
+        print("No good food denstity match was found, defaulting to the density of water (1 g/ml)")
 
     # # NOTE: old way of catching if no good match was made or the matched category does not exist / density is <= 0
-    # if (
-    #     (max_score_key not in _constants.FOOD_DENSITY_BY_GROUP) or \
-    #     (max_score_key in _constants.FOOD_DENSITY_BY_GROUP and _constants.FOOD_DENSITY_BY_GROUP[max_score_key]['density_g_per_ml'] <= 0)
+    # if ((best_category_match not in _constants.FOOD_DENSITY_BY_GROUP) or \
+    #     (best_category_match in _constants.FOOD_DENSITY_BY_GROUP and _constants.FOOD_DENSITY_BY_GROUP[best_category_match]['density_g_per_ml'] <= 0)
     #     ):
-    #     print("No good match was found")
     #     density = 1
     # else:
-    #     density = _constants.FOOD_DENSITY_BY_GROUP[max_score_key]["density_g_per_ml"]
-    #     print(f"Best effort category match for '{food}'\n > '{max_score_key}'\nUsing density value of:\n > '{density} g/ml'")
-
-    gram_weight = density * milliliter_quantity
+    #     density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["density_g_per_ml"]
+        
+    gram_weight     = density * milliliter_quantity
     max_gram_weight = max_density * milliliter_quantity
     min_gram_weight = min_density * milliliter_quantity
 
     return {
         "gram_weight" : gram_weight, 
+        "min_gram_weight" : min_gram_weight,
         "max_gram_weight" : max_gram_weight, 
-        "min_gram_weight" : min_gram_weight
         }
+
 # # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
 # ingredient = "1 1/2 cups of chick nuggets, grounded"
 
@@ -1558,6 +1649,60 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
 # # food = "112"
 # unit = slicer.standardized_unit if slicer.standardized_unit else slicer.unit
 # quantity = slicer.quantity
+
+def _check_food_for_easy_categorization(food:str) -> str:
+
+    """Check if the food can be easily categorized based on the food name.
+    If it can, return the category. Otherwise, return just return None.
+    Args:
+        food: str: The name of the food to categorize.
+    Returns:
+        str: The category of the food if it can be easily categorized. Otherwise, None.
+    """
+
+    # food = "whole  wheat  oaty flour  oil"
+    # food = "toats vdf asvfgf df"
+
+    # clean up tasks
+    food = food.lower().strip()
+    food = _remove_extra_whitespaces(food)
+    food = food.split()
+
+    matched_categories = []
+    for word in food:
+        match = _constants.INDICATOR_STRINGS_MAP.get(word, None)
+        if match:
+            matched_categories.append(match)
+
+    # if we have multiple matches, return the last one because I think its more likely that the last match indicates the category
+    # TODO: this might be stupid but made sense to me ("olive oil", "brown sugar", "white sugar", the indicator word seems to come last-ish)
+    # TODO: Regardless, its pretty unlikely youll get multiple matches anyway
+    category = matched_categories[-1] if matched_categories else None
+
+    return category
+
+def _get_fuzzy_matcher(method: str) -> Callable:
+    """
+    Get the fuzzy string matching function based on the given method.
+    Internal conveniance function
+    Args:
+        method (str): The method to use for fuzzy string matching. Options are "levenshtein", "jaccard", or "dice".
+    Returns:
+        Callable: The fuzzy string matching function.
+    """
+
+    method = method.lower()
+
+    if method not in ["levenshtein", "jaccard", "dice"]:
+        raise ValueError("Invalid 'method'. Options are 'levenshtein', 'jaccard', or 'dice'.")
+
+    fuzzy_matchers = {
+        "levenshtein" : _levenshtein_similarity,
+        "jaccard" : _jaccard_similarity,
+        "dice" : _dice_coeff_similarity
+        }
+
+    return fuzzy_matchers[method]
 
 # _convert_volume_to_grams(food, quantity, unit)
 def _levenshtein_dist(str1, str2):
@@ -1575,7 +1720,7 @@ def _levenshtein_dist(str1, str2):
             substitute = 0 if str1[i - 1] == str2[j - 1] else 1
             matrix[i][j] = min(
                 matrix[i - 1][j] + 1,              # delete
-                matrix[i][j - 1] + 1,               # isert
+                matrix[i][j - 1] + 1,               # isert 
                 matrix[i - 1][j - 1] + substitute  # substitute
             )
 
@@ -1594,7 +1739,8 @@ def _jaccard_similarity(str1, str2):
     union = len(set1.union(set2))
     return intersection / union
 
-def _score_sentence_similarity(first: str, second: str) -> float:
+# Credit: to recipe_scrapers (hhruvs) GitHub repository for the following code
+def _dice_coeff_similarity(first: str, second: str) -> float:
     """Calculate Dice coefficient for two strings.
 
     The dice coefficient is a measure of similarity determined by calculating
