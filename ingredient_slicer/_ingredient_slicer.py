@@ -391,19 +391,13 @@ class IngredientSlicer:
             str: The updated ingredient string
         """
         
-        # pattern = _regex_patterns.QUANTITY_DASH_QUANTITY
-        
         matches = pattern.findall(ingredient)
         # matched_ranges = [match.split("-") for match in matches]
 
         if replacement_function:
-            # print(f"Replacement Function given")
             matched_ranges = [replacement_function(match).split("-") for match in matches]
         else:
-            # print(f"No Replacement Function given")
             matched_ranges = [match.split("-") for match in matches]
-
-        # print(f"Matched Ranges: \n > {matched_ranges}") if self.debug else None
 
         updated_ranges = [" - ".join([str(_utils._fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
         # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
@@ -413,13 +407,7 @@ class IngredientSlicer:
 
         # Replace the ranges in the original string with the updated ranges
         for original_range, updated_range in ranges_map.items():
-            # print(f"Original Range: {original_range}")
-            # print(f"Updated Range: {updated_range}")
-            # if replacement_function:
-            #     print(f"Replacement Function given")
-            #     updated_range = replacement_function(updated_range)
             ingredient = ingredient.replace(original_range, updated_range)
-            # print("\n") if self.debug else None
 
         return ingredient
     
@@ -682,27 +670,17 @@ class IngredientSlicer:
             # unit_after_match = re.search(regex_map.UNITS_PATTERN, ingredient[end:])
             
             if unit_after_match:
-                # print(f"unit after match: > '{unit_after_match.group()}'")
                 units.append(unit_after_match.group())
 
             # add the spaced number to the list
             spaced_nums.append(match.group())
 
-            # print(f"Match: {match.group()} at positions {start}-{end}")
             merged_quantity = self._merge_spaced_numbers(match.group())
             merge_operation = self._which_merge_on_spaced_numbers(match.group())
 
-            # print(f"merged_quantity: {merged_quantity}") if self.debug else None
-            # print(f"merge_operation: {merge_operation}\n") if self.debug else None
-
-            # Calculate the start and end positions in the modified string
             modified_start = start + offset
             modified_end = end + offset
 
-            # print(f" -> Modified match positions: {modified_start}-{modified_end}")
-            # print(f"Replacing {match.group()} with '{merged_quantity}'...") if self.debug else None
-            
-            # Construct the modified string with the replacement applied
             self.standardized_ingredient = self.standardized_ingredient[:modified_start] + str(merged_quantity) + self.standardized_ingredient[modified_end:]
             # ingredient = ingredient[:modified_start] + str(merged_quantity) + ingredient[modified_end:]
 
@@ -1081,8 +1059,6 @@ class IngredientSlicer:
         Returns:
             None
         """
-        
-        # print(f"""Ingredient: '{self.reduced_ingredient}'\nParenthesis: '{parenthesis}'\nQuantity: '{self.quantity}'\nUnit: '{self.unit}'""") if self.debug else None
 
         # Set a None Description
         description = None

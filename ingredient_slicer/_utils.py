@@ -1493,18 +1493,9 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
 
     # ############################################################
     # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
-    # ingredient = "1 1/2 cups of chick nuggets, grounded"
-    # ingredient = "1 1/2 cups of White whole wheat flour, grounded"
-
-    # slicer = IngredientSlicer(ingredient)
-    # food = slicer.food
-    # # food = "112"
-    # unit = slicer.standardized_unit if slicer.standardized_unit else slicer.unit
-    # quantity = slicer.quantity
-    # ############################################################
-
     # method = "jaccard"
     # method = "levenshtein"
+    # ############################################################
 
     if not isinstance(method, str):
         raise ValueError("'method' must be a string")
@@ -1518,28 +1509,30 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
 
     milliliter_quantity = _convert_volumes_to_milliliters(quantity, unit)
 
-    print(f"Looking for categories and densities for:\n > '{food}'")
+    # print(f"Looking for categories and densities for:\n > '{food}'")
     # no_match_string = "no match found in FOOD_CATALOG"
     
     # try to get the food groups for the given food...
     food_groups = _constants.FOOD_CATALOG.get(food, None)
     # food_groups = _constants.FOOD_CATALOG.get(food, no_match_string)
 
-    print(f"Categories for '{food}':\n--> '{food_groups}'")
+    # print(f"Categories for '{food}':\n--> '{food_groups}'")
+
     if not food_groups:
-        print(f"Going for the layup classification for '{food}'...")
+        # print(f"Going for the layup classification for '{food}'...")
         food_group = _check_food_for_easy_categorization(food)
-        print(f"Easily classified as '{food_group}'")
+        # print(f"Easily classified as '{food_group}'")
         if food_group:
-            print(f"Setting previously None 'food_groups' to '{[food_group, food_group]}'")
+            # print(f"Setting previously None 'food_groups' to '{[food_group, food_group]}'")
             food_groups = [food_group, food_group]
 
-    print(f"Categories for '{food}':\n--> '{food_groups}'")
+    # print(f"Categories for '{food}':\n--> '{food_groups}'")
+            
     # Case when we get a real match in the FOOD_CATALOG, 
     # then we can just use the corresponding densities for the matched food
     if food_groups:
     # if food_groups != no_match_string:
-        print(f"Found exact category match:\n '{food}' >>> '{food_groups}'")
+        # print(f"Found exact category match:\n '{food}' >>> '{food_groups}'")
         primary_category, secondary_category = food_groups
 
         # try to get the density values for the given primary category food group, 
@@ -1554,7 +1547,7 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
             
         # try to get the density values for the given primary category food group, 
 
-        print(f"Using density values for category:\n > '{density_map['category']}'")
+        # print(f"Using density values for category:\n > '{density_map['category']}'")
 
         density     = density_map.get("density_g_per_ml", 1)
         min_density = density_map.get("min_density_g_per_ml", 0.9)
@@ -1602,9 +1595,9 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
     # get the key that has the highest similarity score in the dictionary of similarity scores
     best_category_match = max(similarity_scores, key=similarity_scores.get)
 
-    print(f"Key with max similarity score:\n > '{best_category_match}'")
-    print(f"Top score: {similarity_scores[best_category_match]}")
-    print(f"Top scoring food:\n > {top_scoring_foods[best_category_match]}")
+    # print(f"Key with max similarity score:\n > '{best_category_match}'")
+    # print(f"Top score: {similarity_scores[best_category_match]}")
+    # print(f"Top scoring food:\n > {top_scoring_foods[best_category_match]}")
 
     density = 1
     min_density = 0.9
@@ -1618,7 +1611,7 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
         min_density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["min_density_g_per_ml"]
         # print(f"Using density value of:\n > '{density} g/ml'")
     except:
-        print("No good food denstity match was found, defaulting to the density of water (1 g/ml)")
+        print(f"No good food denstity match was found, defaulting to the density of water (1 g/ml)")
 
     # # NOTE: old way of catching if no good match was made or the matched category does not exist / density is <= 0
     # if ((best_category_match not in _constants.FOOD_DENSITY_BY_GROUP) or \
