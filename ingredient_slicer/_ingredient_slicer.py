@@ -1694,21 +1694,18 @@ class IngredientSlicer:
     #     """Add sometimes units to the units variables if they are the only possible units after the ingredient has been parsed."""
     #     # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
     #     dimension_units = _regex_patterns.QUANTITY_DIMENSION_UNIT_GROUPS.findall(ingredient)
-    #     dimension_units.sort()
     #     return dimension_units
     
     def _add_gram_weights(self, ingredient: str) -> str:
         """Add gram weights to the units variables if they are the only possible units after the ingredient has been parsed."""
         # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
         grams_map = _utils._get_gram_weight(self.food, self.quantity, self.unit, "levenshtein")
-        # grams.sort()
         return grams_map
 
     def _address_parenthesis(self) -> None:
         """
         Address any parenthesis that were in the ingredient.
         """
-
         # print(f"Addressing parenthesis: '{self.parenthesis_content}'") if self.debug else None
 
         # loop through each of the parenthesis in the parenthesis content and apply address_parenthesis functions 
@@ -1808,7 +1805,6 @@ class IngredientSlicer:
         # print(f"Extracting food words (version {self.extract_version})") if self.debug else None
         self.prep = self._extract_prep_words(self.staged_ingredient) # TODO: testing using staged_ingredient
         self.size_modifiers = self._extract_size_modifiers(self.staged_ingredient) # TODO: testing using staged_ingredient
-
         # self.prep = self._extract_prep_words(self.standardized_ingredient) 
         # self.size_modifiers = self._extract_size_modifiers(self.standardized_ingredient)
 
