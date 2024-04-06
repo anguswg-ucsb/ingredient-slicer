@@ -7,26 +7,45 @@ from ingredient_slicer import _constants, _utils
 # from ingredient_slicer import IngredientSlicer
 
 # -------------------------------------------------------------------------------
+# ---- _convert_volumes_to_milliters() tests for converting volumes to milliters ----
 # -------------------------------------------------------------------------------
-# ---- _get_gram_weight() tests ----
-# -------------------------------------------------------------------------------
 
-# food:str, 
-# quantity:str, 
-# unit:str
+def test_convert_volumes_to_milliters_one_cup():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "cup")) == 237
 
-# -------------------------------------------------------------------------------
-# ---- _get_gram_weight() test for converting simple weights ----
-# -------------------------------------------------------------------------------
-# grams_map = _utils._get_gram_weight("flour" "1", "cup", "levenshtein")
+def test_convert_volumes_to_milliters_one_tablespoon():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "tbs")) == 15
 
-def test_get_gram_weight_one_ounce():
-    gram_weights = _utils._get_gram_weight("chicken", "1", "ounce")
+def test_convert_volumes_to_milliters_one_teaspoon():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "tsp")) == 5
 
-    gram_weight     = round(float(gram_weights["gram_weight"])) if gram_weights["gram_weight"] else None
-    min_gram_weight = round(float(gram_weights["min_gram_weight"])) if gram_weights["min_gram_weight"] else None
-    max_gram_weight = round(float(gram_weights["max_gram_weight"])) if gram_weights["max_gram_weight"] else None
+def test_convert_volumes_to_milliters_one_fluid_ounce():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "fluid oz")) == 30
 
-    assert gram_weight == 28
-    assert min_gram_weight == None
-    assert max_gram_weight == None
+def test_convert_volumes_to_milliters_one_gallon(): 
+    assert round(_utils._convert_volumes_to_milliliters("1",  "gallon")) == 3785
+
+def test_convert_volumes_to_milliters_one_pint():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "pint")) == 473
+
+def test_convert_volumes_to_milliters_one_quart():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "quart")) == 946
+
+def test_convert_volumes_to_milliters_one_liter():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "liter")) == 1000
+
+def test_convert_volumes_to_milliters_one_milliliter():
+    assert round(_utils._convert_volumes_to_milliliters("1",  "ml")) == 1
+
+def test_convert_volumes_to_milliters_number_quantity():
+    assert round(_utils._convert_volumes_to_milliliters(2,  "cup")) == 473
+
+def test_convert_volumes_to_milliters_decimal_quantity():
+    assert round(_utils._convert_volumes_to_milliliters(2.5,  "cup")) == 591
+
+def test_convert_volumes_to_milliters_fraction_quantity_error():
+    with pytest.raises(ValueError):
+        _utils._convert_volumes_to_milliliters("1/2",  "cup")
+
+def test_convert_volumes_to_milliters_invalid_unit_error():
+    assert _utils._convert_volumes_to_milliliters("1",  "CPOP") is None

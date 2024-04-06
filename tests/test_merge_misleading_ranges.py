@@ -51,3 +51,4 @@ def test_misleading_range_tuple_error():
 def test_misleading_range_float_error():
     with pytest.raises(TypeError):
         assert _utils._merge_misleading_ranges(1.5)
+
