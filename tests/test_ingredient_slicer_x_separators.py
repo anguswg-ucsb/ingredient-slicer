@@ -186,8 +186,6 @@ def test_ingredient_slicer_x_separators_quantity_multiplier_with_decimal_quantit
 def test_ingredient_slicer_x_separators_quantity_multiplier_with_number_quantity_to_multiply_and_multiple_dimension_units_separated_by_x():
                                             
     slicer = IngredientSlicer("3 x 4oz salmon fillets (2 inch x 3 inch)")
-    slicer.reduced_ingredient
-    slicer.standardized_ingredient
     parsed = slicer.to_json()
 
     assert parsed["standardized_ingredient"] == '12 oz salmon fillets'

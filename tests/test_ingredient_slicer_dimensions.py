@@ -80,7 +80,7 @@ def test_two_sets_of_dimension_unit_ranges_separator_by_no_space():
 def test_three_consequetive_x_separated_dimension_units():
     ing = IngredientSlicer("1 cup of flour (4 x 3 x 2 inch)")
 
-    expected_output = {'ingredient': '1 cup of flour (4 x 3 x 2 inch)',
+    expected_output = {
     'standardized_ingredient': '1 cup of flour', 
     'food': 'flour',
     'quantity': '12', 
@@ -89,6 +89,7 @@ def test_three_consequetive_x_separated_dimension_units():
     'secondary_quantity': '1', 
     'secondary_unit': None, 
     'standardized_secondary_unit': None, 
+    'gram_weight': "1641.26",
     'prep': [], 
     'size_modifiers': [], 
     'dimensions': ['2 inch'],

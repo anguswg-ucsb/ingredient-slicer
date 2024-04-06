@@ -477,290 +477,293 @@ NUMBER_WITH_INCH_SYMBOL_MAP = {}
 for inch_symbol in ["\"", "”"]:
     NUMBER_WITH_INCH_SYMBOL_MAP[inch_symbol] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + inch_symbol + r'')
 
-
-# -----------------------------------------------------------------------------
-# --------------------------- Class to store all regex patterns -----------------------
-# A class to hold all regex patterns used in the recipe parser (version 2)
-# - Each pattern is stored as a class attribute and the class 
-# - IngredientTools class has a single method that applies ALL of the 
-#     regex patterns to a given string and return a dictionary of matches (for testing mainly)
-# -----------------------------------------------------------------------------
-# regex variables and maps to put in the class:
-class IngredientTools:
-    """
-    A class to hold all regex patterns used in recipe parsing.
-    """
-
-    def __init__(self) -> None:
-        # Constant data values and lookup tables
-        self.constants = {
-
-            # regex hashmaps
-            "NUMBER_WORDS": _constants.NUMBER_WORDS,
-            "NUMBER_PREFIX_WORDS": _constants.NUMBER_PREFIX_WORDS,
-            "MULTI_FRACTION_WORDS": _constants.MULTI_FRACTION_WORDS,
-            "FRACTION_WORDS": _constants.FRACTION_WORDS,
-            # "DENOMINATOR_WORDS": _constants.DENOMINATOR_WORDS,
-            "UNICODE_FRACTIONS": _constants.UNICODE_FRACTIONS,
-            
-            # unit hashmaps
-            "UNITS": _constants.UNITS,
-            "BASIC_UNITS": _constants.BASIC_UNITS,
-            "VOLUME_UNITS": _constants.VOLUME_UNITS,
-            "WEIGHT_UNITS": _constants.WEIGHT_UNITS,
-            "DIMENSION_UNITS": _constants.DIMENSION_UNITS,
-            "CASUAL_UNITS": _constants.CASUAL_UNITS,
-
-            # unit hashsets
-            "UNITS_SET": _constants.UNITS_SET,
-            "BASIC_UNITS_SET": _constants.BASIC_UNITS_SET,
-            "NON_BASIC_UNITS_SET": _constants.NON_BASIC_UNITS_SET, 
-            "VOLUME_UNITS_SET": _constants.VOLUME_UNITS_SET,
-            "WEIGHT_UNITS_SET": _constants.WEIGHT_UNITS_SET,
-            "DIMENSION_UNITS_SET": _constants.DIMENSION_UNITS_SET,
-            "SIZE_MODIFIERS_SET": _constants.SIZE_MODIFIERS_SET,
-            "CASUAL_UNITS_SET": _constants.CASUAL_UNITS_SET,
-            "CASUAL_QUANTITIES_SET": _constants.CASUAL_QUANTITIES_SET,
-
-            "CASUAL_QUANTITIES": _constants.CASUAL_QUANTITIES,
-            "UNIT_MODIFIERS": _constants.UNIT_MODIFIERS,
-            "PREP_WORDS": _constants.PREP_WORDS,
-            "APPROXIMATE_STRINGS": _constants.APPROXIMATE_STRINGS,
-            "QUANTITY_PER_UNIT_STRINGS": _constants.QUANTITY_PER_UNIT_STRINGS,
-            "UNIT_TO_STANDARD_UNIT": _constants.UNIT_TO_STANDARD_UNIT,
-            "STOP_WORDS": _constants.STOP_WORDS,
-            "DASH_SYMBOLS": _constants.DASH_SYMBOLS,
-            'REMOVABLE_DASH_SYMBOLS': _constants.REMOVABLE_DASH_SYMBOLS
-        }
-
-        # Define regex patterns
-        # string numbers to number map
-        self.NUMBER_WORDS_MAP = NUMBER_WORDS_MAP
-        self.PREFIXED_NUMBER_WORDS = PREFIXED_NUMBER_WORDS
-        self.PREFIXED_NUMBER_WORDS_GROUPS = PREFIXED_NUMBER_WORDS_GROUPS
-
-        # unicode fractions
-        self.UNICODE_FRACTIONS_PATTERN = UNICODE_FRACTIONS_PATTERN
-        
-        # unit matching patterns
-        self.UNITS_PATTERN = UNITS_PATTERN
-        self.BASIC_UNITS_PATTERN = BASIC_UNITS_PATTERN
-        self.NON_BASIC_UNITS_PATTERN = NON_BASIC_UNITS_PATTERN
-        self.VOLUME_UNITS_PATTERN = VOLUME_UNITS_PATTERN
-        self.SIZE_MODIFIERS_PATTERN = SIZE_MODIFIERS_PATTERN
-        self.PREP_WORDS_PATTERN = PREP_WORDS_PATTERN
-        self.STOP_WORDS_PATTERN = STOP_WORDS_PATTERN
-        self.CASUAL_QUANTITIES_PATTERN = CASUAL_QUANTITIES_PATTERN
-        self.CASUAL_UNITS_PATTERN = CASUAL_UNITS_PATTERN
-        self.DIMENSION_UNITS_PATTERN = DIMENSION_UNITS_PATTERN
-        self.UNIT_MODIFIERS_PATTERN = UNIT_MODIFIERS_PATTERN
-        self.APPROXIMATE_STRINGS_PATTERN = APPROXIMATE_STRINGS_PATTERN
-
-        # capture groups for getting anumber followed by the next closest units/basics units/non-basic units
-        self.QUANTITY_UNIT_GROUPS = QUANTITY_UNIT_GROUPS
-        self.QUANTITY_BASIC_UNIT_GROUPS = QUANTITY_BASIC_UNIT_GROUPS
-        self.QUANTITY_NON_BASIC_UNIT_GROUPS = QUANTITY_NON_BASIC_UNIT_GROUPS
-        self.QUANTITY_SOMETIMES_UNIT_GROUPS = QUANTITY_SOMETIMES_UNIT_GROUPS
-        self.QUANTITY_DIMENSION_UNIT_GROUPS = QUANTITY_DIMENSION_UNIT_GROUPS
-        self.QUANTITY_ANYTHING_UNIT_GROUPS = QUANTITY_ANYTHING_UNIT_GROUPS
-        self.QUANTITY_UNIT_ONLY_GROUPS = QUANTITY_UNIT_ONLY_GROUPS
-        self.EQUIV_QUANTITY_UNIT_GROUPS = EQUIV_QUANTITY_UNIT_GROUPS
-        
-        # word fraction patterns
-        self.NUMBER_WITH_FRACTION_WORD = NUMBER_WITH_FRACTION_WORD
-        self.NUMBER_WITH_FRACTION_WORD_GROUPS = NUMBER_WITH_FRACTION_WORD_GROUPS
-        self.NUMBER_WITH_FRACTION_WORD_MAP = NUMBER_WITH_FRACTION_WORD_MAP
-
-        # generic number matchings and/or numbers with specific separators
-        self.ALL_NUMBERS = ALL_NUMBERS
-        self.SPACE_SEP_NUMBERS = SPACE_SEP_NUMBERS
-        self.NUMBERS_SEPARATED_BY_ADD_SYMBOLS = NUMBERS_SEPARATED_BY_ADD_SYMBOLS
-        self.NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS = NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS
-
-        # range patterns
-        self.QUANTITY_DASH_QUANTITY = QUANTITY_DASH_QUANTITY
-        self.QUANTITY_DASH_QUANTITY_GROUPS = QUANTITY_DASH_QUANTITY_GROUPS
-        self.QUANTITY_DASH_QUANTITY_UNIT = QUANTITY_DASH_QUANTITY_UNIT
-        self.QUANTITY_OR_QUANTITY = QUANTITY_OR_QUANTITY
-        self.QUANTITY_TO_QUANTITY = QUANTITY_TO_QUANTITY
-        self.BETWEEN_QUANTITY_AND_QUANTITY = BETWEEN_QUANTITY_AND_QUANTITY
-
-        # fraction specific patterns
-        self.FRACTION_PATTERN = FRACTION_PATTERN
-        self.SPLIT_SPACED_NUMS = SPLIT_SPACED_NUMS
-        
-        # repeated unit string patterns
-        self.REPEAT_UNIT_RANGES = REPEAT_UNIT_RANGES
-
-        # miscellaneous patterns
-        self.CONSECUTIVE_LETTERS_DIGITS = CONSECUTIVE_LETTERS_DIGITS
-
-        self.SPLIT_BY_PARENTHESIS = SPLIT_BY_PARENTHESIS
-
-        # "x" and "X" separators
-        self.X_AFTER_NUMBER = X_AFTER_NUMBER
-
-        # match specific strings 
-        self.OPTIONAL_STRING = OPTIONAL_STRING
-        self.REQUIRED_STRING = REQUIRED_STRING
-        self.WORDS_ENDING_IN_LY = WORDS_ENDING_IN_LY
-        self.PCT_REGEX_MAP = PCT_REGEX_MAP
-        self.NUMBER_WITH_INCH_SYMBOL_MAP = NUMBER_WITH_INCH_SYMBOL_MAP
-
-        # get a list of all the attributes of the class in sorted order by name
-        self.sorted_keys = sorted(self.__dict__.keys(), key=lambda x: x[0])
-
-        # # Sort attributes by name
-        # self.sorted_attrs = sorted(self.__dict__.items(), key=lambda x: x[0])
-
-    def find_matches(self, input_string: str) -> Dict[str, List[Union[str, Tuple[str]]]]:
-        """
-        Find all matches in the input string for each regex pattern.
-        Returns a dictionary with pattern names as keys and corresponding matches as values.
-        """
-
-        matches = {}
-        for name, pattern in self.__dict__.items():
-            if isinstance(pattern, re.Pattern):
-                matches[name] = pattern.findall(input_string)
-        return matches
+# # -----------------------------------------------------------------------------
+# # ---------------------------- OLD IngredientTools class... ---------------------------------
+# # -----------------------------------------------------------------------------
     
-    def print_matches(self, input_string: str) -> None:
-        """
-        Print out all matches in the input string for each regex pattern.
-        Returns None
-        """
-        matches = {}
+# # -----------------------------------------------------------------------------
+# # --------------------------- Class to store all regex patterns -----------------------
+# # A class to hold all regex patterns used in the recipe parser (version 2)
+# # - Each pattern is stored as a class attribute and the class 
+# # - IngredientTools class has a single method that applies ALL of the 
+# #     regex patterns to a given string and return a dictionary of matches (for testing mainly)
+# # -----------------------------------------------------------------------------
+# # regex variables and maps to put in the class:
+# class IngredientTools:
+#     """
+#     A class to hold all regex patterns used in recipe parsing.
+#     """
+
+#     def __init__(self) -> None:
+#         # Constant data values and lookup tables
+#         self.constants = {
+
+#             # regex hashmaps
+#             "NUMBER_WORDS": _constants.NUMBER_WORDS,
+#             "NUMBER_PREFIX_WORDS": _constants.NUMBER_PREFIX_WORDS,
+#             "MULTI_FRACTION_WORDS": _constants.MULTI_FRACTION_WORDS,
+#             "FRACTION_WORDS": _constants.FRACTION_WORDS,
+#             # "DENOMINATOR_WORDS": _constants.DENOMINATOR_WORDS,
+#             "UNICODE_FRACTIONS": _constants.UNICODE_FRACTIONS,
+            
+#             # unit hashmaps
+#             "UNITS": _constants.UNITS,
+#             "BASIC_UNITS": _constants.BASIC_UNITS,
+#             "VOLUME_UNITS": _constants.VOLUME_UNITS,
+#             "WEIGHT_UNITS": _constants.WEIGHT_UNITS,
+#             "DIMENSION_UNITS": _constants.DIMENSION_UNITS,
+#             "CASUAL_UNITS": _constants.CASUAL_UNITS,
+
+#             # unit hashsets
+#             "UNITS_SET": _constants.UNITS_SET,
+#             "BASIC_UNITS_SET": _constants.BASIC_UNITS_SET,
+#             "NON_BASIC_UNITS_SET": _constants.NON_BASIC_UNITS_SET, 
+#             "VOLUME_UNITS_SET": _constants.VOLUME_UNITS_SET,
+#             "WEIGHT_UNITS_SET": _constants.WEIGHT_UNITS_SET,
+#             "DIMENSION_UNITS_SET": _constants.DIMENSION_UNITS_SET,
+#             "SIZE_MODIFIERS_SET": _constants.SIZE_MODIFIERS_SET,
+#             "CASUAL_UNITS_SET": _constants.CASUAL_UNITS_SET,
+#             "CASUAL_QUANTITIES_SET": _constants.CASUAL_QUANTITIES_SET,
+
+#             "CASUAL_QUANTITIES": _constants.CASUAL_QUANTITIES,
+#             "UNIT_MODIFIERS": _constants.UNIT_MODIFIERS,
+#             "PREP_WORDS": _constants.PREP_WORDS,
+#             "APPROXIMATE_STRINGS": _constants.APPROXIMATE_STRINGS,
+#             "QUANTITY_PER_UNIT_STRINGS": _constants.QUANTITY_PER_UNIT_STRINGS,
+#             "UNIT_TO_STANDARD_UNIT": _constants.UNIT_TO_STANDARD_UNIT,
+#             "STOP_WORDS": _constants.STOP_WORDS,
+#             "DASH_SYMBOLS": _constants.DASH_SYMBOLS,
+#             'REMOVABLE_DASH_SYMBOLS': _constants.REMOVABLE_DASH_SYMBOLS
+#         }
+
+#         # Define regex patterns
+#         # string numbers to number map
+#         self.NUMBER_WORDS_MAP = NUMBER_WORDS_MAP
+#         self.PREFIXED_NUMBER_WORDS = PREFIXED_NUMBER_WORDS
+#         self.PREFIXED_NUMBER_WORDS_GROUPS = PREFIXED_NUMBER_WORDS_GROUPS
+
+#         # unicode fractions
+#         self.UNICODE_FRACTIONS_PATTERN = UNICODE_FRACTIONS_PATTERN
         
-        for key in self.sorted_keys:
-            attribute = self.__dict__[key]
-            if isinstance(attribute, re.Pattern):
-                matches[key] = attribute.findall(input_string)
-                print(f"{key}: {matches[key]}")
+#         # unit matching patterns
+#         self.UNITS_PATTERN = UNITS_PATTERN
+#         self.BASIC_UNITS_PATTERN = BASIC_UNITS_PATTERN
+#         self.NON_BASIC_UNITS_PATTERN = NON_BASIC_UNITS_PATTERN
+#         self.VOLUME_UNITS_PATTERN = VOLUME_UNITS_PATTERN
+#         self.SIZE_MODIFIERS_PATTERN = SIZE_MODIFIERS_PATTERN
+#         self.PREP_WORDS_PATTERN = PREP_WORDS_PATTERN
+#         self.STOP_WORDS_PATTERN = STOP_WORDS_PATTERN
+#         self.CASUAL_QUANTITIES_PATTERN = CASUAL_QUANTITIES_PATTERN
+#         self.CASUAL_UNITS_PATTERN = CASUAL_UNITS_PATTERN
+#         self.DIMENSION_UNITS_PATTERN = DIMENSION_UNITS_PATTERN
+#         self.UNIT_MODIFIERS_PATTERN = UNIT_MODIFIERS_PATTERN
+#         self.APPROXIMATE_STRINGS_PATTERN = APPROXIMATE_STRINGS_PATTERN
 
-        # matches = {}
-        # for name, pattern in self.__dict__.items():
-        #     if isinstance(pattern, re.Pattern):
-        #         matches[name] = pattern.findall(input_string)
-        #         print(f"{name}: {matches[name]}")
-
+#         # capture groups for getting anumber followed by the next closest units/basics units/non-basic units
+#         self.QUANTITY_UNIT_GROUPS = QUANTITY_UNIT_GROUPS
+#         self.QUANTITY_BASIC_UNIT_GROUPS = QUANTITY_BASIC_UNIT_GROUPS
+#         self.QUANTITY_NON_BASIC_UNIT_GROUPS = QUANTITY_NON_BASIC_UNIT_GROUPS
+#         self.QUANTITY_SOMETIMES_UNIT_GROUPS = QUANTITY_SOMETIMES_UNIT_GROUPS
+#         self.QUANTITY_DIMENSION_UNIT_GROUPS = QUANTITY_DIMENSION_UNIT_GROUPS
+#         self.QUANTITY_ANYTHING_UNIT_GROUPS = QUANTITY_ANYTHING_UNIT_GROUPS
+#         self.QUANTITY_UNIT_ONLY_GROUPS = QUANTITY_UNIT_ONLY_GROUPS
+#         self.EQUIV_QUANTITY_UNIT_GROUPS = EQUIV_QUANTITY_UNIT_GROUPS
         
-    def list_constants(self) -> None:
-        """
-        List all the attributes of the class.
-        """ 
+#         # word fraction patterns
+#         self.NUMBER_WITH_FRACTION_WORD = NUMBER_WITH_FRACTION_WORD
+#         self.NUMBER_WITH_FRACTION_WORD_GROUPS = NUMBER_WITH_FRACTION_WORD_GROUPS
+#         self.NUMBER_WITH_FRACTION_WORD_MAP = NUMBER_WITH_FRACTION_WORD_MAP
 
-        # attrs = [name for name in self.__dict__]
+#         # generic number matchings and/or numbers with specific separators
+#         self.ALL_NUMBERS = ALL_NUMBERS
+#         self.SPACE_SEP_NUMBERS = SPACE_SEP_NUMBERS
+#         self.NUMBERS_SEPARATED_BY_ADD_SYMBOLS = NUMBERS_SEPARATED_BY_ADD_SYMBOLS
+#         self.NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS = NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS
 
-        for name, pattern in self.__dict__.items():
-            print(f"- {name} ({type(self.__dict__[name]).__name__})")
-            if isinstance(self.__dict__[name], dict):
-                print(f"  > {len(self.__dict__[name])} items")
-                # for key, value in self.__dict__[name].items():
-                #     print(f"   - {key}")
-        # return [name for name in self.__dict__ if isinstance(self.__dict__[name], re.Pattern)]
+#         # range patterns
+#         self.QUANTITY_DASH_QUANTITY = QUANTITY_DASH_QUANTITY
+#         self.QUANTITY_DASH_QUANTITY_GROUPS = QUANTITY_DASH_QUANTITY_GROUPS
+#         self.QUANTITY_DASH_QUANTITY_UNIT = QUANTITY_DASH_QUANTITY_UNIT
+#         self.QUANTITY_OR_QUANTITY = QUANTITY_OR_QUANTITY
+#         self.QUANTITY_TO_QUANTITY = QUANTITY_TO_QUANTITY
+#         self.BETWEEN_QUANTITY_AND_QUANTITY = BETWEEN_QUANTITY_AND_QUANTITY
+
+#         # fraction specific patterns
+#         self.FRACTION_PATTERN = FRACTION_PATTERN
+#         self.SPLIT_SPACED_NUMS = SPLIT_SPACED_NUMS
+        
+#         # repeated unit string patterns
+#         self.REPEAT_UNIT_RANGES = REPEAT_UNIT_RANGES
+
+#         # miscellaneous patterns
+#         self.CONSECUTIVE_LETTERS_DIGITS = CONSECUTIVE_LETTERS_DIGITS
+
+#         self.SPLIT_BY_PARENTHESIS = SPLIT_BY_PARENTHESIS
+
+#         # "x" and "X" separators
+#         self.X_AFTER_NUMBER = X_AFTER_NUMBER
+
+#         # match specific strings 
+#         self.OPTIONAL_STRING = OPTIONAL_STRING
+#         self.REQUIRED_STRING = REQUIRED_STRING
+#         self.WORDS_ENDING_IN_LY = WORDS_ENDING_IN_LY
+#         self.PCT_REGEX_MAP = PCT_REGEX_MAP
+#         self.NUMBER_WITH_INCH_SYMBOL_MAP = NUMBER_WITH_INCH_SYMBOL_MAP
+
+#         # get a list of all the attributes of the class in sorted order by name
+#         self.sorted_keys = sorted(self.__dict__.keys(), key=lambda x: x[0])
+
+#         # # Sort attributes by name
+#         # self.sorted_attrs = sorted(self.__dict__.items(), key=lambda x: x[0])
+
+#     def find_matches(self, input_string: str) -> Dict[str, List[Union[str, Tuple[str]]]]:
+#         """
+#         Find all matches in the input string for each regex pattern.
+#         Returns a dictionary with pattern names as keys and corresponding matches as values.
+#         """
+
+#         matches = {}
+#         for name, pattern in self.__dict__.items():
+#             if isinstance(pattern, re.Pattern):
+#                 matches[name] = pattern.findall(input_string)
+#         return matches
     
-    def get_desc(self, pattern_name: str) -> str:
-        """
-        Get the description of a specific regex pattern.
-        Returns the description of the pattern if found, otherwise returns an empty string.
-        """
+#     def print_matches(self, input_string: str) -> None:
+#         """
+#         Print out all matches in the input string for each regex pattern.
+#         Returns None
+#         """
+#         matches = {}
         
-        # Define descriptions for each pattern
-        descriptions = {
-            ### Constants and lookup tables
-            "NUMBER_WORDS": "Dictionary of number words to numerical values.",
-            "MULTI_FRACTION_WORDS": "Dictionary of fraction phrases (i.e. 'two thirds' or '1 half') to their fractional string value",
-            "FRACTION_WORDS": "Dictionary of single fraction words that represent a singular fraction (i.e. a quarter is equal to 1/4).",
-            "UNICODE_FRACTIONS": "Dictionary of unicode fractions to numerical values.",
+#         for key in self.sorted_keys:
+#             attribute = self.__dict__[key]
+#             if isinstance(attribute, re.Pattern):
+#                 matches[key] = attribute.findall(input_string)
+#                 print(f"{key}: {matches[key]}")
 
-            # dictionaries of units
-            "UNITS": "Dictionary of units used in the recipe parser (All units, including basic, volume, and specific units).",
-            "BASIC_UNITS": "Dictionary of basic units used in the recipe parser (The most common units).",
-            "VOLUME_UNITS": "Dictionary of volume units used in the recipe parser (Units used for measuring volume).",
-            "WEIGHT_UNITS": "Dictionary of weight units used in the recipe parser (Units used for measuring weight).",
-            "DIMENSION_UNITS": "Dictionary of dimension units used in the recipe parser (Units used for measuring dimensions).",
-            "CASUAL_UNITS": "Dictionary of casual units used in the recipe parser (Units that are not standard units).",
+#         # matches = {}
+#         # for name, pattern in self.__dict__.items():
+#         #     if isinstance(pattern, re.Pattern):
+#         #         matches[name] = pattern.findall(input_string)
+#         #         print(f"{name}: {matches[name]}")
 
-            # sets of all unit words
-            "UNITS_SET": "Set of units used in the recipe parser (All units, including basic, volume, and specific units).",
-            "BASIC_UNITS_SET": "Set of basic units used in the recipe parser (The most common units).",
-            "NON_BASIC_UNITS_SET": "Set of non-basic units used in the recipe parser (Units that are not in the BASIC_UNITS dictionary).",
-            "SIZE_MODIFIERS_SET": "Set of units that are sometimes used in the recipe parser (Set of words that MIGHT be units if no other units are around).",
-            "VOLUME_UNITS_SET": "Set of volume units used in the recipe parser (Units used for measuring volume).",
-            "WEIGHT_UNITS_SET": "Set of weight units used in the recipe parser (Units used for measuring weight).",
-            "DIMENSION_UNITS_SET": "Set of dimension units used in the recipe parser (Units used for measuring dimensions).",
-            "CASUAL_UNITS_SET": "Set of casual units used in the recipe parser (Units that are not standard units).",
-            "CASUAL_QUANTITIES_SET": "Set of casual quantities used in the recipe parser (Quantities that are not standard quantities).",
+        
+#     def list_constants(self) -> None:
+#         """
+#         List all the attributes of the class.
+#         """ 
 
-            "CASUAL_QUANTITIES": "Dictionary of casual quantities used in the recipe parser.",
-            "UNIT_MODIFIERS": "Set of unit modifier words for lookups in recipe parser.",
-            "PREP_WORDS": "Set of preparation words for lookups in recipe parser.",
-            "APPROXIMATE_STRINGS": "Set of strings that indicate an approximate quantity in the recipe parser.",
-            "QUANTITY_PER_UNIT_STRINGS": "Set of strings that indicate a quantity per unit in the recipe parser.",
-            "NUMBER_WORDS_MAP": "Dictionary of regex patterns to match number words in a string (i.e. 'one' : '1', 'two' : '2').",
+#         # attrs = [name for name in self.__dict__]
+
+#         for name, pattern in self.__dict__.items():
+#             print(f"- {name} ({type(self.__dict__[name]).__name__})")
+#             if isinstance(self.__dict__[name], dict):
+#                 print(f"  > {len(self.__dict__[name])} items")
+#                 # for key, value in self.__dict__[name].items():
+#                 #     print(f"   - {key}")
+#         # return [name for name in self.__dict__ if isinstance(self.__dict__[name], re.Pattern)]
+    
+#     def get_desc(self, pattern_name: str) -> str:
+#         """
+#         Get the description of a specific regex pattern.
+#         Returns the description of the pattern if found, otherwise returns an empty string.
+#         """
+        
+#         # Define descriptions for each pattern
+#         descriptions = {
+#             ### Constants and lookup tables
+#             "NUMBER_WORDS": "Dictionary of number words to numerical values.",
+#             "MULTI_FRACTION_WORDS": "Dictionary of fraction phrases (i.e. 'two thirds' or '1 half') to their fractional string value",
+#             "FRACTION_WORDS": "Dictionary of single fraction words that represent a singular fraction (i.e. a quarter is equal to 1/4).",
+#             "UNICODE_FRACTIONS": "Dictionary of unicode fractions to numerical values.",
+
+#             # dictionaries of units
+#             "UNITS": "Dictionary of units used in the recipe parser (All units, including basic, volume, and specific units).",
+#             "BASIC_UNITS": "Dictionary of basic units used in the recipe parser (The most common units).",
+#             "VOLUME_UNITS": "Dictionary of volume units used in the recipe parser (Units used for measuring volume).",
+#             "WEIGHT_UNITS": "Dictionary of weight units used in the recipe parser (Units used for measuring weight).",
+#             "DIMENSION_UNITS": "Dictionary of dimension units used in the recipe parser (Units used for measuring dimensions).",
+#             "CASUAL_UNITS": "Dictionary of casual units used in the recipe parser (Units that are not standard units).",
+
+#             # sets of all unit words
+#             "UNITS_SET": "Set of units used in the recipe parser (All units, including basic, volume, and specific units).",
+#             "BASIC_UNITS_SET": "Set of basic units used in the recipe parser (The most common units).",
+#             "NON_BASIC_UNITS_SET": "Set of non-basic units used in the recipe parser (Units that are not in the BASIC_UNITS dictionary).",
+#             "SIZE_MODIFIERS_SET": "Set of units that are sometimes used in the recipe parser (Set of words that MIGHT be units if no other units are around).",
+#             "VOLUME_UNITS_SET": "Set of volume units used in the recipe parser (Units used for measuring volume).",
+#             "WEIGHT_UNITS_SET": "Set of weight units used in the recipe parser (Units used for measuring weight).",
+#             "DIMENSION_UNITS_SET": "Set of dimension units used in the recipe parser (Units used for measuring dimensions).",
+#             "CASUAL_UNITS_SET": "Set of casual units used in the recipe parser (Units that are not standard units).",
+#             "CASUAL_QUANTITIES_SET": "Set of casual quantities used in the recipe parser (Quantities that are not standard quantities).",
+
+#             "CASUAL_QUANTITIES": "Dictionary of casual quantities used in the recipe parser.",
+#             "UNIT_MODIFIERS": "Set of unit modifier words for lookups in recipe parser.",
+#             "PREP_WORDS": "Set of preparation words for lookups in recipe parser.",
+#             "APPROXIMATE_STRINGS": "Set of strings that indicate an approximate quantity in the recipe parser.",
+#             "QUANTITY_PER_UNIT_STRINGS": "Set of strings that indicate a quantity per unit in the recipe parser.",
+#             "NUMBER_WORDS_MAP": "Dictionary of regex patterns to match number words in a string (i.e. 'one' : '1', 'two' : '2').",
             
-            ### Regex patterns
+#             ### Regex patterns
 
-            # simple unit matching patterns
-            "UNITS_PATTERN": "Matches units in a string.",
-            "BASIC_UNITS_PATTERN": "Matches just the basic units from the BASIC_UNITS dictionary.",
-            "NON_BASIC_UNITS_PATTERN": "Matches non-basic units in a string.",
-            "VOLUME_UNITS_PATTERN": "Matches specifically volume units in a string.",
-            "SIZE_MODIFIERS_PATTERN": "Matches sometimes units in a string.",
-            "PREP_WORDS_PATTERN": "Matches preparation words in a string.",
-            "STOP_WORDS_PATTERN": "Matches stop words in a string.",
-            "CASUAL_QUANTITIES_PATTERN": "Matches casual quantities in a string (i.e. 'couple' = 2).",
-            "CASUAL_UNITS_PATTERN": "Matches casual units in a string (i.e. 'dash', 'pinch').",
-            "DIMENSION_UNITS_PATTERN": "Matches dimension units in a string (i.e. 'inches', 'cm').",
-            "UNIT_MODIFIERS_PATTERN": "Matches unit modifiers in a string (i.e. 'large', 'small').",
-            "APPROXIMATE_STRINGS_PATTERN": "Matches approximate strings in a string (i.e. 'about', 'approximately').",
+#             # simple unit matching patterns
+#             "UNITS_PATTERN": "Matches units in a string.",
+#             "BASIC_UNITS_PATTERN": "Matches just the basic units from the BASIC_UNITS dictionary.",
+#             "NON_BASIC_UNITS_PATTERN": "Matches non-basic units in a string.",
+#             "VOLUME_UNITS_PATTERN": "Matches specifically volume units in a string.",
+#             "SIZE_MODIFIERS_PATTERN": "Matches sometimes units in a string.",
+#             "PREP_WORDS_PATTERN": "Matches preparation words in a string.",
+#             "STOP_WORDS_PATTERN": "Matches stop words in a string.",
+#             "CASUAL_QUANTITIES_PATTERN": "Matches casual quantities in a string (i.e. 'couple' = 2).",
+#             "CASUAL_UNITS_PATTERN": "Matches casual units in a string (i.e. 'dash', 'pinch').",
+#             "DIMENSION_UNITS_PATTERN": "Matches dimension units in a string (i.e. 'inches', 'cm').",
+#             "UNIT_MODIFIERS_PATTERN": "Matches unit modifiers in a string (i.e. 'large', 'small').",
+#             "APPROXIMATE_STRINGS_PATTERN": "Matches approximate strings in a string (i.e. 'about', 'approximately').",
 
-            "QUANTITY_UNIT_GROUPS": "Matches a number followed by a unit with capture groups.", 
-            "QUANTITY_BASIC_UNIT_GROUPS": "Matches a number followed by a basic unit with capture groups.",
-            "QUANTITY_NON_BASIC_UNIT_GROUPS": "Matches a number followed by a non-basic unit with capture groups.",
-            "QUANTITY_SOMETIMES_UNIT_GROUPS": "Matches a number followed by a 'sometimes unit' with capture groups (i.e. 'large' is sometimes a unit if no other units are around).",
-            "QUANTITY_ANYTHING_UNIT_GROUPS": "Matches a number followed by any text and then a unit with capture groups.",
-            "QUANTITY_DIMENSION_UNIT_GROUPS": "Matches a number followed by a dimension unit with capture groups.",
-            "QUANTITY_UNIT_ONLY_GROUPS": "Matches a quantity followed by  0+whitespaces/hypens and then a unit with capture groups.",
-            "EQUIV_QUANTITY_UNIT_GROUPS": "Matches an 'approximate/equivalent' string followed by a number followed by a unit with capture groups (helpful for finding equivalent quantity-unit patterns i.e. 'about 1/2 cup').",
+#             "QUANTITY_UNIT_GROUPS": "Matches a number followed by a unit with capture groups.", 
+#             "QUANTITY_BASIC_UNIT_GROUPS": "Matches a number followed by a basic unit with capture groups.",
+#             "QUANTITY_NON_BASIC_UNIT_GROUPS": "Matches a number followed by a non-basic unit with capture groups.",
+#             "QUANTITY_SOMETIMES_UNIT_GROUPS": "Matches a number followed by a 'sometimes unit' with capture groups (i.e. 'large' is sometimes a unit if no other units are around).",
+#             "QUANTITY_ANYTHING_UNIT_GROUPS": "Matches a number followed by any text and then a unit with capture groups.",
+#             "QUANTITY_DIMENSION_UNIT_GROUPS": "Matches a number followed by a dimension unit with capture groups.",
+#             "QUANTITY_UNIT_ONLY_GROUPS": "Matches a quantity followed by  0+whitespaces/hypens and then a unit with capture groups.",
+#             "EQUIV_QUANTITY_UNIT_GROUPS": "Matches an 'approximate/equivalent' string followed by a number followed by a unit with capture groups (helpful for finding equivalent quantity-unit patterns i.e. 'about 1/2 cup').",
 
-            # general umber matching patterns and number with specific separators
-            "ALL_NUMBERS": "Matches ALL number/decimal/fraction in a string regardless of padding.",
-            "SPACE_SEP_NUMBERS": "Matches any number/decimal/fraction followed by a space and then another number/decimal/fraction.",
-            "NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS": "Matches numbers/decimals/fractions separated by 'and', '&', 'plus', or '+' symbols with capture groups.",
+#             # general umber matching patterns and number with specific separators
+#             "ALL_NUMBERS": "Matches ALL number/decimal/fraction in a string regardless of padding.",
+#             "SPACE_SEP_NUMBERS": "Matches any number/decimal/fraction followed by a space and then another number/decimal/fraction.",
+#             "NUMBERS_SEPARATED_BY_ADD_SYMBOLS_GROUPS": "Matches numbers/decimals/fractions separated by 'and', '&', 'plus', or '+' symbols with capture groups.",
 
-            "QUANTITY_DASH_QUANTITY": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions.",
-            "QUANTITY_DASH_QUANTITY_GROUPS": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions with capture groups.",
-            "QUANTITY_DASH_QUANTITY_UNIT": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions followed by a unit (0+ whitespace between last number and the unit).",
-            "QUANTITY_OR_QUANTITY": "Matches numbers/decimals/fractions separated by 'or'.",
-            "QUANTITY_TO_QUANTITY": "Matches numbers/decimals/fractions separated by 'to'.",
-            "BETWEEN_QUANTITY_AND_QUANTITY": "Matches numbers/decimals/fractions separated by 'between' and 'and'.",
+#             "QUANTITY_DASH_QUANTITY": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions.",
+#             "QUANTITY_DASH_QUANTITY_GROUPS": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions with capture groups.",
+#             "QUANTITY_DASH_QUANTITY_UNIT": "Matches numbers/decimals/fractions followed by a hyphen to numbers/decimals/fractions followed by a unit (0+ whitespace between last number and the unit).",
+#             "QUANTITY_OR_QUANTITY": "Matches numbers/decimals/fractions separated by 'or'.",
+#             "QUANTITY_TO_QUANTITY": "Matches numbers/decimals/fractions separated by 'to'.",
+#             "BETWEEN_QUANTITY_AND_QUANTITY": "Matches numbers/decimals/fractions separated by 'between' and 'and'.",
             
-            # Unicode fractions
-            "UNICODE_FRACTIONS_PATTERN": "Matches unicode fractions in the string.",
+#             # Unicode fractions
+#             "UNICODE_FRACTIONS_PATTERN": "Matches unicode fractions in the string.",
             
-            # fraction word patterns
-            "NUMBER_WITH_FRACTION_WORD_GROUPS": "Matches a number followed by a fraction word with capture groups.",
-            "NUMBER_WITH_FRACTION_WORD_MAP": "Dictionary of regex patterns to match number followed by a fraction word in a string (i.e. '1 half' : '1 1/2').",
+#             # fraction word patterns
+#             "NUMBER_WITH_FRACTION_WORD_GROUPS": "Matches a number followed by a fraction word with capture groups.",
+#             "NUMBER_WITH_FRACTION_WORD_MAP": "Dictionary of regex patterns to match number followed by a fraction word in a string (i.e. '1 half' : '1 1/2').",
 
-            # fraction specific patterns
-            "FRACTION_PATTERN": "Matches fraction parts in a string.",
-            "SPLIT_SPACED_NUMS": "Splits numbers/decimals/fractions separated by 1+ whitespaces into a capture group (i.e '1.5 1/2' -> ['1.5', '1/2']).",
-            "REPEAT_UNIT_RANGES": "Matches repeated unit strings in a string.",
+#             # fraction specific patterns
+#             "FRACTION_PATTERN": "Matches fraction parts in a string.",
+#             "SPLIT_SPACED_NUMS": "Splits numbers/decimals/fractions separated by 1+ whitespaces into a capture group (i.e '1.5 1/2' -> ['1.5', '1/2']).",
+#             "REPEAT_UNIT_RANGES": "Matches repeated unit strings in a string.",
 
-            "SPLIT_BY_PARENTHESIS": "Matches parentheses in a string and splits the string by them if used with re.split().",
+#             "SPLIT_BY_PARENTHESIS": "Matches parentheses in a string and splits the string by them if used with re.split().",
 
-            "CONSECUTIVE_LETTERS_DIGITS": "Matches consecutive letters and digits in a string.",
-            "X_AFTER_NUMBER": "Matches a number followed by an 'x'/'X' (can't be the start of a word starting with xX).",
-            "OPTIONAL_STRING": "Matches the word 'optional', 'option', 'opt', etc. in a string.",
-            "REQUIRED_STRING": "Matches the word 'required', 'requirement', 'req', etc. in a string.",
-            "WORDS_ENDING_IN_LY": "Matches any word ending in 'ly' (i.e. 'firmly', 'lightly', 'rapidly').",
-            "PCT_REGEX_MAP" : "Dictionary of regex patterns to match numbers followed by a percentage character '%', 'percentage', 'percent', or 'pct'."
-        }
+#             "CONSECUTIVE_LETTERS_DIGITS": "Matches consecutive letters and digits in a string.",
+#             "X_AFTER_NUMBER": "Matches a number followed by an 'x'/'X' (can't be the start of a word starting with xX).",
+#             "OPTIONAL_STRING": "Matches the word 'optional', 'option', 'opt', etc. in a string.",
+#             "REQUIRED_STRING": "Matches the word 'required', 'requirement', 'req', etc. in a string.",
+#             "WORDS_ENDING_IN_LY": "Matches any word ending in 'ly' (i.e. 'firmly', 'lightly', 'rapidly').",
+#             "PCT_REGEX_MAP" : "Dictionary of regex patterns to match numbers followed by a percentage character '%', 'percentage', 'percent', or 'pct'."
+#         }
 
-        # Retrieve description based on pattern name
-        return descriptions.get(pattern_name, "")
+#         # Retrieve description based on pattern name
+#         return descriptions.get(pattern_name, "")
     
 # ##################################################################################################################
 # ##################################################################################################################

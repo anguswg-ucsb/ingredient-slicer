@@ -8,7 +8,7 @@ authors = [
   {name = "Angus Watters", email = "anguswatters@gmail.com"},
 ]
 version = "0.0.83"
-description = "Parse quantities, units, and (sometimes) foods from recipe ingredients into structured data"
+description = "Parses unstructured recipe ingredient text into standardized quantities, units, and foods"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",

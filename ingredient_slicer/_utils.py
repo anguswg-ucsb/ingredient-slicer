@@ -1,9 +1,12 @@
 
+
 from fractions import Fraction
+from html import unescape
 import re
+import warnings
+from typing import List, Dict, Any, Union, Tuple, Callable
 
 from ingredient_slicer import _constants, _regex_patterns
-from typing import Union, Callable
 
 # -----------------------------------------------------------------------------------------------
 # ---- Utility functions for handling numbers, decimals, and fractions in strings ----
@@ -61,7 +64,11 @@ def _make_int_or_float_str(number_str: str) -> str:
             # f"-{str(number)}" if is_negative else str(number)
 
             return str(number)  # Return float if it's a decimal
-        
+
+# -----------------------------------------------------------------------------------------------
+# ---- Convert a string fraction to a decimal (i.e. "1/2" -> "0.5") ----
+# -----------------------------------------------------------------------------------------------
+
 def _fraction_str_to_decimal(fraction_str: str) -> str:
         """
         Convert a string representation of a fraction to its decimal equivalent.
@@ -143,29 +150,6 @@ def _split_fraction_to_float(split_fraction: list) -> float:
 
     return float(Fraction(numerator_fraction, denominator_fraction))
 
-# 0.01/10
-# split_fraction_to_float(['4', '0.48'])
-# split_fraction_to_float(["-2", 10])
-# split_fraction = ['10', '10']
-# split_fraction = ['4', '0.48']
-# split_fraction = ['0.5', '2']
-# split_fraction = ['0.4', '0.1']
-# split_fraction = ['0.4', '0.1']
-
-# numerator_fraction =  Fraction(split_fraction[0])
-# denominator_fraction = Fraction(split_fraction[1])
-# # Fraction(numerator_fraction, denominator_fraction)
-# _make_int_or_float_str(str(float(Fraction(numerator_fraction, denominator_fraction))))
-
-# def float_to_ratio(flt):
-#     if int(flt) == flt:        # to prevent 3.0 -> 30/10
-#         return int(flt), 1
-#     flt_str = str(flt)
-#     flt_split = flt_str.split('.')
-#     numerator = int(''.join(flt_split))
-#     denominator = 10 ** len(flt_split[1])
-#     return numerator, denominator
-
 # TODO: Delete/Deprecated, this is the old version of the _fraction_str_to_decimal function above
 def _fraction_str_to_decimal2(fraction_str: str) -> str:
         """
@@ -236,7 +220,10 @@ def _fraction_str_to_decimal2(fraction_str: str) -> str:
 
 # -----------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------
-# _regex_patterns.FRACTION_TYPE_MAP.keys()
+
+# -----------------------------------------------------------------------------------------------
+# ---- Convert ALL fractions in a string to their decimal equivalent ----
+# -----------------------------------------------------------------------------------------------
 
 # TODO: Replace the _convert_fractions_to_decimals function defined in the IngredientSlicer class with this version
 # NOTE: This is the NEW implementation of _convert_fractions_to_decimals and specifically deals with each fraction type
@@ -312,56 +299,33 @@ def _convert_fractions_to_decimals(ingredient: str) -> list:
 # _convert_fractions_to_decimals(ingredient)
 # _convert_fractions_to_decimals2(ingredient)
 
-# 2/4
+# -----------------------------------------------------------------------------------------------------------------------
+# ---- Force whitespaces between an number followed by a character or vice versa (i.e. "1cup" -> "1 cup") ----
+# -----------------------------------------------------------------------------------------------------------------------
 
-# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
-# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon, 2.0/4"
-# fraction_str = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
-# matches = _regex_patterns.FRACTION_PATTERN.findall(self.standardized_ingredient)
+def _force_ws_between_numbers_and_chars(ingredient: str) -> str:
+    
+    """Forces spaces between numbers and units and between units and numbers.
+    End result is a string with a space between numbers and units and between units and numbers.
+    Examples:
+    "1cup" becomes "1 cup"
+    "cup1" becomes "cup 1" 
+    and ultimately "1cup" becomes "1 - cup" and "cup1" becomes "cup - 1"
+    """
 
-# # _replace_and_with_hyphen
-# def _update_ranges(ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
-#         """Update the ranges in the ingredient string with the updated ranges
-#         Args:
-#             ingredient (str): The ingredient string to update
-#             pattern (re.Pattern): The pattern to use to find the ranges
-#             replacement_function (function, optional): A function to use to replace the matched ranges. Defaults to None.
-#         Returns:
-#             str: The updated ingredient string
-#         """
-        
-#         # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
-        
-#         matches = pattern.findall(ingredient)
+    NUMBERS_TO_LETTERS = re.compile(r"(\d)\-?([a-zA-Z])")  # 1cup
+    LETTERS_TO_NUMBERS = re.compile(r"([a-zA-Z])(\d)")     # cup1
+    LETTERS_DASH_NUMBERS = re.compile(r"([a-zA-Z])\-(\d)") # cup - 1
 
-#         # matched_ranges = [match.split("-") for match in matches]
+    ingredient = NUMBERS_TO_LETTERS.sub(r"\1 \2", ingredient)
+    ingredient = LETTERS_TO_NUMBERS.sub(r"\1 \2", ingredient)
+    ingredient = LETTERS_DASH_NUMBERS.sub(r"\1 - \2", ingredient)
 
-#         if replacement_function:
-#             # print(f"Replacement Function given")
-#             matched_ranges = [replacement_function(match).split("-") for match in matches]
-#         else:
-#             # print(f"No Replacement Function given")
-#             matched_ranges = [match.split("-") for match in matches]
+    return ingredient
 
-#         # print(f"Matched Ranges: \n > {matched_ranges}") if self.debug else None
-
-#         updated_ranges = [" - ".join([str(_fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
-#         # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
-        
-#         # Create a dictionary to map the matched ranges to the updated ranges
-#         ranges_map = dict(zip(matches, updated_ranges))
-
-#         # Replace the ranges in the original string with the updated ranges
-#         for original_range, updated_range in ranges_map.items():
-#             # print(f"Original Range: {original_range}")
-#             # print(f"Updated Range: {updated_range}")
-#             # if replacement_function:
-#             #     print(f"Replacement Function given")
-#             #     updated_range = replacement_function(updated_range)
-#             ingredient = ingredient.replace(original_range, updated_range)
-#             # print("\n") if self.debug else None
-
-#         return ingredient
+# -----------------------------------------------------------------------------------------------
+# ---- Standardize ranges (numbers separated by "-") so they all are the same form ----
+# -----------------------------------------------------------------------------------------------
 
 def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
         """Update the number ranges in the ingredient string to always have two numbers separated by a whitespace, then a hyphen, then another whitespace.
@@ -377,19 +341,10 @@ def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
             str: The updated ingredient string with all possible ranges updated to always 
                 have 2 numbers separated by a whitespace, then a hyphen, then another whitespace.
         """
-        
+
         # # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
         # ingredient = "1-2 apples and 1- 45 orange slices between 4 and 5 lemons or 1 or 2 oranges and use 1 to 2 lemons"
         # pattern = _regex_patterns.QUANTITY_DASH_QUANTITY
-        
-        # ingredient = '1 - 2 apples and 1 - 45 orange slices between 4 and 5 lemons or 1 or 2 oranges and use 1 to 2 lemons'
-        # pattern = _regex_patterns.BETWEEN_QUANTITY_AND_QUANTITY
-
-        # ingredient = '1 - 2 apples and 1 - 45 orange slices 4 - 5 lemons or 1 or 2 oranges and use 1 to 2 lemons'
-        # pattern = _regex_patterns.QUANTITY_TO_QUANTITY
-
-        # ingredient = '1 - 2 apples and 1 - 45 orange slices 4 - 5 lemons or 1 or 2 oranges and use 1 - 2 lemons'
-        # pattern = _regex_patterns.QUANTITY_OR_QUANTITY
         
         matched_ranges_iter = pattern.finditer(ingredient)
         offset = 0
@@ -400,20 +355,13 @@ def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
             modified_end = end + offset      # new end position
             match_string = match.group()
 
-            # print(f"Match String: '{match_string}'")
-            # print(f"Start: {start} | End: {end}")
-            # print(f"Modified Start: {modified_start} | Modified End: {modified_end}")
-            # print(f"Offset: {offset}")
-
             # In the match string, replace all instances of "and", "&", "to", and "or" with hyphens
             match_string = match_string.replace("and", "-") \
                 .replace("&", "-") \
                 .replace("to", "-") \
                 .replace("or", "-") \
                 .replace("between", "").strip()
-                
-            # print(f"Match AFTER replacement: '{match_string}'\n")
-            # print()
+            
             updated_range = " - ".join([str(_fraction_str_to_decimal(i)) for i in match_string.split("-")])
 
             ingredient = ingredient[:modified_start] + updated_range + ingredient[modified_end:]
@@ -422,6 +370,56 @@ def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
             offset += len(str(updated_range)) - (end - start)
             
         return ingredient
+
+# -----------------------------------------------------------------------------------------------
+# ---- Merge/Fix any ranges that are not really ranges (i.e. "4-1/2" -> "4.5")
+# -----------------------------------------------------------------------------------------------
+
+def _merge_misleading_ranges(ingredient:str) -> str:
+    """ Merge misleading ranges in the parsed ingredient (i.e. "4-1/2" is not a valid range, it should be "4.5" instead)"""
+
+    # Find all the ranges in the ingredient
+    range_iter = _regex_patterns.QUANTITY_DASH_QUANTITY_GROUPS.finditer(ingredient)
+
+    offset = 0
+
+    for match in range_iter:
+        match_string    = match.group()
+        start, end = match.start(), match.end()
+        modified_start = start + offset
+        modified_end = end + offset
+
+        left_range = match.group(1).strip()
+        right_range = match.group(2).strip()
+
+        first_number  = float(_fraction_str_to_decimal(left_range).strip())
+        second_number = float(_fraction_str_to_decimal(right_range).strip())
+
+        # If the second number is less than the first number, then the range is misleading
+        #  and the numbers should be merged (added if second number is a fraction)
+        if second_number < first_number:
+            # print(f"Fixing misleading range: {match_string} with ")
+            second_number_is_fraction = second_number < 1
+            multiply_or_add_str = "add" if second_number_is_fraction else "multiply"
+
+            # print(f"Second number is a fraction: {second_number_is_fraction}\n > '{multiply_or_add_str}' {first_number} and {second_number}") if self.debug else None
+
+            updated_value = f" {_make_int_or_float_str(str(first_number + second_number))} " if second_number_is_fraction else f" {_make_int_or_float_str(str(first_number * second_number))} "
+            # updated_value = f" {_make_int_or_float_str(str(first_number + second_number))} "
+            # print(f"Fixing misleading range: {match_string} with {updated_value}") if self.debug else None
+            
+            ingredient = ingredient[:modified_start] + updated_value + ingredient[modified_end:]
+            offset += len(updated_value) - (end - start)
+
+            # print(f"Ingredient after updating: {ingredient}") if self.debug else None
+
+    ingredient = ingredient.strip()
+
+    return ingredient
+
+# -----------------------------------------------------------------------------------------------
+# ---- Collapse ranges of numbers by averaging the values in the range ----
+# -----------------------------------------------------------------------------------------------
 
 def avg_ranges(ingredient: str) -> str:
     """
@@ -549,9 +547,6 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str) -> str:
     # substrings_to_fix = ["to", "or", "and"]
     # substring = "to"
     # text = '1 to- 4.5 cups of sugar'
-    # text = '1 -to 4.5 cups of sugar'
-    # text = "1-to-three cups of tomato-juice"
-    # debug = True
 
     text = text.lower()
     substring = substring.lower().replace("-", "")
@@ -564,9 +559,6 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str) -> str:
 
     for R in range(0, len(text)):
 
-        # print(f"L: {L}") if debug else None
-        # print(f"R: {R}") if debug else None
-        # print(f"text[L:R]: {text[L:R]}") if debug else None
         if R - L == substring_length:
             # print(f"Found window the size of substring!") if debug else None
             if text[L:R] == substring:
@@ -578,7 +570,6 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str) -> str:
                 char_to_left = text[L - 1] if L - 1 >= 0 else None
                 char_to_right = text[R] if R < len(text) else None
                 
-
                 # character to the left or right of the substring is 
                 # a digit, hyphen, or whitespace or is at the beginning/end of the string
                 valid_left_char  = char_to_left is None or char_to_left.isdigit() or char_to_left == "-" or char_to_left == " "
@@ -587,11 +578,6 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str) -> str:
                 # character to the left or right of the substring is NOT a digit, hyphen, or whitespace 
                 # (i.e. the matched substring is part of a larger word)
                 if not valid_left_char or not valid_right_char:
-                    # print(f"Substring is part of a larger word") if debug else None
-                    # print(f" - char_to_left: '{char_to_left}'") if debug else None
-                    # print(f" - char_to_right: '{char_to_right}'") if debug else None
-                    # print(f"Still increment L from {L} to {L + 1}") if debug else None
-                    # print() if debug else None
                     L += 1
                     continue
 
@@ -600,49 +586,29 @@ def _find_and_remove_hyphens_around_substring(text: str, substring: str) -> str:
 
                 # print(f"Try to go LEFT of '{substring}' substring") if debug else None
                 while GO_LEFT_INDEX >= 0 and (text[GO_LEFT_INDEX] == " " or text[GO_LEFT_INDEX] == "-"):
-                    # print(f"GO_LEFT_INDEX: '{GO_LEFT_INDEX}'") if debug else None
-                    # print(f" - text[GO_LEFT_INDEX]: '{text[GO_LEFT_INDEX]}'") if debug else None
                     if text[GO_LEFT_INDEX] == "-":
                         has_left_hyphen = True
                     GO_LEFT_INDEX -= 1
-                    # print(f" --> Ending text[GO_LEFT_INDEX]: '{text[GO_LEFT_INDEX]}'") if debug else None
                 
-                # print() if debug else None
-
                 # look RIGHT of the matched substring
-                # print(f"Try to go RIGHT of '{substring}' substring") if debug else None
 
                 GO_RIGHT_INDEX = R
-                # GO_RIGHT_INDEX = R + 1 # NOTE: Bug fix, Setting the GO_RIGHT_INDEX to R + 1 will skip the first character after the substring
 
                 while GO_RIGHT_INDEX < len(text) and (text[GO_RIGHT_INDEX] == " " or text[GO_RIGHT_INDEX] == "-"):
-                    # print(f"GO_RIGHT_INDEX: '{GO_RIGHT_INDEX}'") if debug else None
-                    # print(f" - text[GO_RIGHT_INDEX]: '{text[GO_RIGHT_INDEX]}'") if debug else None
+
                     if text[GO_RIGHT_INDEX] == "-":
                         has_right_hyphen = True
                     GO_RIGHT_INDEX += 1
-                    # print(f" --> Ending text[GO_RIGHT_INDEX]: '{text[GO_RIGHT_INDEX]}'") if debug else None
 
                 look_around_string = text[GO_LEFT_INDEX+1:GO_RIGHT_INDEX]
 
                 if has_left_hyphen or has_right_hyphen:
                     hypen_substrings.append(look_around_string)
-                    # print(f"Added '{look_around_string}' to hypen_substrings:\n > '{hypen_substrings}'") if debug else None
-                # print(f"FINAL --> GO_LEFT_INDEX: {GO_LEFT_INDEX} --> has LEFT hypen: {has_left_hyphen}") if debug else None
-                # print(f"FINAL --> GO_RIGHT_INDEX: {GO_RIGHT_INDEX} --> has RIGHT hypen: {has_right_hyphen}") if debug else None
-                # print(f"Final substring: '{look_around_string}'") if debug else None
-
-            # print(f"Incrementing L from {L} to {L + 1}") if debug else None
             L += 1
-        # print(f"----" * 5) if debug else None
-        # print() if debug else None
-    
-    # print(f"hypen_substrings: {hypen_substrings}") if debug else None
-    
+
     for hyphen_substring in hypen_substrings:
         replacement_string = f" {hyphen_substring.replace('-', '').replace(' ', '')} " 
         text = text.replace(hyphen_substring, replacement_string) 
-        # print(f"Replacing '{hyphen_substring}' in 'text' with '{replacement_string}'\n") if debug else None
 
     text = text.strip()
 
@@ -849,7 +815,6 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
 
         if not nearest_number_search:
             # print(f"No number found after approximate match")
-            # print()
             continue
 
         closest_number = nearest_number_search.group() # the actual matching number string
@@ -863,7 +828,6 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
 
         if not nearest_unit_search: # if we don't find a unit after the number, we skip this triplet
             # print(f"No unit found after approximate match")
-            # print()
             continue
 
         closest_unit = nearest_unit_search.group() # the actual matching unit string
@@ -872,7 +836,6 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
         current_result.append(closest_unit) # add the unit to the result
         # approximate_triplets.append(current_result) # add the triplet to the list of approximate triplets
         approximate_triplets.append(tuple(current_result)) # add the triplet to the list of approximate triplets
-        # print()
     
 
     # look for trailing approximate strings
@@ -1091,6 +1054,102 @@ def _find_and_remove(string: str, pattern: re.Pattern) -> str:
 
         return string
 
+def _find_and_replace_casual_quantities(ingredient: str) -> str:
+    """
+    Find and replace matches of CASUAL_QUANTITIES_PATTERN with the key from the CASUAL_QUANTITIES dictionary
+    """
+
+    offset = 0
+    pattern_iter = _regex_patterns.CASUAL_QUANTITIES_PATTERN.finditer(ingredient)
+
+    for match in pattern_iter:
+        match_string    = match.group()
+
+        # Get the start and end of the match and the modified start and end positions given the offset
+        start, end = match.start(), match.end()
+        modified_start = start + offset
+        modified_end = end + offset
+
+        replacement_str = _constants.CASUAL_QUANTITIES[match_string] 
+
+        # Construct the modified string with the replacement applied
+        ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
+
+        # Update the offset for subsequent removals 
+        offset += len(str(replacement_str)) - (end - start)
+
+    return ingredient
+
+def _find_and_replace_prefixed_number_words(ingredient: str) -> str:
+    """ Replace prefixed number words with their corresponding numerical values in the parsed ingredient 
+    Strings like "twenty five" are replaced with "25", or "thirty-two" is replaced with "32"
+
+    """
+    number_words_iter = _regex_patterns.PREFIXED_NUMBER_WORDS_GROUPS.finditer(ingredient)
+
+    offset = 0
+
+    for match in number_words_iter:
+        
+        if match:
+            start, end = match.start(), match.end()
+
+            match_string = match.group()
+            prefix_word = match.group(1)
+            number_word = match.group(2)
+            
+            prefix_value = _constants.NUMBER_PREFIX_WORDS.get(prefix_word, 0)
+            number_value = _constants.NUMBER_WORDS.get(number_word, 0)
+
+            combined_value = prefix_value + number_value
+
+            # Calculate the start and end positions in the modified string
+            modified_start = start + offset
+            modified_end = end + offset
+
+            # Construct the modified string with the replacement applied
+            ingredient = ingredient[:modified_start] + str(combined_value) + ingredient[modified_end:]
+            # ingredient = ingredient[:modified_start] + str(combined_value) + ingredient[modified_end:]
+
+            # Update the offset for subsequent replacements
+            offset += len(str(combined_value)) - (end - start)
+
+            # print(f"""
+            # Match string: {match_string}
+            # - Prefix word: {prefix_word}
+            # - Number word: {number_word}
+            # Prefix value ({prefix_value}) + Number value ({number_value}) = Combined value ({combined_value})
+            # > {prefix_value} + {number_value} = {combined_value}
+            # -> Match: {match_string} at positions {start}-{end}
+            # ---> Modified ingredient: {self.standardized_ingredient}""") if self.debug else None
+
+    return ingredient
+
+def _find_and_replace_number_words(ingredient:str) -> str:
+    """
+    Replace number words with their corresponding numerical values in the parsed ingredient.
+    """
+
+    # print("Parsing number words")
+    for word, regex_data in _regex_patterns.NUMBER_WORDS_MAP.items():
+        pattern = regex_data[1]
+        # print statement if word is found in ingredient and replaced
+        if pattern.search(ingredient):
+            ingredient = pattern.sub(regex_data[0], ingredient)
+    
+    return ingredient
+
+def _clean_html_and_unicode(ingredient: str) -> str:
+    """Unescape fractions from HTML code coded fractions to unicode fractions."""
+
+    # Unescape HTML
+    ingredient = unescape(ingredient)
+
+    # Replace unicode fractions with their decimal equivalents
+    for unicode_fraction, decimal_fraction in _constants.UNICODE_FRACTIONS.items():
+        ingredient = ingredient.replace(unicode_fraction, f" {decimal_fraction}")
+
+    return ingredient
 
 # def replace_number_followed_by_inch_symbol(ingredient: str) -> str:
 #     """Replace numbers followed by the inch symbol with the word 'inch' in the ingredient string.
@@ -1226,7 +1285,6 @@ def _split_dimension_ranges(ingredient: str) -> list[str, list[str]]:
             # ingredient = _find_and_remove(ingredient, pattern)
             dimension_units.append(original_string)
             ingredient = ingredient.replace(original_string, "")
-        # print()
 
     return [ingredient, dimension_units]
 
@@ -1360,6 +1418,20 @@ def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "levenshtein
     # food = "olive oil"
     # quantity = "1"
     # unit = "teaspoon"
+
+    if not unit:
+        return {
+            "gram_weight" : None,
+            "min_gram_weight" : None,
+            "max_gram_weight" : None
+        }
+
+    if quantity is None:
+        quantity = "1"
+
+    # ValueError checks
+    if not isinstance(food, str):
+        raise ValueError("'food' must be a string")
 
     if not isinstance(method, str):
         raise ValueError("'method' must be a string")
@@ -1605,13 +1677,13 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
 
     try: 
         # print(f"Successful best effort category match: \n '{food}' >>> '{best_category_match}'")
-
-        density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["density_g_per_ml"]
-        max_density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["max_density_g_per_ml"]
-        min_density = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]["min_density_g_per_ml"]
+        gram_map    = _constants.FOOD_DENSITY_BY_GROUP[best_category_match]
+        density     = gram_map["density_g_per_ml"]
+        max_density = gram_map["max_density_g_per_ml"]
+        min_density = gram_map["min_density_g_per_ml"]
         # print(f"Using density value of:\n > '{density} g/ml'")
     except:
-        print(f"No good food denstity match was found, defaulting to the density of water (1 g/ml)")
+        warnings.warn(f"No good food denstity match was found, defaulting to the density of water (1 g/ml)")
 
     # # NOTE: old way of catching if no good match was made or the matched category does not exist / density is <= 0
     # if ((best_category_match not in _constants.FOOD_DENSITY_BY_GROUP) or \
@@ -2043,3 +2115,76 @@ def _dice_coeff_similarity(first: str, second: str) -> float:
 
 #             offset += len(str(replacement_str)) - (end - start)
 #     return
+
+
+# def _update_ranges(ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
+#         """Update the ranges in the ingredient string with the updated ranges
+#         Args:
+#             ingredient (str): The ingredient string to update
+#             pattern (re.Pattern): The pattern to use to find the ranges
+#             replacement_function (function, optional): A function to use to replace the matched ranges. Defaults to None.
+#         Returns:
+#             str: The updated ingredient string
+#         """
+        
+#         # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
+        
+#         matches = pattern.findall(ingredient)
+
+#         # matched_ranges = [match.split("-") for match in matches]
+
+#         if replacement_function:
+#             # print(f"Replacement Function given")
+#             matched_ranges = [replacement_function(match).split("-") for match in matches]
+#         else:
+#             # print(f"No Replacement Function given")
+#             matched_ranges = [match.split("-") for match in matches]
+
+#         # print(f"Matched Ranges: \n > {matched_ranges}") if self.debug else None
+
+#         updated_ranges = [" - ".join([str(_fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
+#         # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
+        
+#         # Create a dictionary to map the matched ranges to the updated ranges
+#         ranges_map = dict(zip(matches, updated_ranges))
+
+#         # Replace the ranges in the original string with the updated ranges
+#         for original_range, updated_range in ranges_map.items():
+#             # print(f"Original Range: {original_range}")
+#             # print(f"Updated Range: {updated_range}")
+#             # if replacement_function:
+#             #     print(f"Replacement Function given")
+#             #     updated_range = replacement_function(updated_range)
+#             ingredient = ingredient.replace(original_range, updated_range)
+#             # print("\n") if self.debug else None
+
+#         return ingredient
+# def _update_ranges(self, ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
+#     """Update the ranges in the ingredient string with the updated ranges
+#     Args:
+#         ingredient (str): The ingredient string to update
+#         pattern (re.Pattern): The pattern to use to find the ranges
+#         replacement_function (function, optional): A function to use to replace the matched ranges. Defaults to None.
+#     Returns:
+#         str: The updated ingredient string
+#     """
+    
+#     matches = pattern.findall(ingredient)
+#     # matched_ranges = [match.split("-") for match in matches]
+
+#     if replacement_function:
+#         matched_ranges = [replacement_function(match).split("-") for match in matches]
+#     else:
+#         matched_ranges = [match.split("-") for match in matches]
+
+#     updated_ranges = [" - ".join([str(_utils._fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
+#     # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
+    
+#     # Create a dictionary to map the matched ranges to the updated ranges
+#     ranges_map = dict(zip(matches, updated_ranges))
+
+#     # Replace the ranges in the original string with the updated ranges
+#     for original_range, updated_range in ranges_map.items():
+#         ingredient = ingredient.replace(original_range, updated_range)
+
+#     return ingredient
