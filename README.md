@@ -1,13 +1,13 @@
 ingredient-slicer
 ------
 
-Python 📦 package for extracting quantities, units, and food words from unstructured recipe ingredients text
+Python 📦 package for extracting quantities, units, and food words from unstructured recipe ingredients text. 
 
-Unlike many other recipe ingredient parsers out there, `ingredient-slicer` does not make use of any NLP models or machine learning,
-but rather follows a set of rules to parse out quantities, units, and food words from unstructured recipe ingredients text.
-`ingredient-slicer` was designed with the intent of providing a robust and lightweight method for parsing recipe ingredients 
-text without relying on any external dependencies.
-That being said, it is not perfect. 
+`ingredient-slicer` works by standardizing the input text and then applying a set of rules and heuristic methods to parse out quantities, units, and food words from unstructured recipe ingredients text.
+`ingredient-slicer` was designed to provide a robust and lightweight method for parsing recipe ingredients 
+text *without* relying on any external dependencies or NLP/ML models.
+That being said, it is not perfect and can always be improved upon. 
+
 
 Table of Contents:
 -----------------------
