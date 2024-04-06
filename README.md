@@ -21,7 +21,7 @@ Installation:
 `ingredient_slicer` can be downloaded from PyPI via `pip` like so:
 
 ``` shell
-    pip install ingredient-slicer
+pip install ingredient-slicer
 ```
 
 Usage:
@@ -31,56 +31,57 @@ Provide a string to the `IngredientSlicer` class and thats it. Invoke the `to_js
 
 ```pycon
 
-    import ingredient_slicer
+import ingredient_slicer
 
-    slicer = ingredient_slicer.IngredientSlicer("2 (15-ounces) cans chickpeas, rinsed and drained")
+slicer = ingredient_slicer.IngredientSlicer("2 (15-ounces) cans chickpeas, rinsed and drained")
 
-    slicer.to_json()
-    {
-        'standardized_ingredient': '2 cans chickpeas, rinsed and drained', 
-        'food': 'chickpeas', 
-        
-        # primary units
-        'quantity': '30', 
-        'unit': 'ounces', 
-        'standardized_unit': 'ounce', 
+slicer.to_json()
 
-        # any other secondary units found in the string
-        'secondary_quantity': '2', 
-        'secondary_unit': 'cans', 
-        'standardized_secondary_unit': 'can', 
+{
+    'standardized_ingredient': '2 cans chickpeas, rinsed and drained', 
+    'food': 'chickpeas', 
 
-        'gram_weight': '850.49', 
-        'prep': ['drained', 'rinsed'], 
-        'size_modifiers': [], 
-        'dimensions': [], 
-        'is_required': True, 
-        'parenthesis_content': ['15 ounce']
-    }
+    # primary units
+    'quantity': '30', 
+    'unit': 'ounces', 
+    'standardized_unit': 'ounce', 
+
+    # any other secondary units found in the string
+    'secondary_quantity': '2', 
+    'secondary_unit': 'cans', 
+    'standardized_secondary_unit': 'can', 
+
+    'gram_weight': '850.49', 
+    'prep': ['drained', 'rinsed'], 
+    'size_modifiers': [], 
+    'dimensions': [], 
+    'is_required': True, 
+    'parenthesis_content': ['15 ounce']
+}
 ```
 
-Individual ingredient components can also be found using methods like `food()` or `unit()`
+Individual ingredient components can also be found using methods like `food()`, `quantity()`, or `unit()`
 
 ```pycon
 
-    import ingredient_slicer
+import ingredient_slicer
 
-    slicer = ingredient_slicer.IngredientSlicer("3 tbsp unsalted butter, softened at room temperature")
+slicer = ingredient_slicer.IngredientSlicer("3 tbsp unsalted butter, softened at room temperature")
 
-    slicer.food() 
-    >>> 'unsalted butter'
+slicer.food() 
+>>> 'unsalted butter'
 
-    slicer.unit() 
-    >>> 'tbsp'
+slicer.quantity() 
+>>> '3' 
 
-    slicer.standardized_unit() 
-    >>> 'tablespoon'
+slicer.unit() 
+>>> 'tbsp'
 
-    slicer.quantity() 
-    >>> '3' 
+slicer.standardized_unit() 
+>>> 'tablespoon'
 
-    slicer.prep() 
-    >>> ['room temperature', 'softened']
+slicer.prep() 
+>>> ['room temperature', 'softened']
 ```
 
 Contributing/Issues:
