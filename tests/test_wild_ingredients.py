@@ -8,6 +8,7 @@ from ingredient_slicer import IngredientSlicer
 # -------------------------------------------------------------------------------
 # ---- Assortment of different ingredients seen in the "wild" tests ----
 # -------------------------------------------------------------------------------
+
 def test_wild_ingredients_1():
 
     parse = IngredientSlicer("1 (10 ounce) package frozen chopped spinach, thawed, drained and squeezed dry")
