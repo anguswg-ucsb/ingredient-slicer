@@ -1405,7 +1405,7 @@ def _remove_repeat_units_in_ranges(ingredient) -> str:
     return ingredient 
 
 
-def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "levenshtein") -> dict:
+def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> dict:
 
     """ Get the gram weight of a given quantity of food item.
     Args:
@@ -1769,28 +1769,27 @@ def _get_fuzzy_matcher(method: str) -> Callable:
 
     return fuzzy_matchers[method]
 
-# _convert_volume_to_grams(food, quantity, unit)
-def _levenshtein_dist(str1, str2):
-    # set up a matrix with the dimensions of the two strings
-    matrix = [[0] * (len(str2) + 1) for _ in range(len(str1) + 1)]
-    
-    # initialize the matrix with the values of the first row and column
-    for i in range(len(str1) + 1):
-        matrix[i][0] = i
+def _levenshtein_dist(str1: str, str2: str) -> int:
+    matrix = [[float("inf")] * (len(str2) + 1) for i in range(len(str1) + 1)]
+
     for j in range(len(str2) + 1):
-        matrix[0][j] = j
+        matrix[len(str1)][j] = len(str2) - j
 
-    for i in range(1, len(str1) + 1):
-        for j in range(1, len(str2) + 1):
-            substitute = 0 if str1[i - 1] == str2[j - 1] else 1
-            matrix[i][j] = min(
-                matrix[i - 1][j] + 1,              # delete
-                matrix[i][j - 1] + 1,               # isert 
-                matrix[i - 1][j - 1] + substitute  # substitute
-            )
+    for i in range(len(str1) + 1):
+        matrix[i][len(str2)] = len(str1) - i
 
+    for i in range(len(str1) - 1, -1, -1):
+        for j in range(len(str2) - 1, -1, -1):
+            if str1[i] == str2[j]:
+                matrix[i][j] = matrix[i + 1][j + 1]
+            else:
+                matrix[i][j] = 1 + min(
+                                    matrix[i + 1][j],    # delete
+                                    matrix[i][j + 1],     # isert 
+                                    matrix[i + 1][j + 1] # substitute
+                                    )
     # levenstein distance == bottom right corner of matrix
-    return matrix[len(str1)][len(str2)]
+    return matrix[0][0]
 
 def _levenshtein_similarity(str1, str2):
     distance = _levenshtein_dist(str1, str2)

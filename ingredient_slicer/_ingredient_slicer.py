@@ -1606,7 +1606,7 @@ class IngredientSlicer:
     def _add_gram_weights(self):
         """Add gram weights to the units variables if they are the only possible units after the ingredient has been parsed."""
         # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
-        grams_map = _utils._get_gram_weight(self._food, self._quantity, self._unit, "levenshtein")
+        grams_map = _utils._get_gram_weight(self._food, self._quantity, self._unit, "dice")
 
         if grams_map:
             self._gram_weight      = grams_map.get("gram_weight", None)
