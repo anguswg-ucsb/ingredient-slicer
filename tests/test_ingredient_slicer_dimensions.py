@@ -81,6 +81,7 @@ def test_three_consequetive_x_separated_dimension_units():
     ing = IngredientSlicer("1 cup of flour (4 x 3 x 2 inch)")
 
     expected_output = {
+    'ingredient': "1 cup of flour (4 x 3 x 2 inch)", 
     'standardized_ingredient': '1 cup of flour', 
     'food': 'flour',
     'quantity': '12', 

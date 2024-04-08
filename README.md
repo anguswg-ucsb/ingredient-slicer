@@ -37,16 +37,17 @@ slicer = ingredient_slicer.IngredientSlicer("2 (15-ounces) cans chickpeas, rinse
 
 slicer.to_json()
 
-{
+{   
+    'ingredient': '2 (15-ounces) cans chickpeas, rinsed and drained', 
     'standardized_ingredient': '2 cans chickpeas, rinsed and drained', 
     'food': 'chickpeas', 
 
-    # primary units
+    # primary quantity and units
     'quantity': '30', 
     'unit': 'ounces', 
     'standardized_unit': 'ounce', 
 
-    # any other secondary units found in the string
+    # any other secondary quantity and units found in the string
     'secondary_quantity': '2', 
     'secondary_unit': 'cans', 
     'standardized_secondary_unit': 'can', 

@@ -1864,7 +1864,7 @@ class IngredientSlicer:
             dict: A dictionary containing the IngredientSlicer object's member variables.
         """
         return {
-            # "ingredient": self.ingredient,                                # "2 1/2 large cups of sugar lightly packed (about 40 tbsp of sugar)"
+            "ingredient": self.ingredient,                                # "2 1/2 large cups of sugar lightly packed (about 40 tbsp of sugar)"
             "standardized_ingredient": self._standardized_ingredient,          # "2.5 cups of sugar"
         
             "food" : self._food,                                           # "sugar"
@@ -1896,6 +1896,7 @@ class IngredientSlicer:
             str: A string representation of the IngredientSlicer object.
         """
         return f"""IngredientSlicer Object:
+    \tIngredient: '{self.ingredient}'
     \tStandardized Ingredient: '{self._standardized_ingredient}'
     \tFood: '{self._food}'
     \tQuantity: '{self._quantity}'
