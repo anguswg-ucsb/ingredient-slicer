@@ -85,15 +85,12 @@ def test_casual_quantities_at_end_of_ingredient():
     assert parsed['food'] == 'watermelon watermelons' # TODO: this is a bug, should be just watermelon
     assert parsed['is_required'] == True
 
-# TODO: this seems like it should just be 3, options are to remove "few" from the CASUAL_QUANTITIES dictionary
-# TODO:  or to deal with parenthesis that have an approximate quantity in them WITHOUT a unit (e.g. "(about 3)"
-# TODO: For not this test will stay put...
 def test_casual_quantities_in_parenthesis_1():
 
     slicer = IngredientSlicer("a few (about 3) pinches of salt")
     # slicer.parse()
     parsed = slicer.to_json()
-    assert parsed['quantity'] == "9"
+    assert parsed['quantity'] == "3"
     assert parsed['unit'] == 'pinches'
     assert parsed['standardized_unit'] == 'pinch'
     assert parsed['food'] == 'salt'

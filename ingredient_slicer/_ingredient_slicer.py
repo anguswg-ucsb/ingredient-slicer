@@ -1006,6 +1006,14 @@ class IngredientSlicer:
             description = f"not a quantity only parenthesis"
             self._parenthesis_notes.append(description)
             return
+        
+        is_approximate_quantity = _utils._is_approximate_quantity_only_parenthesis(parenthesis)
+
+        # if the quantity is approximate, then add a note to the parenthesis notes and return early
+        if is_approximate_quantity:
+            description = f"approximate quantity only"
+            self._parenthesis_notes.append(description)
+            return
 
         # pull out the self._quantity from the parenthesis
         parenthesis_quantity = numbers_only[0]

@@ -858,9 +858,135 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
             # pair.append(trailing_approx_string)
         # [i.append(trailing_approx_string) for i in quantity_unit_pairs]
         # print()
-
-    return approximate_triplets
+    
     # return [tuple(i) for i in approximate_triplets]
+    return approximate_triplets
+
+def _is_approximate_quantity_only_parenthesis(input_string: str) -> bool:
+    """Check if a string is an approximate quantity only parenthesis (e.g. "(about 12)")"""
+
+    # input_string = "(about 4)"
+    # input_string = '(about 12 tender and juicy ounces or about 14 grams)'
+    # input_string = '(juicy about or 14)'
+    # input_string = '(12 tender and juicy ounces or 14 grams about)'
+
+    if not isinstance(input_string, str):
+        return False
+
+    approximate_string_matches = _regex_patterns.APPROXIMATE_STRINGS_PATTERN.findall(input_string)
+    quantity_matches           = _regex_patterns.ALL_NUMBERS.findall(input_string)
+    unit_matches               = _regex_patterns.UNITS_PATTERN.findall(input_string)
+
+    has_approximate_string = True if approximate_string_matches else False
+    has_quantity           = True if quantity_matches else False
+    has_unit               = True if unit_matches else False
+
+    if has_unit:
+        return False
+    
+    approximate_and_quantity_only = has_approximate_string and has_quantity
+
+    return approximate_and_quantity_only
+
+def _extract_equivalent_quantity_only(input_string: str) -> list[tuple]:
+
+    """From a string get all sets of quantity/units preceeded by "approximate" strings, (e.g. "about", "approximately", "around", etc.)
+    
+    Useful for getting instances where there is a quantity and unit in parenthesis that is 
+    an approximation of the quantity and unit in the main ingredient string (e.g. "1 cup of chopped chicken breast (about 12 ounces)")
+
+    Args:
+        input_string (str): The string to parse
+    Returns:
+        list: A list of tuples containing the (approximate string, quantity, and unit)
+    """
+
+    # input_string = parenthesis
+    # input_string = "(about 4)"
+    # input_string = '(about 12 tender and juicy ounces or about 14 grams)'
+    # input_string = '(juicy about or 14)'
+    # input_string = '(12 tender and juicy ounces or 14 grams about)'
+
+    if not isinstance(input_string, str):
+        raise ValueError("Invalid input. Input must be a string.")
+
+    # regex_patterns = _regex_patterns.IngredientTools()
+
+    approximate_string_matches = _regex_patterns.APPROXIMATE_STRINGS_PATTERN.finditer(input_string)
+    
+    unit_matches = _regex_patterns.UNITS_PATTERN.findall(input_string)
+    has_units = True if unit_matches else False
+
+    if has_units:
+        return []
+
+    approximate_triplets = []
+
+    for match in approximate_string_matches:
+        match_string = match.group()
+        start, end = match.start(), match.end()
+
+        # print(f"Match String: '{match_string}'")
+        # print(f"Start: {start} | End: {end}")
+        # print(f"Input String: '{input_string}'")
+        current_result = []
+        
+        current_result.append(match_string) # add the approximate string to the result
+
+        str_after_approx_match = input_string[end:] # string after the approximate match
+
+        # _regex_patterns.ALL_NUMBERS.findall(after_approx_match)
+        nearest_number_search = _regex_patterns.ALL_NUMBERS.search(str_after_approx_match) # search for the nearest number after the approximate string
+
+        if not nearest_number_search:
+            # print(f"No number found after approximate match")
+            continue
+
+        closest_number = nearest_number_search.group() # the actual matching number string
+        # print(f"Closest Number: '{closest_number}'")
+        current_result.append(closest_number) # add the number to the result
+        
+        # string after the number 
+        str_after_number_match = str_after_approx_match[nearest_number_search.end():] # string after the number match
+
+        nearest_unit_search = _regex_patterns.UNITS_PATTERN.search(str_after_number_match) # search for the nearest unit after the number
+
+        if not nearest_unit_search: # if we don't find a unit after the number, we skip this triplet
+            # print(f"No unit found after approximate match")
+            continue
+
+        closest_unit = nearest_unit_search.group() # the actual matching unit string
+        # print(f"Closest Unit: '{closest_unit}'")
+
+        current_result.append(closest_unit) # add the unit to the result
+        # approximate_triplets.append(current_result) # add the triplet to the list of approximate triplets
+        approximate_triplets.append(tuple(current_result)) # add the triplet to the list of approximate triplets
+    
+
+    # look for trailing approximate strings
+    trailing_approx_strings = _regex_patterns.APPROXIMATE_STRINGS_PATTERN.findall(input_string)
+
+    # if we didn't get any [approximate, quantity, unit] triplets, but we did get a trailing approximate strings
+    # check the string again for quantity unit pairs and 
+    # add the trailing approximate string to the beginning of each pair
+    # This will help handle the following case:
+    #       "(12 ounces approximately)"
+    if not approximate_triplets and trailing_approx_strings:
+        # print(f"Trailing Approximate Strings: {trailing_approx_strings}")
+        trailing_approx_string = trailing_approx_strings[0]
+        
+        quantity_unit_pairs = _extract_quantity_unit_pairs(input_string)
+
+        for pair in quantity_unit_pairs:
+            new_triplet = (trailing_approx_string, pair[0], pair[1])
+            approximate_triplets.append(new_triplet)
+            # pair.append(trailing_approx_string)
+        # [i.append(trailing_approx_string) for i in quantity_unit_pairs]
+        # print()
+    
+    # return [tuple(i) for i in approximate_triplets]
+    return approximate_triplets
+
 
 # pattern = regex_patterns.QUANTITY_DASH_QUANTITY
 # replacement_function=None

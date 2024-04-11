@@ -1,6 +1,6 @@
 # __init__.py
 
-__version__ = "0.0.86"
+__version__ = "0.0.87"
 
 from ._constants import UNITS, WEIGHT_UNITS, VOLUME_UNITS, DIMENSION_UNITS, \
     CASUAL_UNITS, CASUAL_QUANTITIES, PREP_WORDS, \
