@@ -2160,6 +2160,15 @@ for key, val in FOOD_CATALOG.items():
 #     FOODS_BY_CATEGORY[primary_category] = current_major_set
 #     FOODS_BY_CATEGORY[secondary_category] = current_minor_set
 
+PRIMARY_CATEGORIES = tuple(FOOD_CATEGORIES.keys())
+
+SECONDARY_CATEGORIES = set()
+for key, value in FOOD_CATEGORIES.items():
+    for val in value:
+        SECONDARY_CATEGORIES.add(val)
+        
+SECONDARY_CATEGORIES = tuple(SECONDARY_CATEGORIES)
+
 # -----------------------------------------------------------------------------------------------------
 # ---- Approximate food densities for food groups ----
 # -----------------------------------------------------------------------------------------------------

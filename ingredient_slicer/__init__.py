@@ -1,10 +1,11 @@
 # __init__.py
 
-__version__ = "0.0.87"
+__version__ = "0.0.88"
 
 from ._constants import UNITS, WEIGHT_UNITS, VOLUME_UNITS, DIMENSION_UNITS, \
     CASUAL_UNITS, CASUAL_QUANTITIES, PREP_WORDS, \
-    FOOD_CATALOG, FOOD_CATEGORIES, FOOD_DENSITY_BY_GROUP
+    FOOD_CATALOG, FOOD_CATEGORIES, FOOD_DENSITY_BY_GROUP, \
+    PRIMARY_CATEGORIES, SECONDARY_CATEGORIES
 
 from ._ingredient_slicer import IngredientSlicer
 # from ._regex_patterns import IngredientTools
@@ -25,6 +26,8 @@ __all__ = [
     "FOOD_CATALOG",
     "FOOD_CATEGORIES",
     "FOOD_DENSITY_BY_GROUP",
+    "PRIMARY_CATEGORIES",
+    "SECONDARY_CATEGORIES",
     # Main parser classe
     'IngredientSlicer'
     # 'IngredientTools',  # Old regex patterns class
