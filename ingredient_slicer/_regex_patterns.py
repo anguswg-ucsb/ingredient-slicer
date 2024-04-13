@@ -38,11 +38,9 @@ ANY_UNIT_ALT = '|'.join([re.escape(unit) for variants_list in _constants.UNITS.v
 
 # just the basic units 
 BASIC_UNIT_ALT = '|'.join([re.escape(unit) for variants_list in _constants.BASIC_UNITS.values() for unit in variants_list])
-# BASIC_UNIT_ALT = '|'.join('|'.join(variants) for variants in _constants.BASIC_UNITS.values())
 
 # just the non-basic units
 NON_BASIC_UNIT_ALT = '|'.join([re.escape(unit) for unit in list(_constants.NON_BASIC_UNITS_SET)])
-# NON_BASIC_UNIT_ALT = '|'.join(list(_constants.NON_BASIC_UNITS_SET))
 
 # Generate the regular expression pattern for units in the string
 VOLUME_UNIT_ALT = '|'.join([re.escape(unit) for variants_list in _constants.VOLUME_UNITS.values() for unit in variants_list])
@@ -50,7 +48,6 @@ VOLUME_UNIT_ALT = '|'.join([re.escape(unit) for variants_list in _constants.VOLU
 
 # The "sometimes might be a unit" strings as a "or" pattern
 SOMETIMES_UNIT_ALT = '|'.join([re.escape(unit) for unit in list(_constants.SIZE_MODIFIERS_SET)])
-# SOMETIMES_UNIT_ALT = '|'.join(list(_constants.SIZE_MODIFIERS_SET))
 
 # get a pattern for the "approximate" strings (these are typically used to describe an equivelant amount of a unit)
 EQUIVALENT_ALT = '|'.join([re.escape(unit) for unit in list(_constants.APPROXIMATE_STRINGS)])
@@ -62,8 +59,6 @@ PREP_WORD_ALT = '|'.join([re.escape(prep_word) for prep_word in list(_constants.
 # sort the stopwords by their length to make sure longer stopwords get matched before shorter ones
 #  to make sure we don't match a shorter stopword that is part of a longer stopword
 STOP_WORDS_ALT = '|'.join(sorted([re.escape(stop_word) for stop_word in _constants.STOP_WORDS], key=len, reverse=True))
-# STOP_WORDS_ALT = '|'.join([re.escape(stop_word) for stop_word in list(_constants.STOP_WORDS)])
-
 
 FRACTION_WORDS_ALT = '|'.join([re.escape(fraction_word) for fraction_word in _constants.FRACTION_WORDS])
 
@@ -84,7 +79,6 @@ APPROXIMATE_STRINGS_ALT = '|'.join([re.escape(approximate_string) for approximat
 # #  to make sure we don't match a shorter word that is part of a longer word
 # DENOMINATOR_WORDS_ALT = '|'.join(sorted([re.escape(word) for word in _constants.DENOMINATOR_WORDS], key=len, reverse=True))
 # # DENOMINATOR_WORDS_ALT = '|'.join([re.escape(word) for word in _constants.DENOMINATOR_WORDS])
-
 
 # -----------------------------------------------------------------------------
 # --------------------------- Units patterns -----------------------------
@@ -357,12 +351,10 @@ FRACTION_TYPE_ORDER = ("DECIMAL_SLASH_DECIMAL", "DECIMAL_SLASH_NUMBER", "DECIMAL
 #     "DECIMAL_SLASH_DECIMAL": re.compile(r"\d+\.\d+\s*/\s*\d+\.\d+"),
 #     "DECIMAL_SLASH_NUMBER": re.compile(r"\d+\.\d+\s*/\s*\d+"),
 #     "DECIMAL_SLASH_FRACTION": re.compile(r"\d+\.\d+\s*/\s*\d+/\d+"),
-
 #     # Starts with a whole number:
 #     "NUMBER_SLASH_DECIMAL": re.compile(r"\d+\s*/\s*\d+\.\d+"),
 #     "NUMBER_SLASH_NUMBER": re.compile(r"\d+\s*/\s*\d+"),
 #     "NUMBER_SLASH_FRACTION": re.compile(r"\d+\s*/\s*\d+/\d+"),
-
 #     # Starts with a fraction:
 #     "FRACTION_SLASH_FRACTION": re.compile(r"\d+/\d+\s*/\s*\d+/\d+"),
 #     "FRACTION_SLASH_DECIMAL": re.compile(r"\d+/\d+\s*/\s*\d+\.\d+"),
@@ -373,7 +365,6 @@ FRACTION_TYPE_ORDER = ("DECIMAL_SLASH_DECIMAL", "DECIMAL_SLASH_NUMBER", "DECIMAL
 # FRACTION_PATTERN2 = re.compile(r'\b(\d*\.\d+|\d+)\s*/\s*(\d*\.\d+|\d+)\b')
 # NUMBER_SLASH_NUMBER = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)?\s*/\s*(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)?', re.IGNORECASE)
 # NUMBER_SLASH_NUMBER = re.compile(r"\d+(?:/\d+|\.\d+)?\s*/\s*\d+(?:/\d+|\.\d+)?", re.IGNORECASE) # NOTE: NEW version (SAFE)
-
 
 # -----------------------------------------------------------------------------
 # --------------------------- Repeated strings PATTERNS -----------------------
@@ -467,12 +458,7 @@ for pct_string in ["%", "percent", "pct"]:
 
 # create a map containg regexs for matching a number followed by a "%", "percent", or "pct" string
 # NUMBER_WITH_DIMENSIONS_SYMBOLS_MAP = {}
-
-# NUMBER_WITH_INCH_SYMBOL.findall("1 1/2\"")
-# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
-# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\”')
-# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
-
+    
 NUMBER_WITH_INCH_SYMBOL_MAP = {}
 for inch_symbol in ["\"", "”"]:
     NUMBER_WITH_INCH_SYMBOL_MAP[inch_symbol] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + inch_symbol + r'')

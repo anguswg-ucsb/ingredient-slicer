@@ -2151,22 +2151,13 @@ for key, val in FOOD_CATALOG.items():
     else: 
         FOODS_BY_CATEGORY[secondary_category] = set([key])
 
-# FOODS_BY_CATEGORY = {}
-# for key, val in FOOD_CATALOG.items():
-#     current_major_set = FOODS_BY_CATEGORY.get(primary_category, set())
-#     current_minor_set = FOODS_BY_CATEGORY.get(secondary_category, set())
-#     current_major_set.add(key)
-#     current_minor_set.add(key)
-#     FOODS_BY_CATEGORY[primary_category] = current_major_set
-#     FOODS_BY_CATEGORY[secondary_category] = current_minor_set
-
 PRIMARY_CATEGORIES = tuple(FOOD_CATEGORIES.keys())
 
 SECONDARY_CATEGORIES = set()
 for key, value in FOOD_CATEGORIES.items():
     for val in value:
         SECONDARY_CATEGORIES.add(val)
-        
+
 SECONDARY_CATEGORIES = tuple(SECONDARY_CATEGORIES)
 
 # -----------------------------------------------------------------------------------------------------
@@ -2365,15 +2356,6 @@ FOOD_DENSITY = {
 # ----------------------------------------------------------------------------
 # ---- Strings that obviously point to a food being a specific category ----
 # ----------------------------------------------------------------------------
-
-# INDICATES_A_CEREAL = {"flour", "flours", "bread", "breads"}
-# INDICATES_AN_OIL   = {"oil", "oils"}
-# INDICATES_A_MILK   = {"milk", "milks"}
-# INDICATES_A_SYRUP  = {"syrup", "syrups"}
-# INDICATES_A_SUGAR  = {"sugar", "sugars"}
-# INDICATES_AN_EGG   = {"egg", "eggs"}
-# INDICATES_A_WINE   = {"wine", "wines"}
-# INDICATES_A_BEER   = {"beer", "beers"}
 
 # Words that are so obviously pointing to a specific category that they can be used to determine the category of a food
 # (i.e. if a food contains the word "flour", it is most likely a cereal product)
