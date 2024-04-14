@@ -161,13 +161,6 @@ def _fraction_str_to_decimal2(fraction_str: str) -> str:
         Returns:
             str: The decimal value of the fraction as a string. 
         """
-        # FRACTION_PATTERN2 = re.compile(r'\d+(?:\.\d+|/\d+)')
-
-        # fraction_str = "4/0.48"
-        # fraction_str = "4/0.48."
-        # fraction_str = ".3/4"
-        # FRACTION_PATTERN2.findall(fraction_str)
-        # 4/0.48
         
         if not isinstance(fraction_str, str):
             raise ValueError("Invalid input. Fraction string must be a string.")
@@ -178,12 +171,7 @@ def _fraction_str_to_decimal2(fraction_str: str) -> str:
 
         # If the fraction is a whole number, return the number
         if len(split_fraction) == 1:
-            # print(f"---> Only one part: {split_fraction[0]}")
-
             converted_number = _make_int_or_float_str(split_fraction[0])
-
-            # print(f"---> OLD Output: {round(float(split_fraction[0]), 3)}")
-            # print(f"---> NEW Output: {converted_number}")
             return converted_number
         
         # remove trailing period if it exists
@@ -476,10 +464,8 @@ def _replace_a_or_an_quantities(ingredient: str) -> str:
         if not isinstance(ingredient, str):
             raise ValueError("Invalid input. Ingredient must be a string.")
 
-        # regex_patterns = _regex_patterns.IngredientTools()
-
         # lowercase and split the ingredient string
-        ingredient = ingredient.lower()
+        ingredient       = ingredient.lower()
         split_ingredient = ingredient.split()
 
         quantity_matches = re.findall(_regex_patterns.ALL_NUMBERS, ingredient)
@@ -2284,32 +2270,3 @@ def _dice_coeff_similarity(first: str, second: str) -> float:
 #             # print("\n") if self.debug else None
 
 #         return ingredient
-# def _update_ranges(self, ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
-#     """Update the ranges in the ingredient string with the updated ranges
-#     Args:
-#         ingredient (str): The ingredient string to update
-#         pattern (re.Pattern): The pattern to use to find the ranges
-#         replacement_function (function, optional): A function to use to replace the matched ranges. Defaults to None.
-#     Returns:
-#         str: The updated ingredient string
-#     """
-    
-#     matches = pattern.findall(ingredient)
-#     # matched_ranges = [match.split("-") for match in matches]
-
-#     if replacement_function:
-#         matched_ranges = [replacement_function(match).split("-") for match in matches]
-#     else:
-#         matched_ranges = [match.split("-") for match in matches]
-
-#     updated_ranges = [" - ".join([str(_utils._fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
-#     # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
-    
-#     # Create a dictionary to map the matched ranges to the updated ranges
-#     ranges_map = dict(zip(matches, updated_ranges))
-
-#     # Replace the ranges in the original string with the updated ranges
-#     for original_range, updated_range in ranges_map.items():
-#         ingredient = ingredient.replace(original_range, updated_range)
-
-#     return ingredient
