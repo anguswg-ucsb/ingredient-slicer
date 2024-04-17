@@ -2389,6 +2389,7 @@ INDICATOR_STRINGS_MAP = {
 # sweets
 # wine_and_cider
 # beer
+
 # ----------------------------------------------------------------------------
 # ---- Unused constants ----
 # ----------------------------------------------------------------------------
@@ -2991,12 +2992,9 @@ MULTI_FRACTION_WORDS = {
 # for key, value in FOOD_CONVERSION_FACTORS.items():
 #     volume_string = FOOD_CONVERSION_FACTORS[key]['volume']
 #     parsed_ingredient = IngredientSlicer(volume_string).to_json()
-
 #     quantity = float(parsed_ingredient['quantity'])
 #     unit = parsed_ingredient['unit']
-
 #     multiplication_factor = 1/quantity
-    
 #     converted_ounces = FOOD_CONVERSION_FACTORS[key]["ounces"] * multiplication_factor
 #     converted_grams  = FOOD_CONVERSION_FACTORS[key]["grams"] * multiplication_factor
 #     converted_volume = quantity * multiplication_factor
@@ -3007,42 +3005,3 @@ MULTI_FRACTION_WORDS = {
 #         'ounces': converted_ounces, 
 #         'grams': converted_grams
 #     }
-# ---------------------------------------
-# ---- Old IngredientConstants class ----
-# ---------------------------------------
-
-# class IngredientConstants:
-
-#     # Primary unit maps
-#     UNITS = UNITS
-#     BASIC_UNITS = BASIC_UNITS
-
-#     # other (specific) unit maps
-#     WEIGHT_UNITS = WEIGHT_UNITS
-#     DIMENSION_UNITS = DIMENSION_UNITS
-#     CASUAL_UNITS = CASUAL_UNITS
-#     CASUAL_QUANTITIES = CASUAL_QUANTITIES
-
-#     # primary unit sets
-#     UNITS_SET = UNITS_SET
-#     BASIC_UNITS_SET = BASIC_UNITS_SET
-#     NON_BASIC_UNITS_SET = NON_BASIC_UNITS_SET
-    
-#     # other (specific) units sets
-#     WEIGHT_UNITS_SET = WEIGHT_UNITS_SET
-#     DIMENSION_UNITS_SET = DIMENSION_UNITS_SET
-#     CASUAL_UNITS_SET = CASUAL_UNITS_SET
-#     CASUAL_QUANTITIES_SET = CASUAL_QUANTITIES_SET
-#     SIZE_MODIFIERS_SET = SIZE_MODIFIERS_SET
-
-#     # Misc. Sets
-#     PREP_WORDS = PREP_WORDS
-#     APPROXIMATE_STRINGS = APPROXIMATE_STRINGS
-#     UNIT_MODIFIERS = UNIT_MODIFIERS
-    
-#     # generic stop words for parsing 
-#     STOP_WORDS = STOP_WORDS
-
-#     # food catalog and food categories
-#     FOOD_CATALOG = FOOD_CATALOG
-#     FOOD_CATEGORIES = FOOD_CATEGORIES
