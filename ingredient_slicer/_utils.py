@@ -278,15 +278,6 @@ def _convert_fractions_to_decimals(ingredient: str) -> list:
 
 #     return ingredient
 
-# TODO: USE these as a basis for tests
-# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon"
-# _convert_fractions_to_decimals(ingredient)
-# _convert_fractions_to_decimals2(ingredient)
-
-# ingredient = "1 to 1/2 cups, 2 and 5 animals, 2 2 / 4 cats, 1 and 1/22 cups water melon, 2.0/4"
-# _convert_fractions_to_decimals(ingredient)
-# _convert_fractions_to_decimals2(ingredient)
-
 # -----------------------------------------------------------------------------------------------------------------------
 # ---- Force whitespaces between an number followed by a character or vice versa (i.e. "1cup" -> "1 cup") ----
 # -----------------------------------------------------------------------------------------------------------------------
@@ -652,20 +643,6 @@ def _remove_extra_whitespaces(input_string: str) -> str:
 
 #     assert parsed['is_required'] == True
 
-
-# ingredient = '1 cup of chopped chicken breast (about 12 ounces)'
-# EQUIV_QUANTITY_UNIT_GROUPS
-# QUANTITY_UNIT_GROUPS
-# regex_patterns = _regex_patterns.IngredientTools()
-
-# # ingredient = "1 cup of chopped chicken breast (about 12 ounces)"
-# ingredient = '1 cup of chopped chicken breast (about 12 tender and juicy ounces)'
-# parenthesis_content = ['(about 12 tender and juicy ounces)']
-# # parenthesis_content = ['(about tender and juicy ounces)']
-# parenthesis = parenthesis_content[0]
-
-# _regex_patterns.EQUIV_QUANTITY_UNIT_GROUPS.findall(parenthesis)
-
 def _extract_quantities_only(input_string: str) -> list:
 
     """From a string get all quantities if they exist WITHOUT units
@@ -675,13 +652,6 @@ def _extract_quantities_only(input_string: str) -> list:
     Returns:
         list: A list of quantities
     """
-
-    # input_string = parenthesis
-    # input_string = '(about 12 tender and juicy ounces or about 14 grams)'
-    # input_string = '(about 12 tender and juicy ounces)'
-    # input_string = '(14 cups)'
-    # input_string = '(juicy about 14 ,  and 456)'
-
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
@@ -716,12 +686,7 @@ def _extract_quantity_unit_pairs(input_string: str) -> list[tuple]:
     Returns:
         list: A list of tuples containing the quantity and unit
     """
-
-    # input_string = parenthesis
-    # input_string = '(about 12 tender and juicy ounces or about 14 grams)'
-    # input_string = '(about 12 tender and juicy ounces)'
-    # input_string = '(juicy about or 14)'
-
+    
     if not isinstance(input_string, str):
         raise ValueError("Invalid input. Input must be a string.")
 
