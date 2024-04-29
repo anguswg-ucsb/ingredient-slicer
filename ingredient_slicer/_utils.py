@@ -321,10 +321,6 @@ def _update_ranges(ingredient: str, pattern: re.Pattern) -> str:
                 have 2 numbers separated by a whitespace, then a hyphen, then another whitespace.
         """
 
-        # # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
-        # ingredient = "1-2 apples and 1- 45 orange slices between 4 and 5 lemons or 1 or 2 oranges and use 1 to 2 lemons"
-        # pattern = _regex_patterns.QUANTITY_DASH_QUANTITY
-        
         matched_ranges_iter = pattern.finditer(ingredient)
         offset = 0
 
@@ -627,22 +623,6 @@ def _remove_extra_whitespaces(input_string: str) -> str:
 # -----------------------------------------------------------------------------------------------
 # ---- Functions for parsing parenthesis content / quantity unit regex functions ----
 # -----------------------------------------------------------------------------------------------
-
-# def test_parenthesis_with_equiv_quantity_unit_1():
-#     parse = IngredientSlicer("1 cup of chopped chicken breast (about 12 ounces)", debug = True)
-#     # parse.parse()
-#     parsed = parse.to_json()
-
-#     assert parsed['quantity'] == "12"
-#     assert parsed['unit'] == "ounces"
-#     assert parsed["standardized_unit"] == "ounce"
-
-#     assert parsed['secondary_quantity'] == None  # TODO: maybe this case should get a quantity of 1, but for now it's None
-#     assert parsed['secondary_unit'] == "breast"
-#     assert parsed['standardized_secondary_unit'] == "breast"
-
-#     assert parsed['is_required'] == True
-
 def _extract_quantities_only(input_string: str) -> list:
 
     """From a string get all quantities if they exist WITHOUT units
@@ -734,9 +714,7 @@ def _extract_equivalent_quantity_units(input_string: str) -> list[tuple]:
         list: A list of tuples containing the (approximate string, quantity, and unit)
     """
 
-    # input_string = parenthesis
     # input_string = '(about 12 tender and juicy ounces or about 14 grams)'
-    # input_string = '(juicy about or 14)'
     # input_string = '(12 tender and juicy ounces or 14 grams about)'
 
     if not isinstance(input_string, str):
@@ -1432,13 +1410,6 @@ def _remove_x_separators(ingredient: str) -> str:
         "5   cartons of eggs"
     """
     # ingredient = "5 x cartons of eggs (3 x 4 inches)"
-    # # ingredient = "4x 4  inch"
-    # _regex_patterns.SINGLE_DIMENSION_UNIT_RANGES.findall(ingredient)
-    # _regex_patterns.X_AFTER_NUMBER.findall(ingredient)
-    # _regex_patterns.NUMBER_X_NUMBER.findall(ingredient)
-    # _regex_patterns.X_AFTER_NUMBER.findall("4x4inch")
-    # _regex_patterns.X_AFTER_NUMBER.findall("4x4 inch")
-    # _regex_patterns.X_AFTER_NUMBER.findall("4 x 4 inch")
 
     def replace_x(match):
         return match.group().replace('x', ' ').replace('X', ' ')
@@ -1492,9 +1463,6 @@ def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> d
     Returns:
         dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
     """
-    # food = "olive oil"
-    # quantity = "1"
-    # unit = "teaspoon"
 
     if not unit:
         return {
