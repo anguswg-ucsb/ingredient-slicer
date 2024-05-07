@@ -1489,6 +1489,7 @@ def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> d
     if not isinstance(quantity, (str, int, float)):
         raise ValueError("'quantity' must be a string, integer, or float")
     
+    # if unit is not None and not isinstance(unit, str):
     if not isinstance(unit, str):
         raise ValueError("'unit' must be a string")
 
@@ -1498,10 +1499,14 @@ def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> d
     min_gram_weight = None
     max_gram_weight = None
     
+    # if unit:
     unit = unit.lower()
+    
+    unit_is_weight = unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT
+    unit_is_volume = unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT
 
     # weight check
-    if unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT:
+    if unit_is_weight:
         gram_weight = _convert_weights_to_grams(quantity, unit)
 
         return {
@@ -1511,7 +1516,7 @@ def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> d
             }
     
     # volume check
-    if unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT:
+    if unit_is_volume:
         gram_values_map = _convert_volume_to_grams(food, quantity, unit, method)  
 
         return {
@@ -1519,6 +1524,16 @@ def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> d
             "min_gram_weight" : str(round(gram_values_map["min_gram_weight"], 2)) if gram_values_map["min_gram_weight"] else None,
             "max_gram_weight" : str(round(gram_values_map["max_gram_weight"], 2)) if gram_values_map["max_gram_weight"] else None
             }
+
+    # if not unit or unit is None or (not unit_is_weight and not unit_is_volume):
+    #     print(f"Attempting to get gram weights for single item...\n > food: '{food}'\n > quantity: '{quantity}'\n > unit: '{unit}'\n > gram_weight: '{gram_weight}'")
+    #     gram_weight = _get_single_item_gram_weight(food, quantity, unit, gram_weight)
+
+    #     return {
+    #         "gram_weight" : str(round(gram_weight, 2)) if gram_weight else None,
+    #         "min_gram_weight" : str(round(min_gram_weight, 2)) if min_gram_weight else None,
+    #         "max_gram_weight" : str(round(max_gram_weight, 2)) if max_gram_weight else None
+    #         }
 
     # if the given unit was not a weight or volume unit, return None for all of the gram weights
     return {
@@ -1885,6 +1900,210 @@ def _dice_coeff_similarity(first: str, second: str) -> float:
     intersection = first_bigrams & second_bigrams
 
     return 2.0 * len(intersection) / (len(first_bigrams) + len(second_bigrams))
+
+def _fuzzy_match_key(fuzzy_key:str = None, 
+                    map_to_check:dict = _constants.FOOD_CATEGORIES, 
+                    method:str = "dice",
+                    threshold: Union[float, None] = None,
+                    ) -> str:
+    """
+    Get the key from the map that most closely matches the fuzzy key
+    Args:
+    fuzzy_key: key to match
+    map_to_check: dictionary to check for matches
+    method: method to use for fuzzy matching. Options are "dice", "jaccard", or "levenshtein"
+    threshold: minimum similarity score to return a match (between 0 and 1, default is None)
+    """
+
+    if threshold is not None and not isinstance(threshold, float):
+        raise ValueError("Threshold must be a float")
+
+    method = method.lower()
+
+    if method not in ["dice", "jaccard", "levenshtein"]:
+        raise ValueError("Invalid method. Options are 'dice', 'jaccard', or 'levenshtein'")
+
+    # fuzzy_key = primary_categories[0]
+    # map_to_check = ingredient_slicer.FOOD_CATEGORIES
+
+    fuzzy_matcher = _get_fuzzy_matcher(method)
+    # map_keys = list(map_to_check.keys())
+
+    best_match = None
+    max_similarity = 0
+    
+    for key in map_to_check.keys():
+        similarity = round(fuzzy_matcher(fuzzy_key, key), 3)
+
+        if similarity >= max_similarity:
+            max_similarity = similarity
+            best_match = key
+    
+    if threshold and max_similarity < threshold:
+        return None
+    
+    return best_match
+
+def _fuzzy_match_str_parts_to_key(fuzzy_key:str = None, 
+                    map_to_check:dict = _constants.FOOD_CATEGORIES, 
+                    method:str = "dice",
+                    threshold: Union[float, None] = None,
+                    ) -> str:
+    """
+    Get the key from the map that most closely matches the fuzzy key
+    Args:
+    fuzzy_key: key to match, the key is split into parts and each part is matched to the map keys
+    map_to_check: dictionary to check for matches
+    method: method to use for fuzzy matching. Options are "dice", "jaccard", or "levenshtein"
+    threshold: minimum similarity score to return a match (between 0 and 1, default is None)
+    Returns:
+        str: The key that most closely matches the fuzzy key
+    """
+    # fuzzy_key = 'farmraised fresh eggs'
+    # fuzzy_key = "fresh broccoli heads, light"
+    # map_to_check = _constants.SINGLE_ITEM_FOOD_WEIGHTS
+    # method = "dice"
+    # threshold = None
+
+    if threshold is not None and not isinstance(threshold, float):
+        raise ValueError("Threshold must be a float")
+
+    method = method.lower()
+
+    if method not in ["dice", "jaccard", "levenshtein"]:
+        raise ValueError("Invalid method. Options are 'dice', 'jaccard', or 'levenshtein'")
+
+    # fuzzy_key = primary_categories[0]
+    # map_to_check = ingredient_slicer.FOOD_CATEGORIES
+
+    fuzzy_matcher = _get_fuzzy_matcher(method)
+    # map_keys = list(map_to_check.keys())
+
+    best_match = None
+    max_similarity = 0
+
+    split_fuzzy_key = fuzzy_key.split()
+    
+    for key in map_to_check.keys():
+        split_max_score = 0
+        for split_fuzzy in split_fuzzy_key:
+            # print(f"Split Fuzzy: {split_fuzzy}")
+            if split_fuzzy == key:
+                max_similarity = 1
+                best_match = key
+                continue
+
+            similarity = round(fuzzy_matcher(split_fuzzy, key), 3)
+            # print(f"Split Fuzzy: {split_fuzzy} > '{similarity}")
+
+            split_max_score = max(similarity, split_max_score)
+            # split_scores.append(similarity)
+            # split_max_score = max(split_scores)
+        
+        if split_max_score >= max_similarity:
+            # print(f"New best match: {key}")
+            max_similarity = split_max_score
+            best_match = key
+
+        # print(f"best_match: {best_match}")
+        # print(f"max_similarity: {max_similarity}")
+        # print()
+
+    if threshold and max_similarity < threshold:
+        # print(f"Best match WAS '{best_match}' but the similarity score was too low ({max_similarity} < {threshold})")
+        return None
+    
+    # print(f"Best match is '{best_match}' with a similarity score of {max_similarity}")
+    return best_match
+
+def _estimate_single_item_gram_weights(food:str, threshold:Union[float, None]) -> Union[str, None]:
+
+    """ Estimate the weight of a single food item in grams
+    Args:
+        food: str, food item
+        threshold: float, minimum similarity score to return a match
+    Returns:
+        estimated weight of the food in grams as a string or None
+    """
+
+    # food = "egg whites"
+    # gram_weight = None
+
+    # if gram_weight or gram_weight is not None:
+    #     return gram_weight
+    
+    if food in _constants.SINGLE_ITEM_FOOD_WEIGHTS:
+        return _constants.SINGLE_ITEM_FOOD_WEIGHTS[food]
+    
+    # closest_key = _fuzzy_match_key(food, _constants.SINGLE_ITEM_FOOD_WEIGHTS, "dice", 0.5)
+    closest_key = _fuzzy_match_str_parts_to_key(food, _constants.SINGLE_ITEM_FOOD_WEIGHTS, "dice", threshold)
+
+    # if closest_key:
+        # return _constants.SINGLE_ITEM_FOOD_WEIGHTS[closest_key]
+    
+    return _constants.SINGLE_ITEM_FOOD_WEIGHTS.get(closest_key, None)
+
+def _get_single_item_gram_weight2(food:str, quantity:str, unit:str, gram_weight:str) -> Union[str, None]:
+
+    """ Get the weight of a single food item in grams
+    Args:
+        food: str, food item
+        quantity: str, quantity of the food item
+        unit: str, unit of measurement for the quantity
+        gram_weight: str, weight of the food in grams
+
+    Returns:
+        estimated weight of the food in grams as a string or None
+    """
+
+    # food = "eggs"
+    # unit = "cup"
+    # unit = None
+    # quantity = 1
+    # gram_weight = None
+    
+    # set quantity to 1 if its None
+    quantity = 1 if not quantity else float(quantity)
+
+    # gram_weight already exists or the unit is a weight unit or volume unit just return the gram weight
+    # if gram_weight or unit in _constants.BASIC_UNITS_SET or unit in _constants.VOLUME_UNITS_SET:
+    if gram_weight or unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT or unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT:
+        return gram_weight
+    
+    est_weight = _estimate_single_item_gram_weights(food)
+    
+    return float(est_weight) * quantity if est_weight else None
+
+def _get_single_item_gram_weight(food:str, quantity:str, threshold:Union[float, None] = None) -> Union[str, None]:
+
+    """ Get the weight of a single food item in grams
+    Args:
+        food: str, food item
+        quantity: str, quantity of the food item
+
+    Returns:
+        estimated weight of the food in grams as a string or None
+    """
+
+    if not isinstance(food, str):
+        raise TypeError("'food' must be a string")
+    
+    if quantity is not None and not isinstance(quantity, (str, int, float)):
+        raise TypeError("'quantity' must be a string, integer, or float")
+
+    # food = "eggs"
+    # unit = "cup"
+    # unit = None
+    # quantity = 1
+    # gram_weight = None
+    
+    # set quantity to 1 if its None
+    quantity = 1 if not quantity else float(quantity)
+    
+    est_weight = _estimate_single_item_gram_weights(food,  threshold)
+    
+    return str(float(est_weight) * quantity) if est_weight else None
+
 
 # def _split_dimension_unit_x_ranges(ingredient: str) -> tuple[str]:
 #     """Split an ingredient string by any quantity dimension unit separated by an 'x' character.

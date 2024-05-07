@@ -1887,6 +1887,11 @@ FOOD_CATALOG = {
             "cabernet sauvignon": ("wine_and_cider", "wine"),
             "rosé": ("wine_and_cider", "wine"),
             "rose": ("wine_and_cider", "wine"),
+            "ruby port": ("wine_and_cider", "wine"),
+            "tawny port": ("wine_and_cider", "wine"),
+            "port": ("wine_and_cider", "wine"),
+            "ports": ("wine_and_cider", "wine"),
+            "port wine": ("wine_and_cider", "wine"),
             "rose wine" : ("wine_and_cider", "wine"),
             "champagne": ("wine_and_cider", "wine"),
             "sparkling wine": ("wine_and_cider", "wine"),
@@ -2380,15 +2385,74 @@ INDICATOR_STRINGS_MAP = {
     "beers" : "beer"
 }
 
-# # Categories that indicators point to:
-# cereal_and_cereal_products
-# egg_and_egg_products
-# oils 
-# milk
-# syrups
-# sweets
-# wine_and_cider
-# beer
+# A map of common food items and their weight in grams (i.e. 1 egg is approximately 56.7 grams, 1 apple is approximately 195 grams, etc.)
+SINGLE_ITEM_FOOD_WEIGHTS = {
+    'egg': '56.7',
+    'apple': '195',
+    'apricot': '35',
+    'avocado': '170',
+    'banana': '120',
+    'blackberry': '2.45',
+    'blueberry': '0.5',
+    'cherries': '5',
+    'coconut': '680',
+    'cranberry': '1.13',
+    'fig': '50',
+    'grapefruit': '246',
+    'grapes': '5',
+    'guava': '200',
+    'jackfruit': '6800',
+    'durian': '6800',
+    'kiwi': '75',
+    'lemon': '100',
+    'lime': '50',
+    'mango': '200',
+    'cantaloupe': '1360',
+    'honeydew': '1800',
+    'melon': '1500',
+    'nectarine': '150',
+    'olives': '5',
+    'orange': '130',
+    'papaya': '450',
+    'peach': '150',
+    'pear': '180',
+    'pineapple': '1590',
+    'plum': '65',
+    'pomegranate': '255',
+    'pumpkin': '4500',
+    'raspberry': '5',
+    'strawberry': '12',
+    'watermelon': '9000',
+    'artichoke': '368',
+    'asparagus': '22',
+    'eggplant': '453.5',
+    'garlic': '5',
+    'green beans': '5',
+    'beets': '113',
+    'bell pepper': '170',
+    'broccoli': '225',
+    'brussel sprouts': '14',
+    'cabbage': '9070',
+    'carrots': '60',
+    'cauliflower': '500',
+    'celery': '450',
+    'corn': '180',
+    'cucumber': '250',
+    'kale': '198',
+    'lettuce': '650',
+    'mushrooms': '15',
+    'onion': '160',
+    'parsnip': '115',
+    'pea': '0.2',
+    'potato': '184',
+    'snow pea': '2.5',
+    'spinach': '30',
+    'squash': '200',
+    'butternut squash': '1100',
+    'sweet potato': '113',
+    'tomato': '170',
+    'zucchini': '200'
+}
 
 # ----------------------------------------------------------------------------
 # ---- Unused constants ----

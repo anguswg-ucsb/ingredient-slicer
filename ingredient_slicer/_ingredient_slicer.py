@@ -45,7 +45,7 @@ class IngredientSlicer:
         self._secondary_unit     = None
         self._standardized_secondary_unit = None
 
-        self._gram_weight          = None
+        self._gram_weight         = None
         self._min_gram_weight     = None
         self._max_gram_weight     = None
 
@@ -1617,12 +1617,27 @@ class IngredientSlicer:
         grams_map = _utils._get_gram_weight(self._food, self._quantity, self._unit, "dice")
 
         if grams_map:
-            self._gram_weight      = grams_map.get("gram_weight", None)
+            self._gram_weight     = grams_map.get("gram_weight", None)
             self._min_gram_weight = grams_map.get("min_gram_weight", None)
             self._max_gram_weight = grams_map.get("max_gram_weight", None)
 
         return
+    
+    def _add_gram_weights_for_single_item_foods(self):
 
+        if not self._gram_weight:
+
+            # print(f'THIS IS A SINGLE ITEM FOOD: {self._food}') if self.debug else None
+            # NOTE: this is an arbitrary fuzzy string matching ratio of 0.5 for now
+            gram_weight = _utils._get_single_item_gram_weight(self._food, self._quantity, 0.5)
+            
+            # print(f" >>> Gram weight for single item food: {gram_weight}") if self.debug else None
+            
+            self._gram_weight = gram_weight
+
+        return 
+
+    
     def _address_parenthesis(self) -> None:
         """
         Address any parenthesis that were in the ingredient.
@@ -1733,6 +1748,12 @@ class IngredientSlicer:
         # -------------------------------------------------------------------------------------
         print(f"Calculating gram weights") if self.debug else None
         self._add_gram_weights() # TODO: testing using staged_ingredient
+
+        # ----------------------------------- STEP 10 ------------------------------------------
+        # ---- Calculate gram weights if possible ----
+        # -------------------------------------------------------------------------------------
+        print(f"Estimating gram weights for unitless foods") if self.debug else None
+        self._add_gram_weights_for_single_item_foods() # TODO: testing using staged_ingredient
 
 
     def standardized_ingredient(self) -> str:
