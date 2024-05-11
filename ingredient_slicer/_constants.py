@@ -245,8 +245,9 @@ for key, pattern in UNITS.items():
 # Only the core basic imperial and metric units (Excludes the more specific units like "stalk", "fillet", "slices", etc.)
 BASIC_UNITS = {
     # Imperial volume units
-    'teaspoon': ('teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "tspn", "tspns", "tspn." "tspns." , "ts", "t", "t."), # 'teaspoon': ('teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "t"),
-    'tablespoon': ('tablespoon', 'tablespoons', 'tbsp', 'tbsps', "tbsp", "tbsps", "tbsp.", "tbsps.", "tbl", "tbls", "tbl.", "tbls.", "T", "tbs", "tbs."),
+    'teaspoon': ('teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "tspn", "tspns", "tspn.", "tspns." , "ts", "t", "t."), # 'teaspoon': ('teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "t"),
+    'tablespoon': ('tablespoon', 'tablespoons', 'tbsp', 'tbsps', "tbsp", "tbsps", "tbsp.", "tbsps.", "tbl", "tbls", "tbl.", 
+                   "tbls.", "T", "tbs", "tbs."),
     'tablespoonful': ('tablespoonful', 'tablespoonfuls'),
     'teaspoonful': ('teaspoonful', 'teaspoonfuls'),
     'cup': ('cup', 'cups', "C", "c"),
@@ -1285,6 +1286,7 @@ FOOD_CATALOG = {
             # "duck eggs": ("meat_and_meat_products", "egg"),
             # "quail egg": ("meat_and_meat_products", "egg"),
             # "quail eggs": ("meat_and_meat_products", "egg"),
+
 
             # -------------------------------------------------------------------------------------------------------
             # ----- Egg & egg products ("egg_and_egg_products") -----
