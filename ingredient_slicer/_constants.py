@@ -2371,6 +2371,7 @@ INDICATOR_STRINGS_MAP = {
     "flours" : "cereal_and_cereal_products",
     "bread" : "cereal_and_cereal_products",
     "breads" : "cereal_and_cereal_products",
+    "bouillon" : "soups",
     "oil" : "oils",
     "oils" : "oils",
     "milk" : "milk",
