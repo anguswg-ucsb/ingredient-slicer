@@ -1763,6 +1763,54 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
         "max_gram_weight" : max_gram_weight, 
         }
 
+def _fuzzy_match_food_to_food_group(food:str, method:str) -> str:
+    """
+    Given a food item, compare it to all of the foods in each food group and return the food group that the food item most closely matches.
+    Args:
+        food: string, a food item
+        method: string, the method to use for comparison (options: "dice", "jaccard", "levenshtein")
+    Returns:
+        str: the food group that the food item most closely matches
+    """
+
+    method = method.lower()
+
+    if method not in ["dice", "jaccard", "levenshtein"]:
+        raise ValueError("Invalid method. Options are 'dice', 'jaccard', or 'levenshtein'")
+    
+    fuzzy_matcher = _get_fuzzy_matcher(method)
+
+    similarity_scores = {}
+    top_scoring_foods = {}
+
+    for category in _constants.FOOD_DENSITY_BY_GROUP:
+        # print(f"Category: {category}")
+        # category = "cereal_and_cereal_products"
+        # group_list_of_foods = list(ingredient_slicer._constants.FOODS_BY_CATEGORY[category])
+        food_set = _constants.FOODS_BY_CATEGORY[category]
+        # print(f"Category: {category}\nFood set: {food_set}")
+
+        # find the closeness from the given food to each food in the current category
+        # and extract that food and its value, to stash the top matched food and its score for each category
+        scores =  {i: round(fuzzy_matcher(food, i), 2) for i in food_set}
+        top_score_key = max(scores, key=scores.get) 
+        top_score_value = scores[top_score_key] if top_score_key else 0
+        
+        # NOTE: keep track of the food with the highest similarity score for each category
+        top_scoring_foods[category] = [top_score_key, top_score_value]
+        # print(f" - Top score key/value:\n ----> '{top_score_key} ({scores[top_score_key]})'\n")
+
+        max_similarity = max([round(fuzzy_matcher(food, i), 2) for i in food_set])
+        # max_similarity = max([round(_utils.score_sentence_similarity(food, i), 2) for i in food_set])
+
+        similarity_scores[category] = max_similarity
+        # print()
+
+    # get the key that has the highest similarity score in the dictionary of similarity scores
+    best_category_match = max(similarity_scores, key=similarity_scores.get)
+
+    return best_category_match
+
 # # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
 # ingredient = "1 1/2 cups of chick nuggets, grounded"
 
