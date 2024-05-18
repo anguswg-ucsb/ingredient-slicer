@@ -1543,7 +1543,12 @@ FOOD_CATALOG = {
             "cake mix": ("cereal_and_cereal_products", "flour"),
             "dough": ("cereal_and_cereal_products", "miscellaneous_foods"),
             "dough mix": ("cereal_and_cereal_products", "miscellaneous_foods"),
-
+            "toast": ("cereal_and_cereal_products", "bread"),
+            "toasts" : ("cereal_and_cereal_products", "bread"),
+            "toasts bread": ("cereal_and_cereal_products", "bread"),
+            "toasted bread": ("cereal_and_cereal_products", "bread"),
+            "cracker" : ("cereal_and_cereal_products", "miscellaneous_foods"),
+            "crackers" : ("cereal_and_cereal_products", "miscellaneous_foods"),
             # -------------------------------------------------------------------------------------------------------
             # ----- Nuts and Seeds ("nuts_and_seeds") -----
             # -------------------------------------------------------------------------------------------------------
@@ -1916,6 +1921,9 @@ FOOD_CATALOG = {
             "miso soup": ("soups", "soup"),
             "tomato soup": ("soups", "soup"),
             "tomato bisque": ("soups", "soup"),
+            "bouillon": ("soups", "soup"),
+            "beef bouillon": ("soups", "soup"),
+            "chicken bouillon": ("soups", "soup"),
             "chicken noodle soup": ("soups", "soup"),
             "cream of mushroom soup": ("soups", "soup"),
             "cream of chicken soup": ("soups", "soup"),
@@ -2016,6 +2024,13 @@ FOOD_CATALOG = {
             "maltitol": ("sweets", "sugar alcohol"),
             "chocolate chips": ("sweets", "chocolate"),
             "chocolate": ("sweets", "chocolate"),
+            "white chocolate": ("sweets", "chocolate"),
+            "dark chocolate": ("sweets", "chocolate"),
+            "milk chocolate": ("sweets", "chocolate"),
+            "cocoa": ("sweets", "chocolate"),
+            "ladyfinger": ("sweets", "cookie"),
+            "ladysfingers": ("sweets", "cookie"),
+            "ladyfingers": ("sweets", "cookie"),
 
             # SYRUPS
             "corn syrup": ("syrups", "syrup"),
@@ -2027,6 +2042,7 @@ FOOD_CATALOG = {
             "agave": ("syrups", "nectar"),
             "agave nectar": ("syrups", "nectar"),
             "fruit syrup": ("syrups", "syrup"),
+            "molasses" : ("syrups", "sugar"),
             "pancake syrup": ("syrups", "syrup"),
             "light corn syrup": ("syrups", "syrup"),
             "grenadine syrup": ("syrups", "syrup"),

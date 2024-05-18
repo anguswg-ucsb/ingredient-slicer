@@ -1790,14 +1790,15 @@ def _fuzzy_match_food_to_food_group(food:str, method:str) -> str:
         food_set = _constants.FOODS_BY_CATEGORY[category]
         # print(f"Category: {category}\nFood set: {food_set}")
 
+        # TODO: Don't think i need this code here anymore, no reason to get the top scoring foods in each category
         # find the closeness from the given food to each food in the current category
         # and extract that food and its value, to stash the top matched food and its score for each category
-        scores =  {i: round(fuzzy_matcher(food, i), 2) for i in food_set}
-        top_score_key = max(scores, key=scores.get) 
-        top_score_value = scores[top_score_key] if top_score_key else 0
+        # scores =  {i: round(fuzzy_matcher(food, i), 2) for i in food_set}
+        # top_score_key = max(scores, key=scores.get) 
+        # top_score_value = scores[top_score_key] if top_score_key else 0
         
-        # NOTE: keep track of the food with the highest similarity score for each category
-        top_scoring_foods[category] = [top_score_key, top_score_value]
+        # # NOTE: keep track of the food with the highest similarity score for each category
+        # top_scoring_foods[category] = [top_score_key, top_score_value]
         # print(f" - Top score key/value:\n ----> '{top_score_key} ({scores[top_score_key]})'\n")
 
         max_similarity = max([round(fuzzy_matcher(food, i), 2) for i in food_set])
@@ -1810,6 +1811,68 @@ def _fuzzy_match_food_to_food_group(food:str, method:str) -> str:
     best_category_match = max(similarity_scores, key=similarity_scores.get)
 
     return best_category_match
+
+def _get_closest_fuzzy_food_groups(food:str = None, group_metric:str = "max", method:str = "dice") -> list[list]:
+    """
+    Given a food item, get the top closest food group by fuzzy matching similarity scores of all foods
+      in each food group against the given food
+    Args:
+        food: string, a food item. Default is None
+        group_metric: str, the metric to use for comparison. Either max, mean, or min. Default is max
+        method: string, the method to use for comparison (options: "dice", "jaccard", "levenshtein"). Default is "dice"
+    Returns:
+        list[list]: a list of lists containing the similarity score and the food group ordered from highest to lowest similarity score
+    """
+
+    group_metric = group_metric.lower()
+
+    if group_metric not in ["max", "mean", "min"]:
+        raise ValueError("Invalid group metric. Options are 'max', 'mean', or 'min'")
+
+    method = method.lower()
+
+    if method not in ["dice", "jaccard", "levenshtein"]:
+        raise ValueError("Invalid method. Options are 'dice', 'jaccard', or 'levenshtein'")
+    
+    fuzzy_matcher = _get_fuzzy_matcher(method)
+
+    def non_zero_mean(lst):
+        non_zero_scores = [i for i in lst if i > 0]
+        non_zero_total = sum(non_zero_scores)
+        non_zero_length = len(non_zero_scores) if non_zero_scores else 1
+        return round(non_zero_total / non_zero_length, 4)
+    
+    # list of available metric functions
+    group_metric_functions = {
+        "max" : max,
+        "mean" : non_zero_mean,
+        "min" : min
+        }
+
+    group_metric_func = group_metric_functions.get(group_metric, max)
+
+    scored_categories = []
+    
+    for category in _constants.FOOD_DENSITY_BY_GROUP:
+        # print(f"Category: {category}")
+        # category = "cereal_and_cereal_products"
+        # group_list_of_foods = list(ingredient_slicer._constants.FOODS_BY_CATEGORY[category])
+        food_set = _constants.FOODS_BY_CATEGORY[category]
+        # print(f"Category: {category}\nFood set: {food_set}")
+
+        # find the closeness from the given food to each food in the current category
+        # compute the similarity score for each food in the category and then apply a function across the all of the scores
+        scores =  {i: round(fuzzy_matcher(food, i), 2) for i in food_set}
+        non_zero_scores = [scores[i] for i in scores if scores[i] > 0]
+        non_zero_scores = non_zero_scores if non_zero_scores else [0]
+
+        group_score = group_metric_func(non_zero_scores)
+
+        scored_categories.append([group_score, category])
+
+    scored_categories.sort(reverse = True)
+
+    return scored_categories
 
 # # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
 # ingredient = "1 1/2 cups of chick nuggets, grounded"
