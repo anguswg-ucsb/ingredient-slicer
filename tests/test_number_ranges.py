@@ -6,7 +6,41 @@ import re
 # from fractions import Fraction
 
 from ingredient_slicer import IngredientSlicer, _utils
+# from ingredient_slicer import _constants
 
+# _constants.SECONDARY_CATEGORIES
+# categories_to_ignore = [
+#                     # TODO: misc_changes
+#                     "miscellaneous_foods", 
+#                     "baked_goods",
+#                     "mixed_dishes", 
+#                     "beverages_non_alcoholic_including_soft_drinks_and_juices",
+#                     "tea_cacao_coffee_and_drinking_powders",
+#                     "wine_and_cider", 
+#                     "beer",
+#                     "spirits_and_liqueurs",
+#                     "snacks",
+#                     "water"
+#                     ]
+
+# secondary_categories_to_ignore = [_constants.FOOD_CATEGORIES[i] for i in _constants.FOOD_CATEGORIES if i in categories_to_ignore]
+# secondary_categories_to_ignore = [item for category in categories_to_ignore for item in _constants.FOOD_CATEGORIES.get(category, [])]
+# [i for i in _constants.SECONDARY_CATEGORIES if i not in secondary_categories_to_ignore]
+# [item for sublist in _constants.FOOD_CATEGORIES[i] for item in sublist for i in _constants.FOOD_CATEGORIES if i in categories_to_ignore]
+
+# categories_to_ignore = [
+#                     # TODO: misc_changes
+#                     "miscellaneous_foods", 
+#                     "baked_goods",
+#                     "mixed_dishes", 
+#                     "beverages_non_alcoholic_including_soft_drinks_and_juices",
+#                     "tea_cacao_coffee_and_drinking_powders",
+#                     "wine_and_cider", 
+#                     "beer",
+#                     "spirits_and_liqueurs",
+#                     "snacks",
+#                     "water"
+#                     ]
 # -------------------------------------------------------------------------------
 # ---- Simple number ranges (whole numbers/decimals to whole numbers/decimals) ----
 # -------------------------------------------------------------------------------
@@ -214,6 +248,7 @@ def test_average_from_two_whole_numbers_1():
 def test_average_from_two_whole_numbers_2():
     parse = IngredientSlicer("1-   8 tbsp of thickened cream")
     # parse.parse()
+
     parsed = parse.to_json()
     assert parsed["standardized_ingredient"] == '4.5 tbsp of thickened cream'
     assert parsed['quantity'] == "4.5"

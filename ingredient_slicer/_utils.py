@@ -208,7 +208,66 @@ def _fraction_str_to_decimal2(fraction_str: str) -> str:
 
 # -----------------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------
+# TODO: Write unit tests
+# TODO: Move EDGE_CASE_FOOD_PATTERNS to the _regex_patterns.py file
+# TODO: Possibly add move foods to the EDGE_CASE_FOOD_PATTERNS dictionary
+def _extract_edge_case_foods(ingredient: str) -> str:
+        """
+        Find and extract any edge case like foods from an ingredient string (i.e. "half and half").
+        Args:
+            ingredient (str): The ingredient string to parse.
+        Returns:
+            str: The extracted food, otherwise None
+        """
 
+        # ingredient = "0.43 tablespoon half and half cream"
+        # ingredient = "1/2 half and-half"
+        
+        EDGE_CASE_FOOD_PATTERNS = {
+            "HALF_AND_HALF_PATTERN" : _regex_patterns.HALF_AND_HALF_PATTERN
+        }
+
+        food_matches = []
+        
+        for key in EDGE_CASE_FOOD_PATTERNS:
+            edge_pattern = EDGE_CASE_FOOD_PATTERNS[key]
+            edge_pattern_match = edge_pattern.search(ingredient)
+
+            if edge_pattern_match:
+                food = edge_pattern_match.group()
+                end_index = edge_pattern_match.end()
+                # TODO: Super hacky way to handle the "HALF_AND_HALF_PATTERN" edge case and add the word "creamer" to the food
+                if key == "HALF_AND_HALF_PATTERN":
+                    creamer_words = [i for i in ingredient[end_index:].split() if i in ["cream", "creams",
+                                                                                        "creamer", "creamers"]]
+                    if creamer_words:
+                        food = f"{food} {creamer_words[0]}"
+                        # food = " ".join([food] + creamer_words[0])
+                food_matches.append((food))
+                # food_matches.append((edge_pattern_match.group(), key, edge_pattern_match.end()))
+
+        food = " ".join(food_matches).strip()
+
+        # Remove extra white spaces and non-alphanumeric characters
+        food = re.sub(r'[^\w\s]', '', food)
+        food = re.sub(r'\s+', ' ', food).strip()
+
+        # TODO: super hacky way of dealing with missing ampersands from the "half & half" food
+        if food in ["half half", "halfnhalf", "halfn half", "half nhalf", "halfhalf"]:
+            food = "half and half"
+
+        food = food if food else None
+        return food
+
+# ingredient = "1/2 half and-half"
+
+# half_and_half_match = HALF_AND_HALF_PATTERN.search(ingredient)
+
+# if half_and_half_match:
+#     half_and_half_match.group()
+
+# HALF_AND_HALF_PATTERN.findall(ingredient)
+# HALF_AND_HALF_PATTERN.search(ingredient).group()
 # -----------------------------------------------------------------------------------------------
 # ---- Convert ALL fractions in a string to their decimal equivalent ----
 # -----------------------------------------------------------------------------------------------

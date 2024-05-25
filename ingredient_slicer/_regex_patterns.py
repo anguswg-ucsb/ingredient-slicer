@@ -463,6 +463,13 @@ NUMBER_WITH_INCH_SYMBOL_MAP = {}
 for inch_symbol in ["\"", "”"]:
     NUMBER_WITH_INCH_SYMBOL_MAP[inch_symbol] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + inch_symbol + r'')
 
+# -----------------------------------------------------------------------------
+# --------------------------- Specific Edge case foods -----------------------------
+# Find foods that are specifically tricky to parse:
+# "half-n-half"
+# -----------------------------------------------------------------------------
+HALF_AND_HALF_PATTERN = re.compile(r'half[\s-]{0,5}(and|n|&)[\s-]{0,5}half', re.IGNORECASE)
+
 # # -----------------------------------------------------------------------------
 # # ---------------------------- OLD IngredientTools class... ---------------------------------
 # # -----------------------------------------------------------------------------

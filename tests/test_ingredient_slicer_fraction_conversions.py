@@ -5,7 +5,15 @@ import pytest
 
 import re
 
-from ingredient_slicer import IngredientSlicer
+from ingredient_slicer import IngredientSlicer, _constants
+
+# subcats = [i[1] for i in _constants.FOOD_CATEGORIES.items()]
+
+# subcat_list = []
+
+# for subcat in subcats:
+#     for cat in subcat:
+#         subcat_list.append(cat)
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------

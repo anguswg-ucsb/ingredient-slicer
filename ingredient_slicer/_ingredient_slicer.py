@@ -1551,6 +1551,22 @@ class IngredientSlicer:
         # Apply _utils._remove_parenthesis_from_str() to remove parenthesis content
         ingredient = _utils._remove_parenthesis_from_str(ingredient)
 
+        # check for obscure/tricky edge case foods and if found, return them as the food (i.e. half-and-half, etc.)
+        edge_food = _utils._extract_edge_case_foods(ingredient)
+        if edge_food:
+            # edge_food = re.sub(r'[^\w\s]', '', edge_food)
+            # edge_food = re.sub(r'\s+', ' ', edge_food).strip()
+            return edge_food
+        # ingredient = "1/2 half and-half"
+
+        # half_and_half_match = HALF_AND_HALF_PATTERN.search(ingredient)
+
+        # if half_and_half_match:
+        #     half_and_half_match.group()
+
+        # HALF_AND_HALF_PATTERN.findall(ingredient)
+        # HALF_AND_HALF_PATTERN.search(ingredient).group()
+
         # regular expressions to find and remove from the ingredient
         # NOTE: important to remove "parenthesis" first and "stop words" last to.
         # Parenthesis can contain other patterns and they need to be dealt with first (i.e. "(about 8 oz)" contains a number and a unit)
