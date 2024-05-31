@@ -2244,13 +2244,13 @@ def _get_single_item_gram_weight2(food:str, quantity:str, unit:str, gram_weight:
     
     return float(est_weight) * quantity if est_weight else None
 
-def _get_single_item_gram_weight(food:str, quantity:str, threshold:Union[float, None] = None) -> Union[str, None]:
+def _get_single_item_gram_weight(food:str, quantity:Union[str, int, float, None], threshold:Union[float, int, None] = 0.85) -> Union[str, None]:
 
     """ Get the weight of a single food item in grams
     Args:
         food: str, food item
-        quantity: str, quantity of the food item
-
+        quantity: str, int, or float, quantity of the food item. If None, the quantity is set to 1.
+        threshold: float, int, minimum similarity score to return a match. Score between 0 and 1, where 1 is a perfect match. Default is 0.85
     Returns:
         estimated weight of the food in grams as a string or None
     """
@@ -2260,6 +2260,11 @@ def _get_single_item_gram_weight(food:str, quantity:str, threshold:Union[float, 
     
     if quantity is not None and not isinstance(quantity, (str, int, float)):
         raise TypeError("'quantity' must be a string, integer, or float")
+    
+    if threshold is not None and not isinstance(threshold, (float, int)):
+        raise TypeError("'threshold' must be a float or integer")
+    
+
 
     # food = "eggs"
     # unit = "cup"
@@ -2268,8 +2273,9 @@ def _get_single_item_gram_weight(food:str, quantity:str, threshold:Union[float, 
     # gram_weight = None
     
     # set quantity to 1 if its None
-    quantity = 1 if not quantity else float(quantity)
-    
+    quantity  = 1 if not quantity else float(quantity)
+    threshold = 0.85 if not threshold else float(threshold)
+
     est_weight = _estimate_single_item_gram_weights(food,  threshold)
     
     return str(float(est_weight) * quantity) if est_weight else None

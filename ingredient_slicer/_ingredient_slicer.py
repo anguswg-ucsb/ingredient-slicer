@@ -1644,8 +1644,9 @@ class IngredientSlicer:
         if not self._gram_weight:
 
             # print(f'THIS IS A SINGLE ITEM FOOD: {self._food}') if self.debug else None
-            # NOTE: this is an arbitrary fuzzy string matching ratio of 0.5 for now
-            gram_weight = _utils._get_single_item_gram_weight(self._food, self._quantity, 0.5)
+            # NOTE: this is an arbitrary fuzzy string matching ratio of 0.85 for now, probably want this to be pretty strict 
+            # NOTE: so we don't get false positives (maybe even just make it 0.95 or 1 to just only match single character differences)
+            gram_weight = _utils._get_single_item_gram_weight(self._food, self._quantity, 0.85)
             
             # print(f" >>> Gram weight for single item food: {gram_weight}") if self.debug else None
             
