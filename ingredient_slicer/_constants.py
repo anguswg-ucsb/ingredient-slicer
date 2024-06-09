@@ -2497,9 +2497,7 @@ FOOD_DENSITY = {
     "aerated": 0.5
 }
 
-# ----------------------------------------------------------------------------
 # ---- Strings that obviously point to a food being a specific category ----
-# ----------------------------------------------------------------------------
 
 # Words that are so obviously pointing to a specific category that they can be used to determine the category of a food
 # (i.e. if a food contains the word "flour", it is most likely a cereal product)
@@ -2636,9 +2634,7 @@ SINGLE_ITEM_FOOD_WEIGHTS = {
     'zucchini': '200'
 }
 
-# ----------------------------------------------------------------------------
 # ---- Unused constants ----
-# ----------------------------------------------------------------------------
 
 # TODO: Probably can delete the constants below, they've been replaced/deprecated by other constants
 
