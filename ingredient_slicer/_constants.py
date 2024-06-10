@@ -669,10 +669,8 @@ TEMPERATURE_UNITS = {
     "fahrenheit": ("fahrenheit", "degree fahrenheit", "degrees fahrenheit", "°F")
 }
 
-# -----------------------------------------------------------------------------------------------------
 # ---- Common stop words ----
 # - NOTE: Add more as other stop words become known
-# -----------------------------------------------------------------------------------------------------
 
 # generic list of stop words that are not useful for parsing and should be removed from the string
 STOP_WORDS = set((
@@ -2228,9 +2226,8 @@ FOOD_CATALOG = {
             "active dry yeast": ("baked_goods", "baking"),
             "instant yeast": ("baked_goods", "baking")
             }
-# -----------------------------------------------------------------------------------------------------
+
 # ---- Map of all of the subcategories in each primary category in the FOOD_CATALOG ----
-# -----------------------------------------------------------------------------------------------------
 
 # From the FOOD_CATALOG, generate new food categories dictionary with the major categories as keys and the minor categories as tuple values
 FOOD_CATEGORIES = {}
