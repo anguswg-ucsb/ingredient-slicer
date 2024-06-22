@@ -1051,7 +1051,11 @@ FOOD_CATALOG = {
             "garden peas": ("legumes", "pea"),
             "pea shoot": ("legumes", "pea"),
             "pea shoots": ("legumes", "pea"),
-
+            "green bean": ("legumes", "bean"),
+            "green beans": ("legumes", "bean"),
+            "green-bean": ("legumes", "bean"),
+            "green-beans": ("legumes", "bean"),
+            
             # -------------------------------------------------------------------------------------------------------
             # ----- Meat & meat products ("meat_and_meat_products") -----
             # -------------------------------------------------------------------------------------------------------
@@ -1910,6 +1914,9 @@ FOOD_CATALOG = {
             "sparkling wine": ("wine_and_cider", "wine"),
             "dessert wine": ("wine_and_cider", "wine"),
             "cooking wine": ("wine_and_cider", "wine"),
+            "creme de cassis": ("wine_and_cider", "wine"),
+            "crème de cassis": ("wine_and_cider", "wine"),
+            "cassis": ("wine_and_cider", "wine"),
 
             # -------------------------------------------------------------------------------------------------------
             # ----- Soup, broth, stock ("soups") -----
