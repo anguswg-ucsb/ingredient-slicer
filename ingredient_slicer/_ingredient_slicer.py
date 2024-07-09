@@ -312,6 +312,13 @@ class IngredientSlicer:
         
         return 
     
+    def _replace_emojis(self) -> None:
+        """Remove emojis from the ingredient string."""
+        
+        self._standardized_ingredient = _utils._remove_emojis(self._standardized_ingredient)
+
+        return
+
     def _add_whitespace(self):
         # regex pattern to match consecutive sequences of letters or digits
         pattern = _regex_patterns.CONSECUTIVE_LETTERS_DIGITS        
@@ -745,6 +752,7 @@ class IngredientSlicer:
             self._find_and_replace_fraction_words, # NOTE: testing this out
             self._clean_html_and_unicode,
             self._replace_unicode_fraction_slashes,
+            self._replace_emojis,
             self._convert_fractions_to_decimals,
             # self._fix_ranges, # TODO: ORIGINAL place for fix_ranges() ---> need to decide where this should go
             # self._remove_x_separators,
@@ -863,8 +871,6 @@ class IngredientSlicer:
         # if neither basic nor nonbasic units are found, then get all of the numbers and all of the units
         quantity_matches = _regex_patterns.ALL_NUMBERS.findall(self._standardized_ingredient) # TODO: testing
         unit_matches     = _regex_patterns.UNITS_PATTERN.findall(self._standardized_ingredient) # TODO: testing
-        # quantity_matches = _regex_patterns.ALL_NUMBERS.findall(self._reduced_ingredient)
-        # unit_matches     = _regex_patterns.UNITS_PATTERN.findall(self._reduced_ingredient)
 
         # remove any empty matches
         valid_quantities = [i for i in quantity_matches if len(i) > 0]
@@ -885,27 +891,6 @@ class IngredientSlicer:
             self._unit = valid_units[0].strip() if valid_units else None
             # return {"quantity": self._quantity, "unit": self._unit}
             return
-
-        # # ---- STEP 3: CHECK FOR QUANTITY - NO UNITS (e.g. 1, 2) ----
-
-        # # if neither basic nor nonbasic units are found, then get the first number
-        # quantity_matches = _regex_patterns.ALL_NUMBERS.findall(self._reduced_ingredient)
-        # # quantity_matches = regex.ALL_NUMBERS.findall(_reduced_ingredient)
-        # # remove any empty matches
-        # valid_quantities = [i for i in quantity_matches if len(i) > 0]
-        # # debugging message
-        # quantity_only_message = f"Valid quantities: {valid_quantities}" if valid_quantities else f"No valid quantities found..."
-        # print(quantity_only_message)
-        # # print(quantity_only_message) if self.debug else None
-        # # if we have valid single number quantities, then return the first one
-        # if quantity_matches and valid_quantities:
-        #     self._quantity = valid_quantities[0].strip()
-        #     # return {"quantity": self._quantity, "unit": self._unit}
-        #     return
-            
-        # # ---- STEP 4: UNITS ONLY ----
-        # regex.print_matches(_reduced_ingredient)
-        # unit_matches = regex.UNITS_PATTERN.findall(_reduced_ingredient)
 
         # ---- STEP 4: NO MATCHES ----
         # just print a message if no valid quantities or units are found and return None
@@ -1505,41 +1490,42 @@ class IngredientSlicer:
 
         return 
     
-    def _find_and_remove(self, string: str, pattern: re.Pattern) -> str:
-        """Find and remove all matches of a pattern from a string.
-        Args:
-            string (str): The string to search for matches in
-            pattern (re.Pattern): The pattern to search for in the string
-        Returns:
-            str: The modified string with all matches removed
-        """
+    # TODO: Delete this function, not needed anymore 
+    # def _find_and_remove(self, string: str, pattern: re.Pattern) -> str:
+    #     """Find and remove all matches of a pattern from a string.
+    #     Args:
+    #         string (str): The string to search for matches in
+    #         pattern (re.Pattern): The pattern to search for in the string
+    #     Returns:
+    #         str: The modified string with all matches removed
+    #     """
 
-        pattern_iter = pattern.finditer(string)
+    #     pattern_iter = pattern.finditer(string)
 
-        offset = 0
+    #     offset = 0
 
-        for match in pattern_iter:
-            match_string    = match.group()
-            replacement_str = ""
+    #     for match in pattern_iter:
+    #         match_string    = match.group()
+    #         replacement_str = ""
 
-            # Get the start and end of the match and the modified start and end positions given the offset
-            start, end = match.start(), match.end()
-            modified_start = start + offset
-            modified_end = end + offset
+    #         # Get the start and end of the match and the modified start and end positions given the offset
+    #         start, end = match.start(), match.end()
+    #         modified_start = start + offset
+    #         modified_end = end + offset
 
-            # Construct the modified string with the replacement applied
-            string = string[:modified_start] + str(replacement_str) + string[modified_end:]
-            # self._standardized_ingredient = self._standardized_ingredient[:modified_start] + str(replacement_str) + self._standardized_ingredient[modified_end:]
+    #         # Construct the modified string with the replacement applied
+    #         string = string[:modified_start] + str(replacement_str) + string[modified_end:]
+    #         # self._standardized_ingredient = self._standardized_ingredient[:modified_start] + str(replacement_str) + self._standardized_ingredient[modified_end:]
 
-            # Update the offset for subsequent removals # TODO: this is always 0 because we're removing the match, probably just remove...
-            offset += len(str(replacement_str)) - (end - start)
-            # print(f"""
-            # Match string: {match_string}
-            # -> Match: {match_string} at positions {start}-{end}
-            # --> Modified start/end match positions: {modified_start}-{modified_end}
-            # ---> Modified string: {string}""")
+    #         # Update the offset for subsequent removals # TODO: this is always 0 because we're removing the match, probably just remove...
+    #         offset += len(str(replacement_str)) - (end - start)
+    #         # print(f"""
+    #         # Match string: {match_string}
+    #         # -> Match: {match_string} at positions {start}-{end}
+    #         # --> Modified start/end match positions: {modified_start}-{modified_end}
+    #         # ---> Modified string: {string}""")
 
-        return string
+    #     return string
     
     def _extract_foods(self, ingredient: str) -> str:
         """Does a best effort attempt to extract foods from the ingredient by 
@@ -1557,15 +1543,6 @@ class IngredientSlicer:
             # edge_food = re.sub(r'[^\w\s]', '', edge_food)
             # edge_food = re.sub(r'\s+', ' ', edge_food).strip()
             return edge_food
-        # ingredient = "1/2 half and-half"
-
-        # half_and_half_match = HALF_AND_HALF_PATTERN.search(ingredient)
-
-        # if half_and_half_match:
-        #     half_and_half_match.group()
-
-        # HALF_AND_HALF_PATTERN.findall(ingredient)
-        # HALF_AND_HALF_PATTERN.search(ingredient).group()
 
         # regular expressions to find and remove from the ingredient
         # NOTE: important to remove "parenthesis" first and "stop words" last to.
@@ -1587,15 +1564,13 @@ class IngredientSlicer:
         for key, pattern in patterns_map.items():
             # print(f" > Removing '{key}' from the ingredient\n") if self.debug else None
             # print(f"Starting ingredient:\n > '{ingredient}'") if self.debug else None
-            # ingredient = self._find_and_remove(ingredient, pattern)
             ingredient = _utils._find_and_remove(ingredient, pattern)
             # print(f"Ending ingredient:\n > '{ingredient}'") if self.debug else None
-        # print(f" > Removing any remaining special characters") if self.debug else None
         
+        # print(f" > Removing any remaining special characters") if self.debug else None
         ingredient = re.sub(r'[^\w\s]', '', ingredient) # remove any special characters
 
         # print(f" > Removing any extra whitespaces") if self.debug else None
-
         ingredient = re.sub(r'\s+', ' ', ingredient).strip() # remove any extra whitespace
 
         return ingredient
@@ -1957,99 +1932,3 @@ class IngredientSlicer:
     \tDimensions: '{self._dimensions}'
     \tIs Required: '{self._is_required}'
     \tParenthesis Content: '{self._parenthesis_content}'"""
-
-
-# # ####### Deprecated ####### 
-# def _merge_multi_nums2(self) -> None:
-#     """
-#     Replace unicode and standard fractions with their decimal equivalents in the parsed ingredient.
-#     Assumes that numeric values in string have been padded with a space between numbers and non numeric characters and
-#     that any fractions have been converted to their decimal equivalents.
-#     Args:
-#         ingredient (str): The ingredient string to parse.
-#     Returns:
-#         str: The parsed ingredient string with the numbers separated by a space merged into a single number (either added or multiplied).
-    
-#     >>> _merge_multi_nums('2 0.5 cups of sugar')
-#     '2.5 cups of sugar'
-#     >>> _merge_multi_nums('1 0.5 pounds skinless, boneless chicken breasts, cut into 0.5 inch pieces')
-#     '1.5 pounds skinless, boneless chicken breasts, cut into 0.5 inch pieces'
-#     """
-    
-#     # get the units from the ingredient string
-#     # units = re.findall(regex_map.UNITS_PATTERN, ingredient)
-#     units = re.findall(_regex_patterns.UNITS_PATTERN, self._standardized_ingredient)
-
-#     # spaced_nums = re.findall(regex.SPACE_SEP_NUMBERS, '2 0.5 cups of sugar 3 0.5 lbs of carrots')
-#     spaced_nums = re.findall(_regex_patterns.SPACE_SEP_NUMBERS, self._standardized_ingredient)
-
-#     # Merge the numbers from the space seperated string of numbers
-#     merged_values = [self._merge_spaced_numbers(num_pair) for num_pair in spaced_nums]
-
-#     # Was the operation to merge the numbers an addition or a multiplication?
-#     merge_type = [self._which_merge_on_spaced_numbers(num_pair) for num_pair in spaced_nums]
-
-#     # ---- METHOD 1 ----
-#     # METHOD 1: Create a list of dictionaries with the units and their converted quantities
-#     merged_unit_quantities = [{"units":u, "quantities": q, "merge_operation": m} for u, q, m in zip(units, merged_values, merge_type)]
-#     # merged_unit_quantities = [{"units":u, "quantities": q} for u, q in zip(units, merged_values)] # not including merge_type
-
-#     # map the spaced numbers to the units and their converted quantities
-#     # Key is the spaced numbers, value is a dictionary with the units, merged quantities, and the merge operation
-#     conversions_map = dict(zip(spaced_nums, merged_unit_quantities))
-
-#     # ---- METHOD 2 ----
-#     # METHOD 2: Create a LIST of dictionaries with the original string, the units, their converted quantities, and the merge method (keep track of iteration index and index the matches by position)
-#     conversions_list = [{"input_numbers": n, "units":u, "quantities": q, "merge_operation": m} for n, u, q, m in zip(spaced_nums, units, merged_values, merge_type)]
-
-#     if len(spaced_nums) != len(conversions_map):
-#         warnings.warn(f"Number of spaced numbers and number of converted matches (MAP) are not equal...")
-
-#     if len(spaced_nums) != len(conversions_list):    
-#         warnings.warn(f"Number of spaced numbers and number of converted matches (LIST) are not equal...")
-    
-#     # Create iterable of the matched spaced numbers to insert updated values into the original string
-#     spaced_matches = re.finditer(_regex_patterns.SPACE_SEP_NUMBERS, self._standardized_ingredient)
-
-#     # initialize offset and replacement index values for updating the ingredient string, 
-#     # these will be used to keep track of the position of the match in the string
-#     offset = 0
-#     replacement_index = 0
-
-#     # Update the ingredient string with the merged values
-#     for match in spaced_matches:
-#         # print(f"Ingredient string: {self._standardized_ingredient}")
-
-#         # Get the start and end positions of the match
-#         start, end = match.start(), match.end()
-
-#         # print(f"Match: {match.group()} at positions {start}-{end}")
-
-#         # Get key value pair in the conversions_map that corresponds to the current match and the new quantity values to sub in
-#         conversions = conversions_map[match.group()]
-#         # conversions = conversions_list[replacement_index]
-
-#         # print(f"Conversions: {conversions}")
-
-#         # starting_quantity = conversions["input_numbers"]
-#         merged_quantity = conversions["quantities"]
-#         merge_operation = conversions["merge_operation"] # add or multiply
-
-#         # print(f"Starting quantity {starting_quantity}")
-#         # print(f"Merged Quantity: {merged_quantity}") if self.debug else None
-
-#         # Calculate the start and end positions in the modified string
-#         modified_start = start + offset
-#         modified_end = end + offset
-
-#         # print(f" -> Modified match positions: {modified_start}-{modified_end}")
-#         # print(f"Replacing {match.group()} with '{merged_quantity}'...")
-        
-#         # Construct the modified string with the replacement applied
-#         self._standardized_ingredient = self._standardized_ingredient[:modified_start] + str(merged_quantity) + self._standardized_ingredient[modified_end:]
-#         # ingredient = ingredient[:modified_start] + str(merged_quantity) + ingredient[modified_end:]
-
-#         # Update the offset for subsequent replacements
-#         offset += len(merged_quantity) - (end - start)
-#         replacement_index += 1
-#         # print(f" --> Output ingredient: \n > '{self._standardized_ingredient}'")

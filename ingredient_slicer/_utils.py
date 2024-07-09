@@ -1177,14 +1177,16 @@ def _find_and_replace_casual_quantities(ingredient: str) -> str:
     pattern_iter = _regex_patterns.CASUAL_QUANTITIES_PATTERN.finditer(ingredient)
 
     for match in pattern_iter:
-        match_string    = match.group()
+    
+        match_string  = match.group()
+        match_string  = match_string.lower()
 
         # Get the start and end of the match and the modified start and end positions given the offset
         start, end = match.start(), match.end()
         modified_start = start + offset
         modified_end = end + offset
 
-        replacement_str = _constants.CASUAL_QUANTITIES[match_string] 
+        replacement_str = _constants.CASUAL_QUANTITIES.get(match_string, 1)
 
         # Construct the modified string with the replacement applied
         ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
@@ -1264,6 +1266,41 @@ def _clean_html_and_unicode(ingredient: str) -> str:
         ingredient = ingredient.replace(unicode_fraction, f" {decimal_fraction}")
 
     return ingredient
+
+# Credit: https://stackoverflow.com/questions/33404752/removing-emojis-from-a-string-in-python
+# Stackoverflow user: https://stackoverflow.com/users/4279/jfs
+def _remove_emojis(s):
+    """Remove emojis from a string
+    Args:
+        s: str, string from which to remove emojis
+    Returns:
+        str: string with emojis removed
+    """
+    
+    if s is None or s == "":
+        return ""
+    
+    # TODO: Move this into _regex_patterns.py
+    emoj = re.compile("["
+        u"\U0001F600-\U0001F64F"  # emoticons
+        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+        u"\U0001F680-\U0001F6FF"  # transport & map symbols
+        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+        u"\U00002500-\U00002BEF"  # chinese char
+        u"\U00002702-\U000027B0"
+        u"\U000024C2-\U0001F251"
+        u"\U0001f926-\U0001f937"
+        u"\U00010000-\U0010ffff"
+        u"\u2640-\u2642" 
+        u"\u2600-\u2B55"
+        u"\u200d"
+        u"\u23cf"
+        u"\u23e9"
+        u"\u231a"
+        u"\ufe0f"  # dingbats
+        u"\u3030"
+                    "]+", re.UNICODE)
+    return re.sub(emoj, '', s)
 
 # def replace_number_followed_by_inch_symbol(ingredient: str) -> str:
 #     """Replace numbers followed by the inch symbol with the word 'inch' in the ingredient string.
