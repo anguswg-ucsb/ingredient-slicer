@@ -518,6 +518,11 @@ PREP_WORDS = {
     "firm",
     "firmly",
     'flaked',
+    'flattened',
+    # TODO: not sure if i should have "fresh" and "freshly" in this set, 
+    # TODO: they are used in a lot of recipes but they are not really prep words
+    'fresh', 
+    'freshly', 
     'fried',
     'generous',
     'grated',

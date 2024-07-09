@@ -127,8 +127,8 @@ def test_wild_ingredients_6():
 
     assert parsed['is_required'] == True
 
-    assert parsed['prep'] == ['chopped', 'finely']
-    assert parsed['food'] == 'fresh jalapeño chile pepper'
+    assert parsed['prep'] == ['chopped', 'finely', 'fresh']
+    assert parsed['food'] == 'jalapeño chile pepper'
     assert parsed['size_modifiers'] == ['medium']
 
 def test_wild_ingredients_7():
@@ -252,8 +252,8 @@ def test_wild_ingredients_additional_3():
 
     assert parsed['is_required'] == True
 
-    assert parsed['prep'] == ['minced']
-    assert parsed['food'] == 'fresh ginger'
+    assert parsed['prep'] == ['fresh', 'minced']
+    assert parsed['food'] == 'ginger'
     assert parsed['size_modifiers'] == []
 
 def test_wild_ingredients_additional_4():
@@ -314,8 +314,8 @@ def test_wild_ingredients_additional_6():
 
     assert parsed['is_required'] == True
 
-    assert parsed['prep'] == ['chopped']
-    assert parsed['food'] == 'fresh parsley leaves'
+    assert parsed['prep'] == ['chopped', 'fresh']
+    assert parsed['food'] == 'parsley leaves'
     assert parsed['size_modifiers'] == []
 
 def test_wild_ingredients_additional_7():
@@ -477,8 +477,8 @@ def test_wild_ingredients_additional_14():
 
     assert parsed['is_required'] == True
 
-    assert parsed['prep'] == ['chopped']
-    assert parsed['food'] == 'fresh cilantro leaves'
+    assert parsed['prep'] == ['chopped', 'fresh']
+    assert parsed['food'] == 'cilantro leaves'
     assert parsed['size_modifiers'] == []
 
 
