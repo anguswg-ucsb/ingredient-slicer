@@ -864,6 +864,8 @@ FOOD_CATALOG = {
             "cauliflower rice": ("vegetables", "cruciferous"),
             "brussel sprout": ("vegetables", "cruciferous"),
             "brussel sprouts": ("vegetables", "cruciferous"),
+            "brussels sprouts": ("vegetables", "cruciferous"),
+            "brussel sprouts": ("vegetables", "cruciferous"),
             "lettuce": ("vegetables", "leafy"),
             "romaine lettuce": ("vegetables", "leafy"),
             "iceberg lettuce": ("vegetables", "leafy"),
@@ -2531,6 +2533,20 @@ INDICATOR_STRINGS_MAP = {
 SINGLE_ITEM_FOOD_WEIGHTS = {
     'egg': '56.7',
     'eggs': '56.7',
+    'whole egg' : '56.7',
+    'whole eggs' : '56.7',
+    # NOTE: general rule of thumb for egg / egg white / egg yolk weights:
+        # egg yolk   = 30% of egg weight
+        # egg white  = 60% of egg weight
+        # Source: https://cooking.stackexchange.com/questions/77802/how-much-do-egg-yolks-and-whites-weigh-in-grams
+    'egg yolk': '17', 
+    'egg yolks': '17',
+    'eggs yolk': '17',
+    'eggs yolks': '17',
+    'egg white': '34',
+    'egg whites': '34',
+    'eggs white': '34',
+    'eggs whites': '34',
     'apple': '195',
     'apples': '195',
     'apricot': '35',
