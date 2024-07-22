@@ -45,6 +45,9 @@ class IngredientSlicer:
         self._secondary_unit     = None
         self._standardized_secondary_unit = None
 
+        self._densities           = {}
+        # self._densities           = None
+
         self._gram_weight         = None
         self._min_gram_weight     = None
         self._max_gram_weight     = None
@@ -1601,11 +1604,20 @@ class IngredientSlicer:
     #     # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
     #     dimension_units = _regex_patterns.QUANTITY_DIMENSION_UNIT_GROUPS.findall(ingredient)
     #     return dimension_units
-    
+
+    def _add_food_density(self):
+        """Add food densities to the units variables if they are the only possible units after the ingredient has been parsed."""
+        # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
+        
+        if _utils._has_volume_unit(self._unit, self._standardized_unit, self._secondary_unit, self._standardized_secondary_unit):
+            densities       = _utils._get_food_density(self._food, "dice")
+            self._densities = densities
+
     def _add_gram_weights(self):
         """Add gram weights to the units variables if they are the only possible units after the ingredient has been parsed."""
-        # ingredient = "2 1/2 cups of sugar (about 1/2 inch squares of sugar)"
-        grams_map = _utils._get_gram_weight(self._food, self._quantity, self._unit, "dice")
+        
+        grams_map = _utils._get_gram_weight(self._food, self._quantity, self._unit, self._densities, "dice")
+        # grams_map = _utils._get_gram_weight2(self._food, self._quantity, self._unit, "dice")
 
         if grams_map:
             self._gram_weight     = grams_map.get("gram_weight", None)
@@ -1734,14 +1746,20 @@ class IngredientSlicer:
         self._size_modifiers = self._extract_size_modifiers(self._staged_ingredient) # TODO: testing using staged_ingredient
         # self._prep = self._extract_prep_words(self._standardized_ingredient) 
         # self._size_modifiers = self._extract_size_modifiers(self._standardized_ingredient)
-
+        
         # ----------------------------------- STEP 9 ------------------------------------------
+        # ---- Calculate food density if possible ----
+        # -------------------------------------------------------------------------------------
+        print(f"Calculating food density") if self.debug else None
+        self._add_food_density() 
+
+        # ----------------------------------- STEP 10 ------------------------------------------
         # ---- Calculate gram weights if possible ----
         # -------------------------------------------------------------------------------------
         print(f"Calculating gram weights") if self.debug else None
         self._add_gram_weights() # TODO: testing using staged_ingredient
 
-        # ----------------------------------- STEP 10 ------------------------------------------
+        # ----------------------------------- STEP 11 ------------------------------------------
         # ---- Calculate gram weights if possible ----
         # -------------------------------------------------------------------------------------
         print(f"Estimating gram weights for unitless foods") if self.debug else None
@@ -1811,6 +1829,15 @@ class IngredientSlicer:
             str: The standardized secondary unit string.
         """
         return self._standardized_secondary_unit
+    
+    def density(self) -> Union[str, float, int, None]:
+        """
+        Return the density of the given ingredient.
+        Returns:
+            str: The density of the given ingredient. 
+        """
+
+        return self._densities.get("density") if self._densities else None
     
     def gram_weight(self) -> str:
         """
@@ -1897,7 +1924,8 @@ class IngredientSlicer:
             "secondary_quantity": self._secondary_quantity,                # "40"
             "secondary_unit": self._secondary_unit,                        # "tbsp"
             "standardized_secondary_unit": self._standardized_secondary_unit,  # "tablespoon"
-
+            "density": self._densities.get("density"),                     # 0.95
+            # "density": self._densities.get("density") if self._densities else None,                     # 0.95
             "gram_weight": self._gram_weight,                              # "113.4 grams
 
             "prep": self._prep,                                            # ["lightly", "packed"]
@@ -1926,6 +1954,7 @@ class IngredientSlicer:
     \tSecondary Quantity: '{self._secondary_quantity}'
     \tSecondary Unit: '{self._secondary_unit}'
     \tStandardized Secondary Unit: '{self._standardized_secondary_unit}'
+    \tDensity: '{self._densities.get("density")}'
     \tGram Weight: '{self._gram_weight}'
     \tPrep: '{self._prep}'
     \tSize Modifiers: '{self._size_modifiers}'

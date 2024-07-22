@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Example usage:
+# sh sh/publish_to_pypi.sh <package name> <version> <TestPyPI API Token> <PyPI
+
 # Check if the correct number of arguments is provided
 if [ "$#" -ne 4 ]; then
     echo "Usage: $0 <package name> <version> <TestPyPI API Token> <PyPI API Token>"

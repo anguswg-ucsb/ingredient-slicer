@@ -29,6 +29,7 @@ def test_half_and_half_single_spaced():
         'secondary_quantity': None, 
         'secondary_unit': None, 
         'standardized_secondary_unit': None,
+        'density': 0.827,
         'gram_weight': '97.83', 
         'prep': [],
         'size_modifiers': [], 
@@ -53,6 +54,7 @@ def test_half_n_half_single_spaced():
         'secondary_quantity': None, 
         'secondary_unit': None, 
         'standardized_secondary_unit': None,
+        'density': 0.827,
         'gram_weight': '97.83', 
         'prep': [],
         'size_modifiers': [], 
@@ -60,6 +62,7 @@ def test_half_n_half_single_spaced():
         'is_required': True, 
         'parenthesis_content': []
         }
+    
     assert output == expected_output
 
 def test_half_ampersand_half_single_spaced():
@@ -77,6 +80,7 @@ def test_half_ampersand_half_single_spaced():
         'secondary_quantity': None, 
         'secondary_unit': None, 
         'standardized_secondary_unit': None,
+        'density': 0.827,
         'gram_weight': '97.83', 
         'prep': [],
         'size_modifiers': [], 
@@ -101,6 +105,7 @@ def test_half_and_half_dash_sep():
         'secondary_quantity': None, 
         'secondary_unit': None, 
         'standardized_secondary_unit': None,
+        'density': 0.827,
         'gram_weight': '97.83', 
         'prep': [],
         'size_modifiers': [], 
@@ -125,6 +130,7 @@ def test_half_n_half_dash_sep():
         'secondary_quantity': None, 
         'secondary_unit': None, 
         'standardized_secondary_unit': None,
+        'density': 0.827,
         'gram_weight': '97.83', 
         'prep': [],
         'size_modifiers': [], 
@@ -132,6 +138,7 @@ def test_half_n_half_dash_sep():
         'is_required': True, 
         'parenthesis_content': []
         }
+    
     assert output == expected_output
 
 def test_half_ampersand_half_dash_sep():
@@ -149,6 +156,7 @@ def test_half_ampersand_half_dash_sep():
         'secondary_quantity': None, 
         'secondary_unit': None, 
         'standardized_secondary_unit': None,
+        'density': 0.827,
         'gram_weight': '97.83', 
         'prep': [],
         'size_modifiers': [], 

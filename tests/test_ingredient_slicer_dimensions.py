@@ -90,6 +90,7 @@ def test_three_consequetive_x_separated_dimension_units():
     'secondary_quantity': '1', 
     'secondary_unit': None, 
     'standardized_secondary_unit': None, 
+    'density': 0.5781, 
     'gram_weight': "1641.26",
     'prep': [], 
     'size_modifiers': [], 

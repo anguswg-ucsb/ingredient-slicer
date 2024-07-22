@@ -28,6 +28,7 @@ def test_ingredient_with_quanitity_unit_then_parenthesis_with_about_quantity_onl
         'secondary_quantity': None, 
         'secondary_unit': None, 
         'standardized_secondary_unit': None, 
+        'density': None,
         'gram_weight': '907.18', 
         'prep': ['cored', 'cut', 'peeled'], 
         'size_modifiers': [], 

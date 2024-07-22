@@ -1549,7 +1549,108 @@ def _remove_repeat_units_in_ranges(ingredient) -> str:
     return ingredient 
 
 
-def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> dict:
+def _get_gram_weight(
+        food:str, 
+        quantity:str, 
+        unit:str, 
+        densities:dict = None,
+        method:str = "dice"
+        ) -> dict:
+
+    """ Get the gram weight of a given quantity of food item.
+    Args:
+        food (str): The food item to convert.
+        quantity (Union[str, int, float]): The quantity of the food item.
+        unit (str): The unit of measurement for the quantity.
+    Returns:
+        dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
+    """
+
+    if not unit:
+        return {
+            "gram_weight" : None,
+            "min_gram_weight" : None,
+            "max_gram_weight" : None
+        }
+
+    if quantity is None:
+        quantity = "1"
+
+    # ValueError checks
+    if not isinstance(food, str):
+        raise ValueError("'food' must be a string")
+
+    if not isinstance(method, str):
+        raise ValueError("'method' must be a string")
+
+    method = method.lower()
+
+    if method not in ["levenshtein", "jaccard", "dice"]:
+        raise ValueError("Invalid 'method'. Options are 'levenshtein', 'jaccard', or 'dice'.")
+    
+    if not isinstance(quantity, (str, int, float)):
+        raise TypeError("'quantity' must be a string, integer, or float")
+    
+    # if unit is not None and not isinstance(unit, str):
+    if not isinstance(unit, str):
+        raise TypeError("'unit' must be a string")
+
+    if densities is not None and not isinstance(densities, dict):
+        raise TypeError(f"Invalid 'densities' type '{type(densities).__name__}', densities must be of type 'dict' or 'None' type")
+
+    quantity = float(quantity)
+    
+    gram_weight     = None
+    min_gram_weight = None
+    max_gram_weight = None
+    
+    # if unit:
+    unit = unit.lower()
+    
+    unit_is_weight = _has_weight_unit(unit=unit, std_unit=unit, secondary_unit=None, std_secondary_unit=None)
+    unit_is_volume = _has_volume_unit(unit=unit, std_unit=unit, secondary_unit=None, std_secondary_unit=None)
+
+    # weight check
+    if unit_is_weight:
+        gram_weight = _convert_weights_to_grams(quantity, unit)
+
+        return {
+            "gram_weight" : str(round(gram_weight, 2)) if gram_weight else None,
+            "min_gram_weight" : str(round(min_gram_weight, 2)) if min_gram_weight else None,
+            "max_gram_weight" : str(round(max_gram_weight, 2)) if max_gram_weight else None
+            }
+    
+    # volume check
+    if unit_is_volume:
+
+        gram_values_map = _convert_volume_to_grams_with_densities(food, quantity, unit, densities, method)  
+
+        return {
+            "gram_weight" : str(round(gram_values_map["gram_weight"], 2)) if gram_values_map["gram_weight"] else None,
+            "min_gram_weight" : str(round(gram_values_map["min_gram_weight"], 2)) if gram_values_map["min_gram_weight"] else None,
+            "max_gram_weight" : str(round(gram_values_map["max_gram_weight"], 2)) if gram_values_map["max_gram_weight"] else None
+            }
+
+    # if not unit or unit is None or (not unit_is_weight and not unit_is_volume):
+    #     print(f"Attempting to get gram weights for single item...\n > food: '{food}'\n > quantity: '{quantity}'\n > unit: '{unit}'\n > gram_weight: '{gram_weight}'")
+    #     gram_weight = _get_single_item_gram_weight(food, quantity, unit, gram_weight)
+
+    #     return {
+    #         "gram_weight" : str(round(gram_weight, 2)) if gram_weight else None,
+    #         "min_gram_weight" : str(round(min_gram_weight, 2)) if min_gram_weight else None,
+    #         "max_gram_weight" : str(round(max_gram_weight, 2)) if max_gram_weight else None
+    #         }
+
+    # if the given unit was not a weight or volume unit, return None for all of the gram weights
+    return {
+        "gram_weight" : str(round(gram_weight, 2)) if gram_weight else None,
+        "min_gram_weight" : str(round(min_gram_weight, 2)) if min_gram_weight else None,
+        "max_gram_weight" : str(round(max_gram_weight, 2)) if max_gram_weight else None
+        }
+
+# TODO: Deprecated version of _get_gram_weight(), delete in future updates
+# TODO: moved functionality to use get_food_density (NEW _get_gram_weight() function above ^^^)
+def _get_gram_weight2(food:str, quantity:str, unit:str, method:str = "dice") -> dict:
 
     """ Get the gram weight of a given quantity of food item.
     Args:
@@ -1637,7 +1738,7 @@ def _get_gram_weight(food:str, quantity:str, unit:str, method:str = "dice") -> d
         "min_gram_weight" : str(round(min_gram_weight, 2)) if min_gram_weight else None,
         "max_gram_weight" : str(round(max_gram_weight, 2)) if max_gram_weight else None
         }
-    
+  
 
 def _convert_weights_to_grams(quantity: Union[str, int, float], unit:str) -> str:
     """
@@ -1706,7 +1807,305 @@ def _convert_volumes_to_milliliters(quantity: Union[str, int, float], unit:str) 
     
     return None
 
-def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: str, method:str = "levenshtein") -> dict:
+def _convert_volume_to_grams_with_densities(
+                                food: str, 
+                                quantity: Union[str, int, float], 
+                                unit: str,
+                                densities: dict,
+                                method:str = "levenshtein"
+                                ) -> dict:
+
+    """
+    Convert a volume measurement to a weight measurement in grams.
+    Args:
+        food (str): The food item to convert.
+        quantity (Union[str, int, float]): The quantity of the food item.
+        unit (str): The unit of measurement for the quantity.
+        densities (dict): A dictionary containing the densities of the food item. Keys are "density", "min_density", and "max_density".
+        method (str): The method to use for fuzzy string matching. Options are "levenshtein", "jaccard", or "dice". Defaults to "levenshtein".
+    Returns:
+        dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
+    """
+
+    # ############################################################
+    # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
+    # method = "jaccard"
+    # food = 'sour cream chives'
+    # quantity = 2
+    # unit = 'tablespoons'
+    # densities = {"density": 1.0, "min_density": 0.9, "max_density": 1.1}
+    # method = "levenshtein"
+    # ############################################################
+
+    if not isinstance(method, str):
+        raise ValueError("'method' must be a string")
+    
+    method = method.lower()
+
+    if method not in ["levenshtein", "jaccard", "dice"]:
+        raise ValueError("Invalid 'method'. Options are 'levenshtein', 'jaccard', or 'dice'.")
+
+    if densities is None:
+        densities = {'density': 1.0, 'min_density': 0.9, 'max_density': 1.1}
+
+    milliliter_quantity = _convert_volumes_to_milliliters(quantity, unit)
+
+    gram_weights = _get_gram_weight_map(milliliter_quantity, **densities)
+
+    return gram_weights
+
+def _convert_volume_to_grams(food: str, 
+                             quantity: Union[str, int, float], 
+                             unit: str, 
+                             method:str = "levenshtein"
+                             ) -> dict:
+
+    """
+    Convert a volume measurement to a weight measurement in grams.
+    Args:
+        food (str): The food item to convert.
+        quantity (Union[str, int, float]): The quantity of the food item.
+        unit (str): The unit of measurement for the quantity.
+        method (str): The method to use for fuzzy string matching. Options are "levenshtein", "jaccard", or "dice". Defaults to "levenshtein".
+    Returns:
+        dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
+    """
+
+    # ############################################################
+    # ingredient = "1 1/2 cups of all purpose almond flour, grounded"
+    # method = "jaccard"
+    # food = 'sour cream chives'
+    # quantity = 2
+    # unit = 'tablespoons'
+    # method = "levenshtein"
+    # ############################################################
+
+    if not isinstance(method, str):
+        raise ValueError("'method' must be a string")
+    
+    method = method.lower()
+
+    if method not in ["levenshtein", "jaccard", "dice"]:
+        raise ValueError("Invalid 'method'. Options are 'levenshtein', 'jaccard', or 'dice'.")
+
+    milliliter_quantity = _convert_volumes_to_milliliters(quantity, unit)
+
+    densities = _get_food_density(food, method)
+
+    gram_weights = _get_gram_weight_map(milliliter_quantity, **densities)
+
+    return gram_weights
+
+# def _get_gram_weight_map(milliliters: Union[str, int, float], densities: dict) -> dict:
+#     """
+#     Get the gram weight of a given volume in milliliters using a density map.
+#     Args:
+#         milliliters (Union[str, int, float]): The volume in milliliters.
+#         densities (dict): A dictionary containing the density, min_density, and max_density of the food item.
+#     Returns:
+#         dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
+#     """
+
+#     if not isinstance(milliliters, (str, int, float)):
+#         raise ValueError("'milliliters' must be a string, integer, or float")
+
+#     if densities is not None and not isinstance(densities, dict):
+#         raise ValueError("'densities' must be a dictionary")
+
+#     if isinstance(milliliters, str):
+#         milliliters = float(milliliters)
+#     density = densities.get("density", 1) if densities else 1
+#     density = density if density is not None else 1
+
+#     min_density = densities.get("min_density", 0.9) if densities else 0.9
+#     min_density = min_density if min_density is not None else 0.9
+
+#     max_density = densities.get("max_density", 1.1) if densities else 1.1
+#     max_density = max_density if max_density is not None else 1.1
+
+#     gram_weight     = milliliters * density
+#     min_gram_weight = milliliters * min_density
+#     max_gram_weight = milliliters * max_density
+
+#     return {
+#         "gram_weight" : gram_weight, 
+#         "min_gram_weight" : min_gram_weight,
+#         "max_gram_weight" : max_gram_weight, 
+#         }
+
+def _get_gram_weight_map(milliliters: Union[str, int, float], **kwargs) -> dict:
+    """
+    Get the gram weight of a given volume in milliliters using density values.
+    
+    Args:
+        milliliters (Union[str, int, float]): The volume in milliliters.
+        kwargs: keyword arguments for density, min_density, and max_density.
+                Valid keys are 'density', 'min_density', and 'max_density'.
+    
+    Returns:
+        dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
+    """
+    # milliliters = 100 
+    # density=1.05
+    # min_density=None
+    # max_density=''
+
+    default_density      = 1
+    default_min_density  = 0.9
+    default_max_density  = 1.1
+
+    if not isinstance(milliliters, (str, int, float)):
+        raise ValueError("'milliliters' must be a string, integer, or float")
+
+    if isinstance(milliliters, str):
+        try:
+            milliliters = float(milliliters)
+        except ValueError:
+            raise ValueError("'milliliters' string value must be convertible to a float")
+
+    # check for invalid keyword arguments
+    valid_keys = {"density", "min_density", "max_density"}
+    for key in kwargs:
+        if key not in valid_keys:
+            raise ValueError(f"Invalid keyword argument: {key}")
+
+    density     = _pull_key_with_default(kwargs, "density", default_density)
+    min_density = _pull_key_with_default(kwargs, "min_density", default_min_density)
+    max_density = _pull_key_with_default(kwargs, "max_density", default_max_density)
+
+    gram_weight     = milliliters * float(density)
+    min_gram_weight = milliliters * float(min_density)
+    max_gram_weight = milliliters * float(max_density)
+
+    return {
+        "gram_weight": gram_weight,
+        "min_gram_weight": min_gram_weight,
+        "max_gram_weight": max_gram_weight,
+    }
+
+def _pull_key_with_default(dictionary: dict, key: Union[str, int, tuple], default: str) -> str:
+    """
+    Get a value from a dictionary by key, or return a default value if the key is not present.
+    Args:
+        dictionary (dict): The dictionary to pull the value from.
+        key (Union[str, int, tuple]): The key to use to get the value from the dictionary.
+        default (str): The default value to return if the key is not present in the dictionary.
+    Returns:
+        str: The value from the dictionary by key, or the default value if the key is not present.
+    """
+    if not isinstance(dictionary, dict):
+        raise ValueError("'dictionary' must be a dictionary")
+
+    val = dictionary.get(key, default)
+    val = default if val is None or val == "" else val
+
+    return val
+
+def _get_food_density(food: str, method:str = "levenshtein") -> dict:
+
+    """
+    Get a grams per milliliter density for a given food item
+    Args:
+        food (str): The food item to convert.
+        method (str): The method to use for fuzzy string matching. Options are "levenshtein", "jaccard", or "dice". Defaults to "levenshtein".
+    Returns:
+        dict: A dictionary containing the density, min_density, and max_density of the food item.
+    """
+
+    # ############################################################
+    # food = "sour cream chives"
+    # method = "levenshtein"
+    # ############################################################
+
+    if not isinstance(food, str) and food is not None:
+        raise TypeError(f"'food' must be of type string or None, not {type(food)}.")
+    
+    if not isinstance(method, str):
+        raise ValueError("'method' must be a string")
+    
+    method = method.lower()
+
+    if method not in ["levenshtein", "jaccard", "dice"]:
+        raise ValueError("Invalid 'method'. Options are 'levenshtein', 'jaccard', or 'dice'.")
+
+    if not food or food is None or food == "water":
+        return {
+            "density" : 1.0,
+            "min_density" : 1.0,
+            "max_density" : 1.0
+        }
+
+    fuzzy_matcher =  _get_fuzzy_matcher(method)
+
+    # try to get the food groups for the given food...
+    food_groups = _constants.FOOD_CATALOG.get(food, None)
+    # food_groups = _constants.FOOD_CATALOG.get(food, no_match_string)
+
+    # CASE 1: If we get a match in the FOOD_CATALOG, we can just use the corresponding densities for the matched food
+    if not food_groups:
+        # print(f"Going for the layup classification for '{food}'...")
+        food_group = _check_food_for_easy_categorization(food)
+        # print(f"Easily classified as '{food_group}'")
+        if food_group:
+            # print(f"Setting previously None 'food_groups' to '{[food_group, food_group]}'")
+            food_groups = [food_group, food_group]
+
+    # then we can just use the corresponding densities for the matched food
+    if food_groups:
+    # if food_groups != no_match_string:
+        # print(f"Found exact category match:\n '{food}' >>> '{food_groups}'")
+        primary_category, secondary_category = food_groups
+
+        # try to get the density values for the given primary category food group, 
+        # if that fails try to get the density values for the secondary category food group
+        # and all else fails, use the default density map
+        if primary_category in _constants.FOOD_DENSITY_BY_GROUP:
+            densities = _constants.FOOD_DENSITY_BY_GROUP.get(primary_category, _constants.DEFAULT_DENSITY_MAP)
+        elif secondary_category in _constants.FOOD_DENSITY_BY_GROUP:
+            densities = _constants.FOOD_DENSITY_BY_GROUP.get(secondary_category, _constants.DEFAULT_DENSITY_MAP)
+        else:
+            densities = _constants.DEFAULT_DENSITY_MAP
+            
+        densities = _group_density_map_to_density_map(densities)
+
+        return densities
+     
+    # CASE 2: If we do NOT get a match in the FOOD_CATALOG, we will have to do a FUZZY MATCH between our given food
+    # and ALL of the foods and determine the closet match and use the density of that food group (FOOD_DENSITY_BY_GROUP)
+    similarity_scores = {}
+
+    for category in _constants.FOOD_DENSITY_BY_GROUP:
+        # print(f"Category: {category}")
+        food_set = _constants.FOODS_BY_CATEGORY.get(category)
+
+        if food_set: 
+            max_similarity               = max([round(fuzzy_matcher(food, i), 2) for i in food_set])
+            similarity_scores[category]  = max_similarity
+        
+    # get the key that has the highest similarity score in the dictionary of similarity scores
+    best_category_match = max(similarity_scores, key=similarity_scores.get)
+
+    densities    = _constants.FOOD_DENSITY_BY_GROUP.get(best_category_match)
+    densities    = _group_density_map_to_density_map(densities)
+
+    return densities 
+
+def _group_density_map_to_density_map(group_density_map:dict) -> dict:
+    """
+    Convert a food category density map to a density map with density, min_density, and max_density keys.
+    Args:
+        group_density_map (dict): A dictionary containing the density, min_density, and max_density of a food group.
+    Returns:
+        dict: A dictionary containing the density, min_density, and max_density of the food group.
+    """
+
+    return {
+        "density" : group_density_map.get("density_g_per_ml", 1), 
+        "min_density" : group_density_map.get("min_density_g_per_ml", 0.9),
+        "max_density" : group_density_map.get("max_density_g_per_ml", 1.1)
+    }
+
+def _convert_volume_to_grams2(food: str, quantity: Union[str, int, float], unit: str, method:str = "levenshtein") -> dict:
 
     """
     Convert a volume measurement to a weight measurement in grams.
@@ -1767,19 +2166,19 @@ def _convert_volume_to_grams(food: str, quantity: Union[str, int, float], unit: 
         # if that fails try to get the density values for the secondary category food group
         # and all else fails, use the default density map
         if primary_category in _constants.FOOD_DENSITY_BY_GROUP:
-            density_map = _constants.FOOD_DENSITY_BY_GROUP.get(primary_category, _constants.DEFAULT_DENSITY_MAP)
+            densities = _constants.FOOD_DENSITY_BY_GROUP.get(primary_category, _constants.DEFAULT_DENSITY_MAP)
         elif secondary_category in _constants.FOOD_DENSITY_BY_GROUP:
-            density_map = _constants.FOOD_DENSITY_BY_GROUP.get(secondary_category, _constants.DEFAULT_DENSITY_MAP)
+            densities = _constants.FOOD_DENSITY_BY_GROUP.get(secondary_category, _constants.DEFAULT_DENSITY_MAP)
         else:
-            density_map = _constants.DEFAULT_DENSITY_MAP
+            densities = _constants.DEFAULT_DENSITY_MAP
             
         # try to get the density values for the given primary category food group, 
 
-        # print(f"Using density values for category:\n > '{density_map['category']}'")
+        # print(f"Using density values for category:\n > '{densities['category']}'")
 
-        density     = density_map.get("density_g_per_ml", 1)
-        min_density = density_map.get("min_density_g_per_ml", 0.9)
-        max_density = density_map.get("max_density_g_per_ml", 1.1)
+        density     = densities.get("density_g_per_ml", 1)
+        min_density = densities.get("min_density_g_per_ml", 0.9)
+        max_density = densities.get("max_density_g_per_ml", 1.1)
 
         # if primary_density and secondary_density:
             # print(" > Both densities are available")
@@ -2317,6 +2716,66 @@ def _get_single_item_gram_weight(food:str, quantity:Union[str, int, float, None]
     
     return str(float(est_weight) * quantity) if est_weight else None
 
+def _has_weight_unit(unit:Union[str, None]=None, 
+                     std_unit:Union[str, None]=None, 
+                     secondary_unit:Union[str, None]=None, 
+                     std_secondary_unit:Union[str, None]=None
+                     ) -> bool:
+    """Check if the parsed_ingredient has a weight unit
+    Returns: boolean, whether a weight unit is found or not
+    """
+
+    # check if any of the units are "weight" units
+    unit_is_weight               = unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT
+    std_unit_is_weight           = std_unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT
+    
+    secondary_unit_is_weight     = secondary_unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT
+    std_secondary_unit_is_weight = std_secondary_unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT
+
+    has_weight_unit = unit_is_weight or std_unit_is_weight or secondary_unit_is_weight or std_secondary_unit_is_weight
+
+    return has_weight_unit
+
+def _is_volumetric_primary_unit(unit:Union[str, None]=None, std_unit:Union[str, None]=None) -> bool:
+    """Check if the primary unit of the parsed_ingredient is a volume unit
+    Returns: boolean, whether a volume unit is found or not
+    """
+
+    # check if any of the units are "volume" units
+    unit_is_volume               = unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT
+    std_unit_is_volume           = std_unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT
+    
+    is_volumetric_primary_unit = unit_is_volume or std_unit_is_volume
+
+    return is_volumetric_primary_unit
+
+def _is_volumetric_secondary_unit(secondary_unit:Union[str, None]=None, std_secondary_unit:Union[str, None]=None) -> bool:
+    """Check if the secondary unit of the parsed_ingredient is a volume unit
+    Returns: boolean, whether a volume unit is found or not
+    """
+
+    # check if any of the units are "volume" units
+    secondary_unit_is_volume     = secondary_unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT
+    std_secondary_unit_is_volume = std_secondary_unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT
+
+    is_volumetric_secondary_unit = secondary_unit_is_volume or std_secondary_unit_is_volume
+
+    return is_volumetric_secondary_unit
+
+def _has_volume_unit(unit:Union[str, None]=None, 
+                     std_unit:Union[str, None]=None, 
+                     secondary_unit:Union[str, None]=None, 
+                     std_secondary_unit:Union[str, None]=None
+                     ) -> bool:
+    """Check if the parsed_ingredient has a volume unit in any of its units
+    Returns: boolean, whether a volume unit is found or not
+    """
+    is_volumetric_primary_unit    = _is_volumetric_primary_unit(unit, std_unit)
+    is_volumetric_secondary_unit  = _is_volumetric_secondary_unit(secondary_unit, std_secondary_unit)
+
+    has_volume_unit = is_volumetric_primary_unit or is_volumetric_secondary_unit
+
+    return has_volume_unit
 
 # def _split_dimension_unit_x_ranges(ingredient: str) -> tuple[str]:
 #     """Split an ingredient string by any quantity dimension unit separated by an 'x' character.
