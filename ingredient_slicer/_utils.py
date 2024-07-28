@@ -1945,11 +1945,6 @@ def _get_gram_weight_map(milliliters: Union[str, int, float], **kwargs) -> dict:
     Returns:
         dict: A dictionary containing the gram weight, maximum gram weight, and minimum gram weight.
     """
-    # milliliters = 100 
-    # density=1.05
-    # min_density=None
-    # max_density=''
-
     default_density      = 1
     default_min_density  = 0.9
     default_max_density  = 1.1
@@ -2768,7 +2763,7 @@ def _has_volume_unit(unit:Union[str, None]=None,
                      std_secondary_unit:Union[str, None]=None
                      ) -> bool:
     """Check if the parsed_ingredient has a volume unit in any of its units
-    Returns: boolean, whether a volume unit is found or not
+    Returns: boolean, whether a volume unit is found  or not
     """
     is_volumetric_primary_unit    = _is_volumetric_primary_unit(unit, std_unit)
     is_volumetric_secondary_unit  = _is_volumetric_secondary_unit(secondary_unit, std_secondary_unit)
@@ -2776,6 +2771,12 @@ def _has_volume_unit(unit:Union[str, None]=None,
     has_volume_unit = is_volumetric_primary_unit or is_volumetric_secondary_unit
 
     return has_volume_unit
+
+def _is_weight_unit(unit:Union[str, None]) -> bool:
+    return unit in _constants.WEIGHT_UNIT_TO_STANDARD_WEIGHT_UNIT
+
+def _is_volumetric_unit(unit:Union[str, None]) -> bool:
+    return unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT
 
 # def _split_dimension_unit_x_ranges(ingredient: str) -> tuple[str]:
 #     """Split an ingredient string by any quantity dimension unit separated by an 'x' character.
