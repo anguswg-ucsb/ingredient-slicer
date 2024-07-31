@@ -2617,32 +2617,21 @@ def _fuzzy_match_str_parts_to_key(fuzzy_key:str = None,
     # print(f"Best match is '{best_match}' with a similarity score of {max_similarity}")
     return best_match
 
-def _estimate_single_item_gram_weights(food:str, threshold:Union[float, None]) -> Union[str, None]:
+def _estimate_single_item_gram_weights(food:str) -> Union[str, None]:
 
     """ Estimate the weight of a single food item in grams
     Args:
         food: str, food item
-        threshold: float, minimum similarity score to return a match
     Returns:
         estimated weight of the food in grams as a string or None
     """
-
-    # food = "egg whites"
-    # gram_weight = None
-
-    # if gram_weight or gram_weight is not None:
-    #     return gram_weight
+    # if food in _constants.SINGLE_ITEM_FOOD_WEIGHTS:
+        # return _constants.SINGLE_ITEM_FOOD_WEIGHTS[food]
     
-    if food in _constants.SINGLE_ITEM_FOOD_WEIGHTS:
-        return _constants.SINGLE_ITEM_FOOD_WEIGHTS[food]
-    
-    # closest_key = _fuzzy_match_key(food, _constants.SINGLE_ITEM_FOOD_WEIGHTS, "dice", 0.5)
-    closest_key = _fuzzy_match_str_parts_to_key(food, _constants.SINGLE_ITEM_FOOD_WEIGHTS, "dice", threshold)
+    # closest_key = _fuzzy_match_str_parts_to_key(food, _constants.SINGLE_ITEM_FOOD_WEIGHTS, "dice", threshold)
+    # return _constants.SINGLE_ITEM_FOOD_WEIGHTS.get(closest_key, None)
 
-    # if closest_key:
-        # return _constants.SINGLE_ITEM_FOOD_WEIGHTS[closest_key]
-    
-    return _constants.SINGLE_ITEM_FOOD_WEIGHTS.get(closest_key, None)
+    return _constants.SINGLE_ITEM_FOOD_WEIGHTS.get(food, None)
 
 def _get_single_item_gram_weight2(food:str, quantity:str, unit:str, gram_weight:str) -> Union[str, None]:
 
@@ -2675,13 +2664,12 @@ def _get_single_item_gram_weight2(food:str, quantity:str, unit:str, gram_weight:
     
     return float(est_weight) * quantity if est_weight else None
 
-def _get_single_item_gram_weight(food:str, quantity:Union[str, int, float, None], threshold:Union[float, int, None] = 0.85) -> Union[str, None]:
+def _get_single_item_gram_weight(food:str, quantity:Union[str, int, float, None]) -> Union[str, None]:
 
     """ Get the weight of a single food item in grams
     Args:
         food: str, food item
         quantity: str, int, or float, quantity of the food item. If None, the quantity is set to 1.
-        threshold: float, int, minimum similarity score to return a match. Score between 0 and 1, where 1 is a perfect match. Default is 0.85
     Returns:
         estimated weight of the food in grams as a string or None
     """
@@ -2692,22 +2680,11 @@ def _get_single_item_gram_weight(food:str, quantity:Union[str, int, float, None]
     if quantity is not None and not isinstance(quantity, (str, int, float)):
         raise TypeError("'quantity' must be a string, integer, or float")
     
-    if threshold is not None and not isinstance(threshold, (float, int)):
-        raise TypeError("'threshold' must be a float or integer")
-    
-
-
-    # food = "eggs"
-    # unit = "cup"
-    # unit = None
-    # quantity = 1
-    # gram_weight = None
-    
     # set quantity to 1 if its None
     quantity  = 1 if not quantity else float(quantity)
-    threshold = 0.85 if not threshold else float(threshold)
+    # threshold = 0.85 if not threshold else float(threshold)
 
-    est_weight = _estimate_single_item_gram_weights(food,  threshold)
+    est_weight = _estimate_single_item_gram_weights(food)
     
     return str(float(est_weight) * quantity) if est_weight else None
 

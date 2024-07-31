@@ -165,7 +165,7 @@ UNITS = {
     # 'foot': ('foot', 'feet', 'ft', 'fts'), # TODO: address dimensions
     'gallon': ('gallon', 'gallons', 'gals', 'gal'), 
     'glass': ('glass', 'glasses'), 
-    'gram': ('gram', 'grams', 'g'), 
+    'gram': ('gram', 'grams', 'grm', 'grms', 'g'), 
 
     "handful" : ("handful", "handfuls", "handfull", "handfulls"),
     # "handful" : ("handful", "handfuls", "handfull", "handfulls", "a handful"),
@@ -184,7 +184,7 @@ UNITS = {
     'milligram': ('milligram', 'milligrams', 'mg', 'mgs'), 
     'milliliter': ('milliliter', 'milliliters', 'ml', 'mls'), 
     # 'millimeter': ('millimeter', 'millimeters', 'mm', 'mms'), # TODO: address dimensions
-    'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.'), 
+    'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.', 'onz'), 
     'package': ('package', 'packages', 'pkg', 'pkgs'), 
     'packageful': ('packageful', 'packagefuls'), 
     'packet': ('packet', 'packets'), 
@@ -262,12 +262,12 @@ BASIC_UNITS = {
     'liter': ('liter', 'liters', 'l'),
 
     # Imperial weight units
-    'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.'), 
+    'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.', 'onz'), 
     'pound': ('pound', 'pounds', 'lbs', 'lb', 'lb.', 'lbs.'),
 
     # Metric weight units
     'milligram': ('milligram', 'milligrams', 'mg', 'mgs'),
-    'gram': ('gram', 'grams', 'g'),
+    'gram': ('gram', 'grams', 'grm', 'grms', 'g'),
     'kilogram': ('kilogram', 'kilograms', 'kg', 'kgs'),
 }
 
@@ -324,9 +324,9 @@ MILLILITER_CONVERSION_FACTORS = {
 
 # dry weight units dictionary, things like "ounce", "pound", "gram", etc.
 WEIGHT_UNITS = {
-    'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.'), 
+    'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.', 'onz'), 
     'pound': ('pound', 'pounds', 'lbs', 'lb', 'lb.', 'lbs.'),
-    'gram': ('gram', 'grams', 'g'),
+    'gram': ('gram', 'grams', 'grm', 'grms', 'g'),
     'kilogram': ('kilogram', 'kilograms', 'kg', 'kgs'),
     'milligram': ('milligram', 'milligrams', 'mg', 'mgs'),
     'microgram': ('microgram', 'micrograms', 'µg', 'mcg', 'mcgs')
@@ -710,7 +710,9 @@ STOP_WORDS = set((
     "e", "e2", "e3", "ea", "each", "ec", "ed", "edu", "ee", "ef", "effect", "eg", "ei", "eight", "eighty", "either", 
     "ej", "el", "eleven", "else", "elsewhere", "em", "empty", "en", "end", "ending", "enough", "entirely", "eo", 
     "ep", "eq", "er", "es", "especially", "est", "et", "et-al", "etc", "eu", "ev", "even", "ever", "every", 
-    "everybody", "everyone", "everything", "everywhere", "ex", "exactly", "example", "except", "ey", "f", "f2", 
+    "everybody", "everyone", "everything", "everywhere", "ex", "exactly", "example", "except", "ey", 
+    "farmraised", "farm-raised", "farm", "raised",
+    "f", "f2", 
     "fa", "far", "fc", "few", "ff", "fi", "fifteen", "fifth", "fify", "fill", "find", "fire", "first", "five", 
     "fix", "fj", "fl", "fn", "fo", "followed", "following", "follows", "for", "former", "formerly", "forth", 
     "forty", "found", "four", "fr", "from", "front", "frozen", "further", "furthermore", 
@@ -1486,12 +1488,12 @@ FOOD_CATALOG = {
             "english muffins": ("cereal_and_cereal_products", "bread"),
             "bagel": ("cereal_and_cereal_products", "bread"),
             "bagels": ("cereal_and_cereal_products", "bread"),
-            "tortilla": ("cereal_and_cereal_products", "bread"),
-            "tortillas": ("cereal_and_cereal_products", "bread"),
-            "corn tortilla": ("cereal_and_cereal_products", "bread"),
-            "corn tortillas": ("cereal_and_cereal_products", "bread"),
-            "flour tortilla": ("cereal_and_cereal_products", "bread"),
-            "flour tortillas": ("cereal_and_cereal_products", "bread"),
+            "tortilla": ("cereal_and_cereal_products", "tortilla"),
+            "tortillas": ("cereal_and_cereal_products", "tortilla"),
+            "corn tortilla": ("cereal_and_cereal_products", "tortilla"),
+            "corn tortillas": ("cereal_and_cereal_products", "tortilla"),
+            "flour tortilla": ("cereal_and_cereal_products", "tortilla"),
+            "flour tortillas": ("cereal_and_cereal_products", "tortilla"),
             "flatbread": ("cereal_and_cereal_products", "bread"),
             "flatbreads": ("cereal_and_cereal_products", "bread"),
             "pita": ("cereal_and_cereal_products", "bread"),
@@ -1739,6 +1741,10 @@ FOOD_CATALOG = {
             # -------------------------------------------------------------------------------------------------------
 
             # FRUITS
+            "avocado": ("fruits", "berry"),
+            "avocados": ("fruits", "berry"),
+            "hass avocado": ("fruits", "berry"),
+            "hass avocados": ("fruits", "berry"),
             "grapefruit": ("fruits", "citrus"),
             "grapefruits": ("fruits", "citrus"),
             "lime": ("fruits", "citrus"),
@@ -2638,6 +2644,7 @@ SINGLE_ITEM_FOOD_WEIGHTS = {
     'asparagus': '22',
     'asparaguses': '22',
     'eggplant': '453.5',
+    'eggplants': '453.5',
     'garlic': '5',
     'green beans': '5',
     'beet' : '113',

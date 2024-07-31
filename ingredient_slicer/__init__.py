@@ -1,6 +1,6 @@
 # __init__.py
 
-__version__ = "1.1.12"
+__version__ = "1.1.14"
 
 from ._ingredient_slicer import IngredientSlicer
 
@@ -36,30 +36,3 @@ __all__ = [
     'IngredientSlicer'
     # 'IngredientTools',  # Old regex patterns class
     ]
-
-# # ---- OLD Constants ----
-# 'NUMBER_WORDS', 
-# 'NUMBER_PREFIX_WORDS',
-# 'MULTI_FRACTION_WORDS',
-# 'FRACTION_WORDS',
-# 'DENOMINATOR_WORDS',
-# 'UNICODE_FRACTIONS', 
-# 'UNITS', 
-# 'BASIC_UNITS', 
-# 'VOLUME_UNITS',
-# 'WEIGHT_UNITS',
-# 'DIMENSION_UNITS',
-# 'CASUAL_UNITS',
-# 'CASUAL_QUANTITIES',
-# 'UNITS_SET',
-# 'BASIC_UNITS_SET', 
-# 'NON_BASIC_UNITS_SET', 
-# 'SIZE_MODIFIERS_SET', 
-# 'VOLUME_UNITS_SET',
-# 'WEIGHT_UNITS_SET',
-# 'DIMENSION_UNITS_SET',
-# 'CASUAL_UNITS_SET',
-# 'CASUAL_QUANTITIES_SET',
-# 'UNIT_MODIFIERS', 
-# 'PREP_WORDS', 
-# 'APPROXIMATE_STRINGS', 
