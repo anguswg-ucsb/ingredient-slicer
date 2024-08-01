@@ -118,8 +118,8 @@ def test_wild_ingredients_6():
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "0.5"
-    assert parsed['unit'] == None
-    assert parsed['standardized_unit'] == None
+    assert parsed['unit'] == "pepper"
+    assert parsed['standardized_unit'] == "pepper"
 
     assert parsed['secondary_quantity'] == None
     assert parsed['secondary_unit'] == None
@@ -263,10 +263,10 @@ def test_wild_ingredients_additional_4():
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
-    assert parsed['unit'] == None # TODO: need a special case for "cloves" as a unit vs. "cloves" as a food
-    assert parsed['standardized_unit'] == None
-    # assert parsed['unit'] == 'cloves'
-    # assert parsed['standardized_unit'] == 'clove'
+    # assert parsed['unit'] == None # TODO: need a special case for "cloves" as a unit vs. "cloves" as a food
+    # assert parsed['standardized_unit'] == None
+    assert parsed['unit'] == 'cloves'
+    assert parsed['standardized_unit'] == 'clove'
 
     assert parsed['secondary_quantity'] == None
     assert parsed['secondary_unit'] == None
@@ -447,8 +447,12 @@ def test_wild_ingredients_additional_13():
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
-    assert parsed['unit'] == None
-    assert parsed['standardized_unit'] == None
+
+    assert parsed['unit'] == 'cloves'
+    assert parsed['standardized_unit'] == 'clove'
+
+    # assert parsed['unit'] == None
+    # assert parsed['standardized_unit'] == None
 
     assert parsed['secondary_quantity'] == None
     assert parsed['secondary_unit'] == None
@@ -502,11 +506,28 @@ def test_wild_ingredients_additional_15():
     assert parsed['food'] == 'black pepper'
     assert parsed['size_modifiers'] == []
 
-# "1 (14 ounce) can coconut milk"
-# "1 (6 ounce) can tomato paste"
-# "2 (15-ounce) cans chickpeas, rinsed and drained"
-# "1/2 medium fresh jalapeño chile pepper, finely chopped*"
-# "1 (9.25ounce) bag corn chips, such as Fritos® Scoops!®"
-# "1/4 cup (1/2 stick) butter, divided"
-# "Graham cracker crumbs or powdered sugar for topping"
-# "1 large egg, lightly beaten"
+def test_wild_ingredients_corn_tortillas_1():
+    ingredient = "16 corn tortillas (6-inch)"
+    parse = IngredientSlicer(ingredient)
+    # parse.parse()
+    parsed = parse.to_json()
+
+    expected = {'ingredient': '16 corn tortillas (6-inch)', 
+                'standardized_ingredient': '16 corn tortillas', 
+                'food': 'corn tortillas', 
+                'quantity': '16', 
+                'unit': 'tortillas', 
+                'standardized_unit': 'tortilla', 
+                'secondary_quantity': None, 
+                'secondary_unit': None, 
+                'standardized_secondary_unit': None, 
+                'density': None, 
+                'gram_weight': None, 
+                'prep': [], 
+                'size_modifiers': [], 
+                'dimensions': ['6 inch'], 
+                'is_required': True, 
+                'parenthesis_content': ['']
+                }
+    
+    assert parsed == expected

@@ -1,10 +1,10 @@
 # __init__.py
 
-__version__ = "1.1.14"
+__version__ = "1.1.16"
 
 from ._ingredient_slicer import IngredientSlicer
 
-from ._constants import UNITS, WEIGHT_UNITS, VOLUME_UNITS, DIMENSION_UNITS, \
+from ._constants import UNITS, WEIGHT_UNITS, VOLUME_UNITS, FOOD_UNITS, DIMENSION_UNITS, \
     CASUAL_UNITS, CASUAL_QUANTITIES, PREP_WORDS, \
     FOOD_CATALOG, FOOD_CATEGORIES, FOOD_DENSITY_BY_GROUP, \
     PRIMARY_CATEGORIES, SECONDARY_CATEGORIES, \
@@ -21,6 +21,7 @@ __all__ = [
     "UNITS",
     "WEIGHT_UNITS",
     "VOLUME_UNITS",
+    "FOOD_UNITS",
     "DIMENSION_UNITS", 
     "CASUAL_UNITS", 
     "CASUAL_QUANTITIES",

@@ -212,7 +212,7 @@ def test_quantity_only_parenthesis_1():
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
-    assert parsed['unit'] == None
+    assert parsed['unit'] == 'steaks'
     assert parsed['is_required'] == True
     assert parsed['secondary_quantity'] == None
     assert parsed['secondary_unit'] == None
@@ -224,7 +224,7 @@ def test_quantity_only_parenthesis_2():
     parsed = parse.to_json()
 
     assert parsed['quantity'] == "2"
-    assert parsed['unit'] == None
+    assert parsed['unit'] == 'steaks'
     assert parsed['is_required'] == False
     assert parsed['secondary_quantity'] == None
     assert parsed['secondary_unit'] == None

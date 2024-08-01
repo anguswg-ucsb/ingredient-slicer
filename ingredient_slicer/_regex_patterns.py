@@ -75,6 +75,10 @@ DIMENSION_UNITS_ALT     = '|'.join([re.escape(unit) for unit in _constants.DIMEN
 UNIT_MODIFIERS_ALT      = '|'.join([re.escape(unit_modifier) for unit_modifier in _constants.UNIT_MODIFIERS])
 APPROXIMATE_STRINGS_ALT = '|'.join([re.escape(approximate_string) for approximate_string in _constants.APPROXIMATE_STRINGS])
 
+# food units like ('2 tortillas' where therefore unit is 'tortillas')
+FOOD_UNITS_ALT = '|'.join([re.escape(unit) for unit in _constants.FOOD_UNITS_SET])
+# FOOD_UNITS_ALT = '|'.join([re.escape(unit) for variants_list in _constants.FOOD_UNITS.values() for unit in variants_list])
+
 # # sort the denominator words by their length to make sure longer words get matched before shorter ones
 # #  to make sure we don't match a shorter word that is part of a longer word
 # DENOMINATOR_WORDS_ALT = '|'.join(sorted([re.escape(word) for word in _constants.DENOMINATOR_WORDS], key=len, reverse=True))
@@ -123,6 +127,9 @@ CASUAL_QUANTITIES_PATTERN   = re.compile(r'\b(?:' + CASUAL_QUANTITIES_ALT + r')\
 DIMENSION_UNITS_PATTERN     = re.compile(r'\b(?:' + DIMENSION_UNITS_ALT + r')\b', re.IGNORECASE) # e.g. "inch", "inches", "cm", "mm", "millimeter", "millimeters", "centimeter", "centimeters"
 UNIT_MODIFIERS_PATTERN      = re.compile(r'\b(?:' + UNIT_MODIFIERS_ALT + r')\b', re.IGNORECASE) # e.g. "large", "small", "medium
 APPROXIMATE_STRINGS_PATTERN = re.compile(r'\b(?:' + APPROXIMATE_STRINGS_ALT + r')\b', re.IGNORECASE) # e.g. "about", "approximately", "around", "roughly", "nearly", "almost
+
+# match 'food units' like ('2 tortillas' with a unit of 'tortillas')
+FOOD_UNITS_PATTERN = re.compile(r'\b(?:' + FOOD_UNITS_ALT + r')\b', re.IGNORECASE)
 
 # -----------------------------------------------------------------------------
 # --------------------------- Prefix number words with number words patterns -----------------------------

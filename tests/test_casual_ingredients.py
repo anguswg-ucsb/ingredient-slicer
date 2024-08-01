@@ -54,12 +54,12 @@ def test_casual_units_with_number_quantity_3():
 
 def test_casual_quantities_with_dozen_1():
         
-    slicer = IngredientSlicer("a couple dozen eggs")
+    slicer = IngredientSlicer("a couple dozen eggs", debug=False)
     
     parsed = slicer.to_json()
     assert parsed['quantity'] == "24"
-    assert parsed['unit'] == None
-    assert parsed['standardized_unit'] == None
+    assert parsed['unit'] == 'eggs'
+    assert parsed['standardized_unit'] == 'egg'
     assert parsed['food'] == 'eggs'
     assert parsed['is_required'] == True
 
@@ -68,8 +68,8 @@ def test_casual_quantities_with_dozen_2():
     slicer = IngredientSlicer("a few dozen eggs")
     parsed = slicer.to_json()
     assert parsed['quantity'] == "36"
-    assert parsed['unit'] == None
-    assert parsed['standardized_unit'] == None
+    assert parsed['unit'] == "eggs"
+    assert parsed['standardized_unit'] == 'egg'
     assert parsed['food'] == 'eggs'
     assert parsed['is_required'] == True
 
@@ -79,8 +79,8 @@ def test_casual_quantities_at_end_of_ingredient():
     
     parsed = slicer.to_json()
     assert parsed['quantity'] == "2"
-    assert parsed['unit'] == None
-    assert parsed['standardized_unit'] == None
+    assert parsed['unit'] == 'watermelons'
+    assert parsed['standardized_unit'] == 'watermelon'
     assert parsed['food'] == 'watermelon watermelons' # TODO: this is a bug, should be just watermelon
     assert parsed['is_required'] == True
 

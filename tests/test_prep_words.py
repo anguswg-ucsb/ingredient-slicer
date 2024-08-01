@@ -71,7 +71,7 @@ def test_prep_words_additional_3():
     parsed = slicer.to_json()
 
     assert parsed['quantity'] == "3"
-    assert parsed['unit'] == None            # TODO: need a special case for "cloves" as a unit vs. "cloves" as a food
+    assert parsed['unit'] == 'cloves'            # TODO: need a special case for "cloves" as a unit vs. "cloves" as a food
     assert parsed['food'] == 'cloves garlic'   
     assert parsed['is_required'] == True
     assert parsed['prep'] == ['minced']

@@ -2755,6 +2755,30 @@ def _is_weight_unit(unit:Union[str, None]) -> bool:
 def _is_volumetric_unit(unit:Union[str, None]) -> bool:
     return unit in _constants.VOLUME_UNIT_TO_STANDARD_VOLUME_UNIT
 
+def _get_food_unit_list(ingredient:str) -> list[str]: 
+    """Find all 'food units' in an ingredient string
+    Args:
+        ingredient: str, ingredient string to find all food units in
+    Returns:
+        list[str]: list of food units found in the ingredient string
+    """
+
+    food_units = re.findall(_regex_patterns.FOOD_UNITS_PATTERN, ingredient)
+
+    return food_units
+
+def _get_food_unit(ingredient:str) -> str: 
+    """Get the food as a unit from the ingredient string (if it exists). 
+    For example "2 corn tortillas" has no formal unit but "tortillas" acts as a unit. This function is reliant on the foods in the FOOD_UNITS_SET.
+    Args:
+        ingredient: str, ingredient string to get the food as a unit from
+    Returns:
+        str: food unit 
+    """
+    food_units = _get_food_unit_list(ingredient)
+
+    return food_units[-1] if food_units else None
+
 # def _split_dimension_unit_x_ranges(ingredient: str) -> tuple[str]:
 #     """Split an ingredient string by any quantity dimension unit separated by an 'x' character.
 #     (i.e. "2 steaks, 3 inches x 4 inches thick" -> ("2 steaks, thick", "3 inches x 4 inches")
@@ -2765,13 +2789,7 @@ def _is_volumetric_unit(unit:Union[str, None]) -> bool:
 #         tuple[str]: A tuple containing the updated ingredient string with the range removed and a list of the dimension units strings.
 #     """
 
-#     # ingredient = "2 steaks, 3 inches x 4 inches thick"
-#     # ingredient = "2 steaks, 3 cm x 4 inches thick"
-#     # ingredient = "2 steaks, 3 cm x 4 inches thick"
-#     # ingredient = "2 steaks, (3 cm x 4 inches) thick"
-
 #     quantity_unit_x_range_iter = _regex_patterns.QUANTITY_UNIT_X_QUANTITY_UNIT.finditer(ingredient)
-
 #     dimension_units = []
 
 #     for match in quantity_unit_x_range_iter:
@@ -2787,17 +2805,6 @@ def _is_volumetric_unit(unit:Union[str, None]) -> bool:
 #         unit2     = match.group(4)
 
 #         unit1_is_dimension = unit1 in _constants.DIMENSION_UNITS_SET
-#         unit2_is_dimension = unit2 in _constants.DIMENSION_UNITS_SET
-
-#         print(f"Original String: {original_string}")
-#         print("First Quantity/Unit Pair")
-#         print(f"- Quantity 1: {quantity1}")
-#         print(f"- Unit 1: {unit1}")
-#         print(f" >> '{unit1}' is dimension? {unit1_is_dimension}")
-#         print("Second Quantity/Unit Pair")
-#         print(f"- Quantity 2: {quantity2}")
-#         print(f"- Unit 2: {unit2}")
-#         print(f" >> '{unit2}' is dimension? {unit2_is_dimension}")
 
 #         if unit1_is_dimension and unit2_is_dimension:
 #             print(f"Both units are dimensions")
@@ -2838,237 +2845,9 @@ def _is_volumetric_unit(unit:Union[str, None]) -> bool:
 #         unit1_is_dimension = unit1 in _constants.DIMENSION_UNITS_SET
 #         unit2_is_dimension = unit2 in _constants.DIMENSION_UNITS_SET
 
-#         print(f"Original String: {original_string}")
-#         print("First Quantity/Unit Pair")
-#         print(f"- Quantity 1: {quantity1}")
-#         print(f"- Unit 1: {unit1}")
-#         print(f" >> '{unit1}' is dimension? {unit1_is_dimension}")
-#         print("Second Quantity/Unit Pair")
-#         print(f"- Quantity 2: {quantity2}")
-#         print(f"- Unit 2: {unit2}")
-#         print(f" >> '{unit2}' is dimension? {unit2_is_dimension}")
-
 #         if unit1_is_dimension and unit2_is_dimension:
 #             print(f"Both units are dimensions")
-#             # ingredient = _find_and_remove(ingredient, pattern)
 #             dimension_units.append(original_string)
 #             ingredient = ingredient.replace(original_string, "")
 
-#         print()
-
 #     return ingredient, dimension_units
-
-###################################################################
-#### OLD AVERAGE RANGES functions from IngredientSlicer class ####
-#### TODO: Delete these old versions... ###########################
-###################################################################
-# def _avg_ranges2(self) -> None:
-#     """
-#     Replace ranges of numbers with their average in the parsed ingredient.
-#     Examples:
-#     "1-2 oz" -> "1.5 oz"
-#     "1 - 2 ft" -> "1.5 ft"
-#     """
-#     # ingredient = "1 - 2 cups of sugar"
-#     search_ranges = _regex_patterns.QUANTITY_DASH_QUANTITY.search(self.standardized_ingredient)
-#     # search_ranges = _regex_patterns.QUANTITY_DASH_QUANTITY.search(ingredient)
-
-#     # OG = re.compile(r"\d+(?:/\d+|\.\d+)?\s*-\s*\d+(?:/\d+|\.\d+)?") # NOTE: this is the golden child, OG --> PREVIOUS VERSION THAT WORKS PERFECTLY (ALMOST)
-#     # search_ranges = OG.search(ingredient)
-
-#     print(f"Starting while loop searching for ranges in ingredient: {self.standardized_ingredient}") if self.debug else None
-#     while search_ranges:
-
-#         start, end = search_ranges.start(), search_ranges.end()
-#         match_string = search_ranges.group()
-        
-#         left_range, right_range = match_string.split("-")
-        
-#         left_range = left_range.strip()
-#         right_range = right_range.strip()
-
-#         print(f"Match: {match_string}") if self.debug else None
-#         print(f"left_range: {left_range}") if self.debug else None
-#         print(f"right_range: {right_range}") if self.debug else None
-#         print(f"Start: {start}") if self.debug else None
-#         print(f"End: {end}") if self.debug else None
-
-#         first_number  = float(_utils._fraction_str_to_decimal(left_range).strip())
-#         second_number = float(_utils._fraction_str_to_decimal(right_range).strip())
-        
-#         range_average = f" {_utils._make_int_or_float_str(str((first_number + second_number) / 2))} "
-#         self.standardized_ingredient = self.standardized_ingredient[:start] + range_average + self.standardized_ingredient[end:]
-
-#         search_ranges = _regex_patterns.QUANTITY_DASH_QUANTITY.search(self.standardized_ingredient)
-#         # search_ranges = _regex_patterns.QUANTITY_DASH_QUANTITY_GROUPS.search(ingredient)
-    
-#     print(f"All ranges have been updated: {self.standardized_ingredient}") if self.debug else None
-
-#     self.standardized_ingredient = self.standardized_ingredient.strip()
-
-#     return
-    
-# def _avg_ranges(self) -> None:
-#     """
-#     Replace ranges of numbers with their average in the parsed ingredient.
-#     Examples:
-#     "1-2 oz" -> "1.5 oz"
-#     "1 - 2 ft" -> "1.5 ft"
-#     """
-    
-#     all_ranges = re.finditer(_regex_patterns.QUANTITY_DASH_QUANTITY, self.standardized_ingredient)
-
-#     # initialize offset and replacement index values for updating the ingredient string, 
-#     # these will be used to keep track of the position of the match in the string
-#     offset = 0
-
-#     # Update the ingredient string with the merged values
-#     for match in all_ranges:
-#         print(f"Ingredient string: {self.standardized_ingredient}") if self.debug else None
-
-#         # Get the start and end positions of the match
-#         start, end = match.start(), match.end()
-
-#         print(f"Match: {match.group()} at positions {start}-{end}") if self.debug else None
-
-#         # Get the range values from the match
-#         range_values = re.findall(_regex_patterns.QUANTITY_DASH_QUANTITY, match.group())
-
-#         print(f"Range Values: {range_values}") if self.debug else None
-        
-#         # split the range values into a list of lists
-#         split_range_values = [i.split("-") for i in range_values]
-        
-#         print(f"  >>> Split Range Values: {split_range_values}") if self.debug else None
-#         # print() if self.debug else None
-
-#         # get the average of each of the range values
-#         range_avgs    = [sum([float(num_str) for num_str in i]) / 2 for i in split_range_values][0]
-#         range_average = _utils._make_int_or_float_str(str(range_avgs))
-
-#         print(f"Range Averages: {range_average}") if self.debug else None
-
-#         # Calculate the start and end positions in the modified string
-#         modified_start = start + offset
-#         modified_end = end + offset
-
-#         print(f"Replacing {match.group()} with '{range_average}'...") if self.debug else None
-        
-#         # Construct the modified string with the replacement applied
-#         self.standardized_ingredient = self.standardized_ingredient[:modified_start] + str(range_average) + self.standardized_ingredient[modified_end:]
-#         # ingredient = ingredient[:modified_start] + str(range_average) + ingredient[modified_end:]
-
-#         # Update the offset for subsequent replacements
-#         offset += len(range_average) - (end - start)
-
-#     return 
-
-# # import re
-# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
-# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\”')
-# NUMBER_WITH_FOOT_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\'')
-
-
-# test_strings = [
-#     f""" 1" """,
-#     f""" 1 1/2" """,
-#     f""" 1 1/2 inch """,
-#     f""" 1 1/2 inches """,
-#     f""" 1 1/2 inch(es)" """,
-#     f""" 1 1/2" incch """,
-#     f""" 1 0.5" inch """,
-#     f""" 1 0.5 " inches """
-# ]
-
-# for test_string in test_strings:
-#     print(NUMBER_WITH_INCH_SYMBOL.findall(test_string))
-
-# NUMBER_WITH_INCH_SYMBOL.findall("1 1/2\"")
-
-# # ingredient = "fruit (4-2/3” long x 2-3/4” dia)"
-# # ingredient = 'waffle round (4" dia)'
-
-# NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\"')
-# # NUMBER_WITH_INCH_SYMBOL = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*\”')
-
-# NUMBER_WITH_INCH_SYMBOL_MAP = {}
-# for inch_symbol in ["\"", "”"]:
-#     NUMBER_WITH_INCH_SYMBOL_MAP[inch_symbol] = re.compile(r'(?:\d*\.\d+|\d+\s*/\s*\d+|\d+)\s*' + inch_symbol + r'')
-
-# def _replace_number_followed_by_inch_symbol(ingredient: str ) -> str:
-#     """
-#     Find and remove percentages from the ingredient string.
-#     """
-#     # ingredient = "1 cup of 2% heavy cream"
-#     # ingredient = "fruit (4-2/3” long x 2-3/4” dia)"
-#     # ingredient = 'waffle round (4 " dia)'
-
-#     for key, pattern in _regex_patterns.NUMBER_WITH_INCH_SYMBOL_MAP.items():
-#         # print(f"Key: {key}")
-#         # print(f"Pattern: {pattern}")
-#         pattern_iter = pattern.finditer(ingredient)
-#         # print(f"Pattern Iter: {pattern_iter}")
-#         # all_matches = pattern.findall(ingredient)
-#         # print(f"All Matches: {all_matches}")
-        
-#         offset = 0
-#         for match in pattern_iter:
-#             match_string = match.group()
-#             start, end = match.start(), match.end()
-#             modified_start = start + offset
-#             modified_end = end + offset
-
-#             # replacement_str = ""
-#             # print(f"Match String: {match_string}")
-#             # print(f"Start: {start} | End: {end}")
-#             replacement_str = match_string.replace(key, "inch")
-
-#             # Construct the modified string with the replacement applied
-#             ingredient = ingredient[:modified_start] + str(replacement_str) + ingredient[modified_end:]
-
-#             offset += len(str(replacement_str)) - (end - start)
-#     return
-
-
-# def _update_ranges(ingredient: str, pattern: re.Pattern, replacement_function=None) -> str:
-#         """Update the ranges in the ingredient string with the updated ranges
-#         Args:
-#             ingredient (str): The ingredient string to update
-#             pattern (re.Pattern): The pattern to use to find the ranges
-#             replacement_function (function, optional): A function to use to replace the matched ranges. Defaults to None.
-#         Returns:
-#             str: The updated ingredient string
-#         """
-        
-#         # pattern = IngredientSlicer.regex.QUANTITY_DASH_QUANTITY
-        
-#         matches = pattern.findall(ingredient)
-
-#         # matched_ranges = [match.split("-") for match in matches]
-
-#         if replacement_function:
-#             # print(f"Replacement Function given")
-#             matched_ranges = [replacement_function(match).split("-") for match in matches]
-#         else:
-#             # print(f"No Replacement Function given")
-#             matched_ranges = [match.split("-") for match in matches]
-
-#         # print(f"Matched Ranges: \n > {matched_ranges}") if self.debug else None
-
-#         updated_ranges = [" - ".join([str(_fraction_str_to_decimal(i)) for i in match if i]) for match in matched_ranges]
-#         # updated_ranges = [" - ".join([str(int(i)) for i in match if i]) for match in matched_ranges]
-        
-#         # Create a dictionary to map the matched ranges to the updated ranges
-#         ranges_map = dict(zip(matches, updated_ranges))
-
-#         # Replace the ranges in the original string with the updated ranges
-#         for original_range, updated_range in ranges_map.items():
-#             # print(f"Original Range: {original_range}")
-#             # print(f"Updated Range: {updated_range}")
-#             # if replacement_function:
-#             #     print(f"Replacement Function given")
-#             #     updated_range = replacement_function(updated_range)
-#             ingredient = ingredient.replace(original_range, updated_range)
-#             # print("\n") if self.debug else None
-
-#         return ingredient

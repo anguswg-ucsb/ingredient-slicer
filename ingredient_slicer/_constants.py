@@ -2680,6 +2680,117 @@ SINGLE_ITEM_FOOD_WEIGHTS = {
     'zucchini': '200'
 }
 
+# Maps and sets for common foods that don't have a "real" unit but instead have the food name as the unit (i.e. "1 egg", "1 apple", "4 corn tortillas" etc.)
+FOOD_UNITS = {
+    "egg": ("eggs",),
+    # "egg": ("eggs", "whole egg", "whole eggs", "egg yolk", "egg yolks", 
+            # "eggs yolk", "eggs yolks", "egg white", "egg whites", "eggs white", "eggs whites"),
+    "tortilla": ("tortillas",),
+    "rack": ("racks",),
+    "bagel": ("bagels",),
+    "cake": ("cakes",),
+    "bar": ("bars",),
+    "biscuit": ("biscuits",),
+    "pancake": ("pancakes",),
+    "wedge": ("wedges",),
+    "steak": ("steaks",),
+    "roast": ("roasts",),  # Assuming there might be a plural form
+    "taco": ("tacos",),
+    "hotdog": ("hotdogs",),
+    "frankfurter": ("frankfurters",),
+    "tomato": ("tomatoes",),
+    "pastry": ("pastries",),
+    "patty": ("patties",),
+    "hambuger": ("hamburgers",),  # Assuming there might be a plural form
+    "burger": ("burgers",),
+    "pepper": ("peppers",),
+    "onion": ("onions",),
+    "bun": ("buns",),
+    "banana": ("bananas",),
+    "lemon": ("lemons",),
+    "lime": ("limes",),
+    "waffle": ("waffles",),
+    "wafer": ("wafers",),
+    "cracker": ("crackers",),
+    "apple": ("apples",),
+    "apricot": ("apricots",),
+    "avocado": ("avocados",),
+    "blackberry": ("blackberries",),
+    "blueberry": ("blueberries",),
+    "cherry": ("cherries",),
+    "coconut": ("coconuts",),
+    "cranberry": ("cranberries",),
+    "date": ("dates", "medjool", "medjools"),
+    "fig": ("figs",),
+    "grapefruit": ("grapefruits",),
+    "grape": ("grapes",),
+    "guava": ("guavas",),
+    "jackfruit": ("jackfruits",),
+    "durian": ("durians",),
+    "kiwi": ("kiwis", "kiwifruit", "kiwifruits"),
+    "cantaloupe": ("cantaloupes",),
+    "honeydew": ("honeydew", "honeydews"),
+    "melon": ("melons",),
+    "nectarine": ("nectarines",),
+    "olive": ("olives",),
+    "orange": ("oranges",),
+    "papaya": ("papayas",),
+    "peach": ("peaches",),
+    "pear": ("pears",),
+    "pineapple": ("pineapples",),
+    "plum": ("plums",),
+    "pomegranate": ("pomegranates",),
+    "pumpkin": ("pumpkins",),
+    "raspberry": ("raspberries",),
+    "strawberry": ("strawberries",),
+    "watermelon": ("watermelons",),
+    "artichoke": ("artichokes",),
+    "asparagus": ("asparaguses",),
+    "eggplant": ("eggplants",),
+
+    "clove": ("cloves",),
+    # "garlic": ("garlics",),
+
+    # "green bean": ("green beans",),
+    "beet": ("beets",),
+    # "bell pepper": ("bell peppers",),
+    "broccoli": ("broccolis",),
+    "broccolini": ("broccolinis",),
+    # "brussel sprout": ("brussel sprouts",),
+    "cabbage": ("cabbages",),
+    "carrot": ("carrots",),
+    "cauliflower": ("cauliflowers",),
+    "celery": ("celeries",),
+    "corn": ("corns",),
+    "cucumber": ("cucumbers",),
+    "kale": ("kales",),
+    "lettuce": ("lettuces",),
+    "mushroom": ("mushrooms",),
+    "parsnip": ("parsnips",),
+    "pea": ("peas", "snowpea", "snowpeas"),
+    "potato": ("potatoes",),
+    "spinach": ("spinaches",),
+    "squash": ("squashes", "butternutsquash"),
+    # "sweet potato": ("sweet potatoes",),
+    "sweetpotato": ("sweetpotatoes",),
+    "zucchini": ("zucchinis",)
+}
+
+# Create a set of all the food units
+FOOD_UNITS_SET = set()
+
+for key, pattern in FOOD_UNITS.items():
+    FOOD_UNITS_SET.add(key)
+    for val in pattern:
+        FOOD_UNITS_SET.add(val)
+
+FOOD_UNIT_TO_STANDARD_FOOD_UNIT = {}
+
+for key, pattern in FOOD_UNITS.items():
+    for val in pattern:
+        FOOD_UNIT_TO_STANDARD_FOOD_UNIT[val] = key
+    FOOD_UNIT_TO_STANDARD_FOOD_UNIT[key] = key
+
 # ---- Unused constants ----
 
 # TODO: Probably can delete the constants below, they've been replaced/deprecated by other constants

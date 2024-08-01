@@ -1487,6 +1487,16 @@ class IngredientSlicer:
 
         return 
 
+    def _get_food_units(self):
+        """If no units were found, check for possible 'food units', and use those if they are found"""
+
+        if not self._unit and not self._standardized_unit:
+            food_unit     = _utils._get_food_unit(self._standardized_ingredient)
+            std_food_unit = _constants.FOOD_UNIT_TO_STANDARD_FOOD_UNIT.get(food_unit)
+
+            self._unit              = food_unit
+            self._standardized_unit = std_food_unit
+
     
     def _address_parenthesis(self) -> None:
         """
@@ -1607,6 +1617,12 @@ class IngredientSlicer:
         print(f"Estimating gram weights for unitless foods") if self.debug else None
         self._add_gram_weights_for_single_item_foods() # TODO: testing using staged_ingredient
 
+        # ----------------------------------- STEP 12 ------------------------------------------
+        # ---- If no units were found ---- 
+        # ---- check for food units and set those as the unit / standardized_unit ----
+        # -------------------------------------------------------------------------------------
+        print(f"Checking for possible 'food units' (i.e. '2 corn tortillas' has a unit of 'tortillas')") if self.debug else None
+        self._get_food_units() # TODO: testing using staged_ingredient
 
     def standardized_ingredient(self) -> str:
         """
