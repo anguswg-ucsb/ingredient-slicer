@@ -140,11 +140,14 @@ UNITS = {
     'bunch': ('bunch', 'bunches'), 
     'can': ('can', 'cans'), 
     'canful': ('canful', 'canfuls'), 
+    'cheek': ('cheek', 'cheeks'),
+    'carton': ('carton', 'cartons'),
     # 'centimeter': ('centimeter', 'centimeters', 'cm', 'cms'),  # TODO: address dimensions
     'container': ('container', 'containers'), 
     'cube': ('cube', 'cubes'), 
     'cup': ('cup', 'cups', "C", "c"),
     'cupful': ('cupful', 'cupfuls'), 
+    'cutlet': ('cutlet', 'cutlets'),
     # "dallop" : ("dallop", "dallops", "dollop", "dollops", "a dallop", "a dollop"),
     # "dash" : ("dash", "dashes", "a dash"),
     # "drop" : ("drop", "drops", "a drop"),
@@ -166,6 +169,7 @@ UNITS = {
     'gallon': ('gallon', 'gallons', 'gals', 'gal'), 
     'glass': ('glass', 'glasses'), 
     'gram': ('gram', 'grams', 'grm', 'grms', 'g'), 
+    'giblet' : ('giblet', 'giblets'),
 
     "handful" : ("handful", "handfuls", "handfull", "handfulls"),
     # "handful" : ("handful", "handfuls", "handfull", "handfulls", "a handful"),
@@ -178,11 +182,11 @@ UNITS = {
     'kilogram': ('kilogram', 'kilograms', 'kg', 'kgs'), 
     'leg': ('leg', 'legs'), 
     'link': ('link', 'links'), 
-    'liter': ('liter', 'liters', 'l'), 
+    'liter': ('liter', 'liters', 'litre', 'litres', 'l'), 
     'loaf': ('loaf', 'loaves'), 
     # 'meter': ('meter', 'meters', 'm', 'ms'), # TODO: address dimensions
     'milligram': ('milligram', 'milligrams', 'mg', 'mgs'), 
-    'milliliter': ('milliliter', 'milliliters', 'ml', 'mls'), 
+    'milliliter': ('milliliter', 'milliliters', 'millilitre', 'millilitres', 'ml', 'mls'), 
     # 'millimeter': ('millimeter', 'millimeters', 'mm', 'mms'), # TODO: address dimensions
     'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.', 'onz'), 
     'package': ('package', 'packages', 'pkg', 'pkgs'), 
@@ -197,8 +201,11 @@ UNITS = {
     'portion': ('portion', 'portions'), 
     'pound': ('pound', 'pounds', 'lbs', 'lb', 'lb.', 'lbs.'),
     'quart': ('quart', 'quarts', 'qt', 'qts'), 
+    'rib': ('rib', 'ribs'),
+    'ribeye': ('ribeye', 'ribeyes', 'rib eye', 'rib eyes', 'rib-eye', 'rib-eyes'),
     'rim': ('rim', 'rims'), 
     'roll': ('roll', 'rolls'), 
+    'round': ('round', 'rounds'),
     'scoop': ('scoop', 'scoops'), 
     'sheet': ('sheet', 'sheets'), 
     'slice': ('slice', 'slices'), 
@@ -218,8 +225,11 @@ UNITS = {
     # "tad" : ("tad", "tads", "a tad"),
     'teaspoon': ('teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "tspn", "tspns", "tspn.", "tspns.", "ts", "t", "t."), # 'teaspoon': ('teaspoon', 'teaspoons', 'tsp', 'tsps', "tsp", "t"),
     'teaspoonful': ('teaspoonful', 'teaspoonfuls'), 
+    'tender' : ('tender', 'tenders'),
+    'tenderloin': ('tenderloin', 'tenderloins'),
     'thigh': ('thigh', 'thighs'),
     "to taste" : ("to taste",), 
+    'tongue': ('tongue', 'tongues'),
     "touch" : ("touch", "touches"),
     # "touch" : ("touch", "touches", "a touch"),
     'tube': ('tube', 'tubes'), 
@@ -259,8 +269,8 @@ BASIC_UNITS = {
                     "fluid oz", "fluid ozs", "fluid oz", "fluid ozs"),
 
     # Metric volume units
-    'milliliter': ('milliliter', 'milliliters', 'ml', 'mls'),
-    'liter': ('liter', 'liters', 'l'),
+    'milliliter': ('milliliter', 'milliliters', 'millilitre', 'millilitres', 'ml', 'mls'), 
+    'liter': ('liter', 'liters', 'litre', 'litres', 'l'), 
 
     # Imperial weight units
     'ounce': ('ounce', 'ounces', 'oz', 'ozs', 'oz.', 'ozs.', 'onz'), 
@@ -288,8 +298,8 @@ VOLUME_UNITS = {
     'cup': ('cup', 'cups', "C", "c"),
     'fluid ounce': ('fluid ounce', 'fluid ounces', 'fl oz', 'fl ozs', "fluid oz", "fluid ozs", "fluid oz", "fluid ozs"),
     'gallon': ('gallon', 'gallons', "gals", "gal"),
-    'liter': ('liter', 'liters', 'l'),
-    'milliliter': ('milliliter', 'milliliters', 'ml', 'mls'),
+    'liter': ('liter', 'liters', 'litre', 'litres', 'l'), 
+    'milliliter': ('milliliter', 'milliliters', 'millilitre', 'millilitres', 'ml', 'mls'), 
     # 'ounce': ('ounce', 'ounces', 'oz', 'ozs', "oz", "ozs"),
     'pint': ('pint', 'pints', "pt", "pts"),
     'quart': ('quart', 'quarts', "qt", "qts"),
@@ -360,13 +370,13 @@ GRAM_CONVERSION_FACTORS = {
 
 # dimensions dictioanry, things like "feet", "inches", "centimeters", etc.
 DIMENSION_UNITS = {
-    'centimeter': ('centimeter', 'centimeters', 'cm', 'cms'),
+    'centimeter': ('centimeter', 'centimeters', 'centimetre', 'centimetres', 'cm', 'cms'),
     'foot': ('foot', 'feet', 'ft', 'fts'),
     'inch': ('inch', 'inches'), # TODO: Removing unit "in" for now, unit "in" needs to be dealt with separately somehow, "in" is used for both the unit "inch" and the standard usage of the word "in" (i.e. "I am in a house")
     # 'inch': ('inch', 'inches', 'in', 'ins'),
     # 'inch': ('inch', 'inches', 'ins'), 
-    'meter': ('meter', 'meters', 'm', 'ms'),
-    'millimeter': ('millimeter', 'millimeters', 'mm', 'mms')
+    'meter': ('meter', 'meters', 'metre', 'metres', 'm', 'ms'),
+    'millimeter': ('millimeter', 'millimeters', 'millimetre', 'millimetres', 'mm', 'mms')
 }
 
 DIMENSION_UNITS_SET = set()
@@ -445,6 +455,89 @@ for key, pattern in CASUAL_UNITS.items():
     CASUAL_UNITS_SET.add(key)
     for val in pattern:
         CASUAL_UNITS_SET.add(val)
+
+# set of units in UNITS that are meat related cuts / portions (i.e. "breast", "cutlet", "drumstick", "filet", "fillet", "leg", "rib", "ribeye", "tenderloin", "thigh", "tongue", "wing"
+ANIMAL_PROTEIN_UNITS = { 
+    "breast", 
+    "cutlet", 
+    "drumstick", 
+    "filet", 
+    "fillet", 
+    "giblet", 
+    "leg", 
+    "patty", 
+    "rib", 
+    "ribeye", 
+    "round", 
+    "strip", 
+    "tender", 
+    "tenderloin", 
+    "thigh", 
+    "tongue", 
+    "wing"
+    }
+
+ANIMAL_PROTEIN_UNITS = {
+    "breast": ("breast", "breasts"),
+    "cutlet": ("cutlet", "cutlets"),
+    "drumstick": ("drumstick", "drumsticks"),
+    "filet": ("filet", "filets"),
+    "fillet": ("fillet", "fillets"),
+    "giblet": ("giblet", "giblets"),
+    "leg": ("leg", "legs"),
+    "patty": ("patty", "patties"),
+    "rib": ("rib", "ribs"),
+    "ribeye": ("ribeye", "ribeyes", "rib eye", "rib eyes", "rib-eye", "rib-eyes"),
+    "round": ("round", "rounds"),
+    "strip": ("strip", "strips"),
+    "tender": ("tender", "tenders"),
+    "tenderloin": ("tenderloin", "tenderloins"),
+    "thigh": ("thigh", "thighs"),
+    "tongue": ("tongue", "tongues"),
+    "wing": ("wing", "wings")
+}
+
+ANIMAL_PROTEIN_UNITS_SET = set()
+
+# add all of the keys and values to a Hash set to contain all of the weight units words
+for key, pattern in ANIMAL_PROTEIN_UNITS.items():
+    ANIMAL_PROTEIN_UNITS_SET.add(key)
+    for val in pattern:
+        ANIMAL_PROTEIN_UNITS_SET.add(val)
+
+ANIMAL_PROTEIN_UNIT_TO_STANDARD_ANIMAL_PROTEIN_UNIT = {}
+for key, pattern in ANIMAL_PROTEIN_UNITS.items():
+    for val in pattern:
+        ANIMAL_PROTEIN_UNIT_TO_STANDARD_ANIMAL_PROTEIN_UNIT[val] = key
+
+ANIMAL_PROTEIN_UNITS_SET = set()
+for key in ANIMAL_PROTEIN_UNITS:
+    # print(f"key: {key}")
+    ANIMAL_PROTEIN_UNITS_SET.add(key)
+    unit_variations = UNITS.get(key, None)
+    if unit_variations:
+        for unit in unit_variations:
+            ANIMAL_PROTEIN_UNITS_SET.add(unit) 
+
+ANIMAL_PROTEIN_UNITS_TO_GRAMS = {
+    "breast": 170.1,
+    "cutlet": 85.05,
+    "drumstick": 113.4,
+    "filet": 170.1,
+    "fillet": 170.1,
+    "giblet": 28.35,
+    "leg": 113.4,
+    "patty": 113.4,
+    "rib": 42.5,
+    "ribeye": 226.8,
+    "round": 170.1,
+    "strip": 85.05,
+    "tender": 56.699,
+    "tenderloin": 56.699,
+    "thigh":  113.4,
+    "tongue": 453.592,
+    "wing": 56.699
+}
 
 # Units that if they appear in a string and there are no "real" units, then these strings might be units
 # (i.e. "2 small carrots" -> "quantity: 2, unit: small, ingredient: carrots")
@@ -2613,8 +2706,8 @@ SINGLE_ITEM_FOOD_WEIGHTS = {
     'kiwi': '75',
     'kiwis' : '75',
     'kiwifruit': '75',
-    'lemon': '100',
-    'lemons': '100',
+    'lemon': '55',
+    'lemons': '55',
     'lime': '50',
     'limes': '50',
     'mango': '200',
@@ -2848,6 +2941,115 @@ for key, pattern in FOOD_UNITS.items():
     for val in pattern:
         FOOD_UNIT_TO_STANDARD_FOOD_UNIT[val] = key
     FOOD_UNIT_TO_STANDARD_FOOD_UNIT[key] = key
+
+# ANIMAL_PROTEIN_UNIT_TO_GRAMS = {
+#     "chicken" : {
+#         "breast"  : 170.097,
+#         "boneless breast" : 170.097,
+#         "bone-in breast" : 283.495,
+#         "cutlet" : 85.046,
+#         "tender" : 56.699,
+#         "tenderloin" : 56.699,
+#         "thigh" : 141.748,
+#         "drumstick" : 113.398,
+#         "drum" : 113.398,
+#         "leg" : 113.398,
+#         "wing" :  56.699,
+#         "giblet" : 28.35,
+#         "gizzard" : 28.35
+#     },
+#      "beef" : {
+#         "steak" : 227,
+#         "ground beef" : 113,
+#         "ribeye" : 340,
+#         "sirloin" : 227,
+#         "tenderloin" : 170,
+#         "brisket" : 453,
+#         "short ribs" : 340,
+#         "chuck roast" : 453
+#     },
+#     "pork" : {
+#         "chop" : 170,
+#         "tenderloin" : 113,
+#         "shoulder" : 227,
+#         "loin" : 227,
+#         "ribs" : 340,
+#         "belly" : 227,
+#         "ham" : 453,
+#         "ground pork" : 113
+#     },
+#     "turkey" : {
+#         "breast" : 227,
+#         "thigh" : 170,
+#         "drumstick" : 113,
+#         "wing" : 85,
+#         "ground turkey" : 113,
+#         "tenderloin" : 113
+#     },
+#     "veal" : {
+#         "cutlet" : 85,
+#         "chop" : 170,
+#         "shank" : 227,
+#         "tenderloin" : 113,
+#         "rib" : 170,
+#         "ground veal" : 113
+#     },
+#     "lamb" : {
+#         "chop" : 113,
+#         "leg" : 340,
+#         "shank" : 227,
+#         "rib" : 113,
+#         "shoulder" : 227,
+#         "ground lamb" : 113
+#     }
+# }
+
+# MEAT_FOODS = set([
+#     "beef",
+#     "pork",
+#     "chicken",
+#     "turkey",
+#     "duck",
+#     "goose",
+#     "lamb",
+#     "veal",
+#     "sausage",
+#     "salmon",
+#     "tuna",
+#     "trout",
+#     "cod",
+#     "haddock",
+#     "halibut",
+#     "mackerel",
+#     "sardine",
+#     "anchovy",
+#     "herring",
+#     "swordfish",
+#     "snapper",
+#     "bass",
+#     "catfish",
+#     "tilapia",
+#     "perch",
+#     "pollock",
+#     "shark",
+#     "shrimp",
+#     "prawn",
+#     "bison",
+#     "buffalo",
+#     "rabbit",
+#     "quail",
+#     "pheasant",
+#     "venison",
+#     "elk",
+#     "moose",
+#     "boar",
+#     "wild boar",
+#     "emu",
+#     "ostrich",
+#     "alligator",
+#     "crocodile",
+#     "snake"
+# ])
 
 # ---- Unused constants ----
 

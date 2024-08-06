@@ -1497,6 +1497,16 @@ class IngredientSlicer:
             self._unit              = food_unit
             self._standardized_unit = std_food_unit
 
+    def _get_animal_protein_gram_weight(self):
+        """If the food is an animal protein, then get the gram weight for that protein"""
+        if not self._gram_weight:
+            gram_weight = _utils._get_animal_protein_gram_weight(self._quantity, self._unit)
+            if not gram_weight:
+                gram_weight = _utils._get_animal_protein_gram_weight(self._secondary_quantity, self._secondary_unit)
+            
+            self._gram_weight = gram_weight
+
+        return 
     
     def _address_parenthesis(self) -> None:
         """
@@ -1609,21 +1619,30 @@ class IngredientSlicer:
         # ---- Calculate gram weights if possible ----
         # -------------------------------------------------------------------------------------
         print(f"Calculating gram weights") if self.debug else None
-        self._add_gram_weights() # TODO: testing using staged_ingredient
+        self._add_gram_weights() 
 
         # ----------------------------------- STEP 11 ------------------------------------------
         # ---- Calculate gram weights if possible ----
         # -------------------------------------------------------------------------------------
         print(f"Estimating gram weights for unitless foods") if self.debug else None
-        self._add_gram_weights_for_single_item_foods() # TODO: testing using staged_ingredient
+        self._add_gram_weights_for_single_item_foods() 
 
         # ----------------------------------- STEP 12 ------------------------------------------
         # ---- If no units were found ---- 
         # ---- check for food units and set those as the unit / standardized_unit ----
         # -------------------------------------------------------------------------------------
         print(f"Checking for possible 'food units' (i.e. '2 corn tortillas' has a unit of 'tortillas')") if self.debug else None
-        self._get_food_units() # TODO: testing using staged_ingredient
+        self._get_food_units() 
+       
 
+        # ----------------------------------- STEP 13 ------------------------------------------
+        # ---- If no gram weight has been found ---- 
+        # ---- check for any common 'animal protein units' (i.e. 'breasts', 'drumsticks', etc)
+        # ---- and calculate a gram weight for any found units ----
+        # -------------------------------------------------------------------------------------
+        print(f"Checking for possible 'animal protein units' (i.e. '2 chicken breasts' has a unit of 'breast') and calculating a gram weight for any found units") if self.debug else None
+        self._get_animal_protein_gram_weight() 
+       
     def standardized_ingredient(self) -> str:
         """
         Return the standardized ingredient string.

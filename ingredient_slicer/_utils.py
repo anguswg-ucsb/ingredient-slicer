@@ -11,6 +11,33 @@ from ingredient_slicer import _constants, _regex_patterns
 # -----------------------------------------------------------------------------------------------
 # ---- Utility functions for handling numbers, decimals, and fractions in strings ----
 # -----------------------------------------------------------------------------------------------
+def _is_number(x: Union[str, int, float, None]) -> bool:
+    
+    if isinstance(x, str):
+        try:
+            x = float(x)
+            return True
+        except:
+            return False
+    
+    if isinstance(x, (int, float)):
+        return True
+    
+    return False
+
+def _get_number(x: Union[str, int, float, None]) -> Union[int, float, None]:
+    
+    if isinstance(x, str):
+        try:
+            x = float(x)
+            return x
+        except:
+            return
+    
+    if isinstance(x, (int, float)):
+        return x
+    
+    return 
 
 def _make_int_or_float_str(number_str: str) -> str:
         """ Convert a string representation of a number to its integer or float equivalent.
@@ -2778,6 +2805,58 @@ def _get_food_unit(ingredient:str) -> str:
     food_units = _get_food_unit_list(ingredient)
 
     return food_units[-1] if food_units else None
+
+def _get_animal_protein_unit_gram_weight(
+        unit: Union[str, None] 
+        ) -> Union[int, float, None]:
+
+    if not isinstance(unit, str) or unit is None:
+        return
+
+    gram_weight_per_unit = None
+
+    if unit in _constants.ANIMAL_PROTEIN_UNITS_SET:
+        std_unit             = _constants.ANIMAL_PROTEIN_UNIT_TO_STANDARD_ANIMAL_PROTEIN_UNIT.get(unit)
+        gram_weight_per_unit = _constants.ANIMAL_PROTEIN_UNITS_TO_GRAMS.get(std_unit)
+
+    return gram_weight_per_unit
+
+def _get_animal_protein_gram_weight(
+        quantity: Union[int, float, str, None], 
+        unit: Union[str, None]
+        ) -> Union[str, None]: 
+    
+    """ Get the gran weight of a given animal protein unit (i.e. "breasts", "tenders", etc.)
+    """
+    # unit = "breasts"
+    # quantity = "8"
+
+    if not isinstance(unit, str) or unit is None:
+        return
+    
+    # if not isinstance(unit, str) and unit is not None:
+        # raise TypeError("'unit
+
+    if not isinstance(quantity, (int, float, str)) and quantity is not None:
+        raise TypeError("'quantity' must be a string, integer, float or None")
+    
+    if not _is_number(quantity) and quantity is not None:
+        raise ValueError("'quantity' must be a string representation of a number, an interger, a float or None")
+    
+    gram_weight = None
+
+    if _is_number(quantity):
+        quantity = _get_number(quantity)
+    elif quantity is None:
+        quantity = 1
+
+    if unit in _constants.ANIMAL_PROTEIN_UNITS_SET:
+        gram_weight     = _get_animal_protein_unit_gram_weight(unit)
+
+    if gram_weight:
+        gram_weight = round(float(gram_weight) * float(quantity), 2)
+
+    return str(gram_weight) if gram_weight is not None else None
 
 # def _split_dimension_unit_x_ranges(ingredient: str) -> tuple[str]:
 #     """Split an ingredient string by any quantity dimension unit separated by an 'x' character.
