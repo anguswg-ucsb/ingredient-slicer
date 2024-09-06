@@ -1026,6 +1026,23 @@ FOOD_CATALOG = {
             "portobello mushrooms": ("vegetables", "fungi"),
             "shiitake mushroom": ("vegetables", "fungi"),
             "shiitake mushrooms": ("vegetables", "fungi"),
+            
+            "eggplant": ("vegetables", "fruit"),
+            "eggplants": ("vegetables", "fruit"),
+            "chinese eggplant": ("vegetables", "fruit"),
+            "chinese eggplants": ("vegetables", "fruit"),
+            "indian eggplant": ("vegetables", "fruit"),
+            "indian eggplants": ("vegetables", "fruit"),
+            "japanese eggplant": ("vegetables", "fruit"),
+            "japanese eggplants": ("vegetables", "fruit"),
+            "globe eggplant": ("vegetables", "fruit"),
+            "globe eggplants": ("vegetables", "fruit"),
+            "american eggplant": ("vegetables", "fruit"),
+            "american eggplants": ("vegetables", "fruit"),
+
+            "kohlrabi": ("vegetables", "cruciferous"),
+            "kohlrabis": ("vegetables", "cruciferous"),
+            "parsnip": ("vegetables", "root"),
 
             # -------------------------------------------------------------------------------------------------------
             # ----- Tubers & products ("tubers_and_products") -----
@@ -2050,16 +2067,23 @@ FOOD_CATALOG = {
             "stock": ("soups", "soup"),
             "chicken broth": ("soups", "soup"),
             "beef broth": ("soups", "soup"),
+            "pork broth": ("soups", "soup"),
             "vegetable broth": ("soups", "soup"),
+
             "chicken stock": ("soups", "soup"),
             "beef stock": ("soups", "soup"),
+            "pork stock": ("soups", "soup"),
             "vegetable stock": ("soups", "soup"),
-            "miso soup": ("soups", "soup"),
-            "tomato soup": ("soups", "soup"),
-            "tomato bisque": ("soups", "soup"),
+
             "bouillon": ("soups", "soup"),
             "beef bouillon": ("soups", "soup"),
             "chicken bouillon": ("soups", "soup"),
+            "pork bouillon": ("soups", "soup"),
+            "vegetable bouillon": ("soups", "soup"),
+ 
+            "miso soup": ("soups", "soup"),
+            "tomato soup": ("soups", "soup"),
+            "tomato bisque": ("soups", "soup"),
             "chicken noodle soup": ("soups", "soup"),
             "cream of mushroom soup": ("soups", "soup"),
             "cream of chicken soup": ("soups", "soup"),
