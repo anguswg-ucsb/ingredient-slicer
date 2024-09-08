@@ -46,13 +46,3 @@ def test_get_single_gram_weight_for_melon_with_quantity_of_float_two():
     # ing.food()
 
     assert ing.gram_weight() == '3600.0'
-
-
-
-
-
-
-# IngredientSlicer("3 nuggets chopped", debug = True).gram_weight()
-# IngredientSlicer("3 head of fresh organic brocolni, chopped", debug = True).gram_weight()
-# IngredientSlicer("1 head of fresh organic brocollii, chopped", debug = True).gram_weight()
-# IngredientSlicer("1 head of fresh organic chicken, chopped", debug = True).gram_weight()

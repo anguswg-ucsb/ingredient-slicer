@@ -26,29 +26,9 @@ def test_merge_numbers_1():
     assert parsed['food'] == 'flour'
     assert parsed['size_modifiers'] == []
 
-# def test_merge_numbers_2():
-#     parse = IngredientSlicer("1 2/3 and 2 1/2 cups of flour")
-#     # parse.parse()
-#     parsed = parse.to_json()
-#     assert parsed['quantity'] == "4.167"
-#     assert parsed['unit'] == 'cups'
-#     assert parsed['standardized_unit'] == "cup"
-
-#     assert parsed['secondary_quantity'] == None
-#     assert parsed['secondary_unit'] == None
-#     assert parsed['standardized_secondary_unit'] == None
-
-#     assert parsed['is_required'] == True
-#     assert parsed['prep'] == []
-#     assert parsed['food'] == 'flour'
-#     assert parsed['size_modifiers'] == []
-
 def test_merge_numbers_3():
     parse = IngredientSlicer("1 2/3 or 2 1/2 cups of flour", debug=True)
-    # parse.parse()
     parsed = parse.to_json()
-
-    # (1.667 + 2.5)
 
     assert parsed['quantity'] == "2.0835"
     assert parsed['unit'] == 'cups'

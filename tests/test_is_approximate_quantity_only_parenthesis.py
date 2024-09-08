@@ -1,13 +1,10 @@
 import pytest
 
-
 from ingredient_slicer import _utils
 
 # -------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------
 # ---- Test _is_approximate_quantity_only_parenthesis() utils function  ----
 # -------------------------------------------------------------------------------
-
 
 def test_is_approximate_quantity_only_parenthesis_about_then_single_number():
     assert _utils._is_approximate_quantity_only_parenthesis("about 4") == True

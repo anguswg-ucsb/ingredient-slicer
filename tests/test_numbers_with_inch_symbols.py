@@ -6,9 +6,7 @@ import re
 from ingredient_slicer import _utils
 
 # -------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------
 # ---- Test the _replace_number_followed_by_inch_symbol() function -----
-
 # -------------------------------------------------------------------------------
 
 def test_replace_number_followed_by_inch_symbol_type1_1():
