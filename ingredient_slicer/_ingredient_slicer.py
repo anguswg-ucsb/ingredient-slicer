@@ -16,7 +16,6 @@ from . import _constants
 # from ingredient_slicer import _utils
 # from ingredient_slicer import _regex_patterns
 # from ingredient_slicer import _constants
-# # from ingredient_slicer import IngredientTools
 
 class IngredientSlicer:
     """

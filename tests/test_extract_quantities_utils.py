@@ -78,6 +78,3 @@ def test_extract_quantity_integer_error():
 def test_extract_equivalent_quantity_units_no_approximate_1():
     assert _utils._extract_equivalent_quantity_units("1 cup of sugar") == []
 
-
-
-
