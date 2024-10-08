@@ -4,7 +4,7 @@ import pytest
 import re
 
 from ingredient_slicer import _constants, _utils
-# from ingredient_slicer import IngredientSlicer
+from ingredient_slicer import IngredientSlicer
 
 # -------------------------------------------------------------------------------
 # ---- _get_animal_protein_gram_weight() tests ----
@@ -13,15 +13,23 @@ from ingredient_slicer import _constants, _utils
 def test_get_animal_protein_gram_weight_animal_protein_gram_weight_for_all_animal_protein_units():
     animal_protein_units = sorted(list(_constants.ANIMAL_PROTEIN_UNITS_SET))
     for unit in animal_protein_units:
+        
+        print(f'unit: {unit}')
         quantities = [1, 2, 5, 8]
-        for quantity in quantities:
 
+        for quantity in quantities:
+            print(f'quantity: {quantity}')
             std_unit = _constants.ANIMAL_PROTEIN_UNIT_TO_STANDARD_ANIMAL_PROTEIN_UNIT.get(unit)
+            
+            # _constants.ANIMAL_PROTEIN_UNITS_TO_GRAMS.get(std_unit)
+            # str(round(quantity * _constants.ANIMAL_PROTEIN_UNITS_TO_GRAMS.get(std_unit), 2))
 
             expected_result = str(round(quantity * _constants.ANIMAL_PROTEIN_UNITS_TO_GRAMS.get(std_unit), 2))
             result          = _utils._get_animal_protein_gram_weight(quantity, unit)
             
             assert result == expected_result
+        print()
+
 
 def test_get_animal_protein_gram_weight_animal_protein_unit_and_zero_int():
     assert _utils._get_animal_protein_gram_weight(0, "breasts") == '0.0'
@@ -57,4 +65,3 @@ def test_get_animal_protein_gram_weight_invalid_list_type_as_quantity():
 
 def test_get_animal_protein_gram_weight_invalid_list_type_as_unit():
     assert _utils._get_animal_protein_gram_weight(1, [1, 2, 3]) == None
-    

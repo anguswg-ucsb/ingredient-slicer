@@ -23,6 +23,9 @@ sed -i '' "s/^version = \".*\"/version = \"$VERSION\"/" pyproject.toml
 # sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" pyproject.toml
 # sed -i -e 's/^version = ".*"/version = "1.0.9"/' pyproject.toml
 
+echo "Updating version in ingredient_slicer.__init__.py to $VERSION..."
+sed -i '' "s/^version = \".*\"/version = \"$VERSION\"/" ingredient_slicer/__init__.py
+
 # # Delete old dist/ folder
 # if [ -d "dist" ]; then
 #     echo "Deleting old dist/ folder..."
@@ -48,3 +51,5 @@ echo "Uploading package to PyPI..."
 TWINE_PASSWORD=$PYPI_TOKEN twine upload dist/*
 
 echo "Completed publishing version $VERSION of $PACKAGE_NAME to PyPI!"
+
+

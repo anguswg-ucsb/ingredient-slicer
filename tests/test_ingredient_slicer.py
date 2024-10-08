@@ -11,6 +11,9 @@ from ingredient_slicer import IngredientSlicer
 # ---- Simple standard form ingredients tests ----
 # Standard form: "1 cup of sugar" (quantity, unit, ingredient)
 # -------------------------------------------------------------------------------
+# ing = "1 cabbage, green, core removed and leaves separated"
+# parsed = IngredientSlicer(ing).to_json()
+# parsed
 
 def test_standard_formatted_ingredients():
 

@@ -31,12 +31,17 @@ def test_get_food_units_food_with_food_unit_and_no_other_unit():
     assert _utils._get_food_unit("1 tortilla") == 'tortilla'
 
 def test_get_food_units_all_units_in_FOOD_UNITS():
-    for i, unit in enumerate(_constants.FOOD_UNITS_SET):
-        random_ingredient = f"{i} {unit}"
-        food_unit = _utils._get_food_unit(random_ingredient)
 
-        # assert food_unit == unit
+    for i, unit in enumerate(_constants.FOOD_UNITS_SET):
+
+        random_ingredient = f"{i} {unit}"
+        
+        # print(random_ingredient)
+
+        food_unit = _utils._get_food_unit(random_ingredient)
         assert _constants.FOOD_UNIT_TO_STANDARD_FOOD_UNIT.get(food_unit) == _constants.FOOD_UNIT_TO_STANDARD_FOOD_UNIT.get(unit)
+
+        # print() 
 
 def test_get_food_units_with_ingredient_that_has_two_food_units():
     assert _utils._get_food_unit("1 corn tortilla ") == 'tortilla'   

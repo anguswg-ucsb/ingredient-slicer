@@ -1479,6 +1479,8 @@ class IngredientSlicer:
             # NOTE: this is an arbitrary fuzzy string matching ratio of 0.85 for now, probably want this to be pretty strict 
             # NOTE: so we don't get false positives (maybe even just make it 0.95 or 1 to just only match single character differences)
             gram_weight = _utils._get_single_item_gram_weight(self._food, self._quantity)
+
+            
             
             # print(f" >>> Gram weight for single item food: {gram_weight}") if self.debug else None
             
@@ -1495,6 +1497,22 @@ class IngredientSlicer:
 
             self._unit              = food_unit
             self._standardized_unit = std_food_unit
+        
+        # TODO: code for storing FOOD UNITS as secondary units if no "real" secondary unit is found
+        # # if the secondary units are empty as well, then try to fill those in with food units if possible
+        # if not self._secondary_unit and not self._standardized_secondary_unit:
+        #     secondary_food_unit      = _utils._get_food_unit(self._standardized_ingredient)
+        #     std_secondary_food_unit  = _constants.FOOD_UNIT_TO_STANDARD_FOOD_UNIT.get(secondary_food_unit)
+
+        #     self._secondary_unit               = secondary_food_unit
+        #     self._standardized_secondary_unit  = std_secondary_food_unit
+
+        # # if the same unit ends up in the first and secondary unit, just set the secondary unit to None
+        # if self._unit == self._secondary_unit: 
+        #     self._secondary_unit = None
+        #     self._standardized_secondary_unit = None
+
+        return 
 
     def _get_animal_protein_gram_weight(self):
         """If the food is an animal protein, then get the gram weight for that protein"""

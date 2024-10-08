@@ -234,6 +234,7 @@ UNITS = {
     # "touch" : ("touch", "touches", "a touch"),
     'tube': ('tube', 'tubes'), 
     'wheel': ('wheel', 'wheels'), 
+    'whole fryer' : ('whole fryer', 'whole fryers'), # TODO: just added to try and get gram weights for whole versions of various meats (i.e. 'whole chicken/fryer' as a unit)
     'wing': ('wing', 'wings')
 }
 
@@ -456,31 +457,32 @@ for key, pattern in CASUAL_UNITS.items():
     for val in pattern:
         CASUAL_UNITS_SET.add(val)
 
-# set of units in UNITS that are meat related cuts / portions (i.e. "breast", "cutlet", "drumstick", "filet", "fillet", "leg", "rib", "ribeye", "tenderloin", "thigh", "tongue", "wing"
-ANIMAL_PROTEIN_UNITS = { 
-    "breast", 
-    "cutlet", 
-    "drumstick", 
-    "filet", 
-    "fillet", 
-    "giblet", 
-    "leg", 
-    "patty", 
-    "rib", 
-    "ribeye", 
-    "round", 
-    "strip", 
-    "tender", 
-    "tenderloin", 
-    "thigh", 
-    "tongue", 
-    "wing"
-    }
+# # set of units in UNITS that are meat related cuts / portions (i.e. "breast", "cutlet", "drumstick", "filet", "fillet", "leg", "rib", "ribeye", "tenderloin", "thigh", "tongue", "wing"
+# ANIMAL_PROTEIN_UNITS = { 
+#     "breast", 
+#     "cutlet", 
+#     "drumstick", 
+#     "filet", 
+#     "fillet", 
+#     "giblet", 
+#     "leg", 
+#     "patty", 
+#     "rib", 
+#     "ribeye", 
+#     "round", 
+#     "strip", 
+#     "tender", 
+#     "tenderloin", 
+#     "thigh", 
+#     "tongue", 
+#     "wing"
+#     }
 
 ANIMAL_PROTEIN_UNITS = {
     "breast": ("breast", "breasts"),
     "cutlet": ("cutlet", "cutlets"),
     "drumstick": ("drumstick", "drumsticks"),
+    "whole fryer" : ("whole fryer", "whole fryers"),
     "filet": ("filet", "filets"),
     "fillet": ("fillet", "fillets"),
     "giblet": ("giblet", "giblets"),
@@ -523,6 +525,7 @@ ANIMAL_PROTEIN_UNITS_TO_GRAMS = {
     "breast": 170.1,
     "cutlet": 85.05,
     "drumstick": 113.4,
+    "whole fryer" : 900.0,
     "filet": 170.1,
     "fillet": 170.1,
     "giblet": 28.35,
@@ -2800,7 +2803,8 @@ SINGLE_ITEM_FOOD_WEIGHTS = {
     'broccoli': '225',
     'broccolini' : '16',
     'brussel sprouts': '14',
-    'cabbage': '9070',
+    'cabbage': '900',
+    'cabbages': '900',
     'carrots': '60',
     'cauliflower': '500',
     'celery': '450',
@@ -2830,8 +2834,12 @@ SINGLE_ITEM_FOOD_WEIGHTS = {
 # Maps and sets for common foods that don't have a "real" unit but instead have the food name as the unit (i.e. "1 egg", "1 apple", "4 corn tortillas" etc.)
 FOOD_UNITS = {
     "egg": ("eggs",),
-    # "egg": ("eggs", "whole egg", "whole eggs", "egg yolk", "egg yolks", 
+     # "egg": ("eggs", "whole egg", "whole eggs", "egg yolk", "egg yolks", 
             # "eggs yolk", "eggs yolks", "egg white", "egg whites", "eggs white", "eggs whites"),
+
+    "whole fryer" : ("whole fryers", ),
+    # "whole fryer chicken" : ("whole fryer chickens", ),
+
     "anchovy": ("anchovies",),
     "sardine": ("sardines",),
     "gizzard": ("gizzards",),
