@@ -1513,6 +1513,23 @@ class IngredientSlicer:
         #     self._standardized_secondary_unit = None
 
         return 
+    
+    def _set_default_quantities(self):
+        """Set a default quantity if no quantity was found"""
+        
+        is_weight_or_volume_unit = _utils._is_weight_unit(self._standardized_unit) or _utils._is_volumetric_unit(self._standardized_unit)
+        missing_primary_quantity = self._quantity is None
+        
+        if is_weight_or_volume_unit and missing_primary_quantity:
+            self._quantity = "1"
+
+        # if missing_primary_quantity:
+            # self._quantity = "1"
+        
+        # if missing_primary_quantity and self._secondary_quantity is None:
+        #     self._secondary_quantity = "1"
+        
+        return
 
     def _get_animal_protein_gram_weight(self):
         """If the food is an animal protein, then get the gram weight for that protein"""
@@ -1651,8 +1668,13 @@ class IngredientSlicer:
         print(f"Checking for possible 'food units' (i.e. '2 corn tortillas' has a unit of 'tortillas')") if self.debug else None
         self._get_food_units() 
        
-
         # ----------------------------------- STEP 13 ------------------------------------------
+        # ---- If not quantity is found, set quantity to a default of 1 ---- 
+        # -------------------------------------------------------------------------------------
+        print(f"Set quantity to 1 if not found") if self.debug else None
+        self._set_default_quantities()
+       
+        # ----------------------------------- STEP 14 ------------------------------------------
         # ---- If no gram weight has been found ---- 
         # ---- check for any common 'animal protein units' (i.e. 'breasts', 'drumsticks', etc)
         # ---- and calculate a gram weight for any found units ----

@@ -51,5 +51,3 @@ echo "Uploading package to PyPI..."
 TWINE_PASSWORD=$PYPI_TOKEN twine upload dist/*
 
 echo "Completed publishing version $VERSION of $PACKAGE_NAME to PyPI!"
-
-
