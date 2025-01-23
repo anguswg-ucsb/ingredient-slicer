@@ -132,13 +132,9 @@ class IngredientSlicer:
                 modified_end = end + offset
 
                 match_string = match_string.replace("-", " ")
-                # print(f"Match: {match_string}") if self.debug else None
-                # match_string = match_string.replace("-", " ")
                 split_match = match_string.split(" ")
 
                 split_match = [i.strip() for i in split_match]
-
-                # print(f"Split Match: {split_match}") if self.debug else None
 
                 number_word = split_match[0]
                 fraction_word = split_match[1]
@@ -147,8 +143,6 @@ class IngredientSlicer:
 
                 updated_value = str(float(number_word) * float(decimal))
                 self._standardized_ingredient = self._standardized_ingredient[:modified_start] + str(updated_value) + self._standardized_ingredient[modified_end:]
-                # self._standardized_ingredient = self._standardized_ingredient[:match.start()] + str(updated_value) + self._standardized_ingredient[match.end():]
-                # ingredient = ingredient[:modified_start] + str(updated_value) + ingredient[modified_end:]
 
                 offset += len(str(updated_value)) - (end - start)
 
@@ -175,15 +169,10 @@ class IngredientSlicer:
             first_number = float(match.group(1).strip())
             second_number = float(match.group(2).strip())
 
-            # print(f"MATCH: {match_string}") if self.debug else None
-            # print(f"First Number: {first_number}") if self.debug else None
-            # print(f"Second Number: {second_number}") if self.debug else None
-
             updated_value = f" {_utils._make_int_or_float_str(str(first_number + second_number))} "
-            # print(f"Updated Value: {updated_value}") if self.debug else None
 
             self._standardized_ingredient = self._standardized_ingredient[:modified_start] + str(updated_value) + self._standardized_ingredient[modified_end:]
-            # self._standardized_ingredient = self._standardized_ingredient[:match.start()] + updated_value + self._standardized_ingredient[match.end():]
+
             offset += len(updated_value) - (end - start)
     
         return
@@ -195,7 +184,6 @@ class IngredientSlicer:
         return 
     
     def _drop_special_dashes(self) -> None:
-        # print("Dropping special dashes")
         self._standardized_ingredient = self._standardized_ingredient.replace("—", "-").replace("–", "-").replace("~", "-")
         return
 
@@ -276,18 +264,6 @@ class IngredientSlicer:
 
         return
     
-    # # TODO: Delete this, _utils has replaced this
-    # def _clean_html_and_unicode2(self) -> None:
-    #     """Unescape fractions from HTML code coded fractions to unicode fractions."""
-
-    #     # Unescape HTML
-    #     self._standardized_ingredient = unescape(self._standardized_ingredient)
-
-    #     # Replace unicode fractions with their decimal equivalents
-    #     for unicode_fraction, decimal_fraction in _constants.UNICODE_FRACTIONS.items():
-    #         self._standardized_ingredient = self._standardized_ingredient.replace(unicode_fraction, f" {decimal_fraction}")
-    #         # self._standardized_ingredient = self._standardized_ingredient.replace(unicode_fraction, decimal_fraction)
-
     def _replace_unicode_fraction_slashes(self) -> None:
         """Replace unicode fraction slashes with standard slashes in the parsed ingredient."""
 
@@ -400,30 +376,20 @@ class IngredientSlicer:
 
         """
 
-        # print(f"Before initial range update:\n {self._standardized_ingredient}") if self.debug else None
-
         # Update ranges of numbers that are separated by one or more hyphens
         self._standardized_ingredient = _utils._update_ranges(self._standardized_ingredient, _regex_patterns.QUANTITY_DASH_QUANTITY)
 
-        # print(f"After initial range update:\n {self._standardized_ingredient}") if self.debug else None
-
-        # # Update ranges of numbers that are preceded by "between" and followed by "and" or "&"
+        # Update ranges of numbers that are preceded by "between" and followed by "and" or "&"
         self._standardized_ingredient = _utils._update_ranges(self._standardized_ingredient, _regex_patterns.BETWEEN_QUANTITY_AND_QUANTITY)
 
         # Update ranges that are separated by "to" 
         self._standardized_ingredient = _utils._update_ranges(self._standardized_ingredient, _regex_patterns.QUANTITY_TO_QUANTITY)
   
-        # print(f"After 'TO' update:\n {self._standardized_ingredient}") if self.debug else None
-
         # Update ranges that are separated by "or"
         self._standardized_ingredient = _utils._update_ranges(self._standardized_ingredient, _regex_patterns.QUANTITY_OR_QUANTITY)
  
-        # print(f"After 'OR' update:\n {self._standardized_ingredient}") if self.debug else None
-
         # check and merge any misleading ranges
         self._standardized_ingredient = _utils._merge_misleading_ranges(self._standardized_ingredient)
-
-        # print(f"After misleading range update:\n {self._standardized_ingredient}") if self.debug else None
 
         return
     
@@ -662,7 +628,7 @@ class IngredientSlicer:
             self._average_ranges,
             self._separate_parenthesis
         ]
-        # print(f"Ingredient before standardizing: {self._standardized_ingredient}") if self.debug else None
+        
         # call each method in the list on the input ingredient string
         for method in methods:
             # print(f"Calling method: {method.__name__}") if self.debug else None
@@ -670,18 +636,8 @@ class IngredientSlicer:
 
             method()
 
-            # print(f"> Ending ingredient: '{self._standardized_ingredient}'") if self.debug else None
-        
-        # print(f"Ingredient after standardizing: {self._standardized_ingredient}") if self.debug else None
-        # print(f"Removing extra whitespaces...") if self.debug else None
-
         self._standardized_ingredient = _utils._remove_extra_whitespaces(self._standardized_ingredient)
-        # self._standardized_ingredient = self._remove_extra_whitespaces(self._standardized_ingredient)
 
-        # print(f"Done, returning standardized ingredient: \n > '{self._standardized_ingredient}'") if self.debug else None
-
-        # return the parsed ingredient string
-        # return self._standardized_ingredient
         return
 
     def extract_first_quantity_unit(self) -> None:
