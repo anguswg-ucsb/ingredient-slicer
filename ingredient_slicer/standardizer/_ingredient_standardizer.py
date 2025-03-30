@@ -23,9 +23,8 @@ class IngredientStandardizer:
     def __init__(self, ingredient: str):
         self.ingredient = ingredient
         self._builder = IngredientStandardizerBuilder(ingredient)
-        self._standardized_ingredient_data = None
         self._parse()
-        
+
     def _parse(self):
         """Apply all building steps using the builder."""
         self._builder = (
@@ -56,9 +55,4 @@ class IngredientStandardizer:
 
     def get_standardized_ingredient(self) -> Dict[str, Any]:
         """Returns the standardized ingredient dictionary."""
-        # return self._standardized_ingredient_data
         return self._builder.get_standardized_ingredient()
-
-ingredient = "1/2 cup of chicken breast (chopped)"
-standardizer = IngredientStandardizer(ingredient)
-standardizer.get_standardized_ingredient()
