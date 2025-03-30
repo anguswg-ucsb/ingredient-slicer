@@ -8,33 +8,27 @@ from html import unescape
 import warnings
 
 # package imports
-from .. import _utils
-from .. import _regex_patterns
-from .. import _constants
 from ._ingredient_standardizer_builder import IngredientStandardizerBuilder
-
-from ingredient_slicer.standardizer._ingredient_standardizer_builder import IngredientStandardizerBuilder 
-# # from ._regex_patterns import IngredientTools
 
 # # local dev import statements
 # from ingredient_slicer import _utils
 # from ingredient_slicer import _regex_patterns
 # from ingredient_slicer import _constants
+# from ingredient_slicer.standardizer._ingredient_standardizer_builder import IngredientStandardizerBuilder 
 
 class IngredientStandardizer:
     """
     A class to standardize an ingredient into a common form using a builder.
     """
-    def __init__(self, ingredient: str, debug=False):
+    def __init__(self, ingredient: str):
         self.ingredient = ingredient
-        self.debug = debug
         self._builder = IngredientStandardizerBuilder(ingredient)
         self._standardized_ingredient_data = None
         self._parse()
-
+        
     def _parse(self):
         """Apply all building steps using the builder."""
-        self._standardized_ingredient_data = (
+        self._builder = (
             self._builder
             ._drop_special_dashes() 
             ._find_and_remove_percentages() 
@@ -58,12 +52,12 @@ class IngredientStandardizer:
             ._replace_a_or_an_quantities() 
             ._average_ranges() 
             ._separate_parenthesis() 
-            .get_standardized_ingredient()
         )
 
     def get_standardized_ingredient(self) -> Dict[str, Any]:
         """Returns the standardized ingredient dictionary."""
-        return self._standardized_ingredient_data
+        # return self._standardized_ingredient_data
+        return self._builder.get_standardized_ingredient()
 
 ingredient = "1/2 cup of chicken breast (chopped)"
 standardizer = IngredientStandardizer(ingredient)

@@ -11,7 +11,6 @@ import warnings
 from .. import _utils
 from .. import _regex_patterns
 from .. import _constants
-# # from ._regex_patterns import IngredientTools
 
 # # local dev import statements
 # from ingredient_slicer import _utils
@@ -38,7 +37,6 @@ class IngredientStandardizerBuilder:
         """
         Find and remove percentages from the ingredient string.
         """
-        # ingredient = "1 cup of 2% heavy cream"
         
         for key, pattern in _regex_patterns.PCT_REGEX_MAP.items():
             pattern_iter = pattern.finditer(self._standardized_ingredient)
@@ -96,7 +94,6 @@ class IngredientStandardizerBuilder:
             offset = 0
 
             for match in pattern_iter:
-                # print(f"Got a fraction word match with key: {key}") if self.debug else None
                 match_string = match.group(0)
                 start, end = match.start(), match.end()
                 modified_start = start + offset
@@ -169,7 +166,7 @@ class IngredientStandardizerBuilder:
         
         return self
     
-    def _separate_dimensions(self) -> None:
+    def _separate_dimensions(self):
         """
         Split the dimensions from the parsed ingredient.
         """
