@@ -12,11 +12,6 @@ from .. import _utils
 from .. import _regex_patterns
 from .. import _constants
 
-# # local dev import statements
-# from ingredient_slicer import _utils
-# from ingredient_slicer import _regex_patterns
-# from ingredient_slicer import _constants
-
 class IngredientStandardizerBuilder:
     def __init__(self, ingredient: str):
         self._ingredient = ingredient
@@ -406,7 +401,7 @@ class IngredientStandardizerBuilder:
 
         return self
 
-    def get_standardized_ingredient(self):
+    def get_standardized_ingredient_data(self):
         """Return the standardized ingredient and additional keys."""
         return {
             '_standardized_ingredient': self._standardized_ingredient,

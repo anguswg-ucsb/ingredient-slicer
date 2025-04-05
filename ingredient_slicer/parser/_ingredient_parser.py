@@ -10,14 +10,169 @@ import warnings
 from . import _utils
 from . import _regex_patterns
 from . import _constants
-from .standardizer._ingredient_standardizer import IngredientStandardizer 
+from ingredient_slicer.standardizer._ingredient_standardizer import IngredientStandardizer 
+from ingredient_slicer.models.quantity_unit_data import QuantityUnitData
+quantity_unit_data = QuantityUnitData(quantity="1", unit="1")
+quantity_unit_data.quantity
 
 # # local dev import statements
 # from ingredient_slicer import _utils
 # from ingredient_slicer import _regex_patterns
 # from ingredient_slicer import _constants
+def _address_equivalence_parenthesis2(self, parenthesis: str, quantity_unit_data : QuantityUnitData) -> QuantityUnitData:
+    """
+    Address the case where the parenthesis content contains any equivalence strings like "about" or "approximately", followed by a quantity and then a unit later in the sting.
+    Attempts to update quantity_unit_data.quantity, quantity_unit_data.unit, quantity_unit_data.secondary_quantity, and quantity_unit_data.secondary_unit given 
+    information from the parenthesis string and the current quantity_unit_data.quantity and quantity_unit_data.unit
+    e.g. "(about 3 ounces)", "(about a 1/3 cup)", "(approximately 1 large tablespoon)"
 
-class IngredientSlicer:
+    Args:
+        parenthesis (str): A string containing parenthesis from the ingredients string
+    Returns:
+        None
+    """
+
+    # print(f"""Ingredient: '{self._reduced_ingredient}'\nParenthesis: '{parenthesis}'\nQuantity: '{quantity_unit_data.quantity}'\nUnit: '{quantity_unit_data.unit}'""") if self.debug else None
+
+    # check for the equivelency pattern (e.g. "<equivelent string> <quantity> <unit>" )
+    equivalent_quantity_unit = _utils._extract_equivalent_quantity_units(parenthesis)
+    # equivalent_quantity_unit = _regex_patterns.EQUIV_QUANTITY_UNIT_GROUPS.findall(parenthesis)
+    # equivalent_quantity_unit = [item for i in [regex.EQUIV_QUANTITY_UNIT_GROUPS.findall(i) for i in parenthesis] for item in i]
+
+    # remove parenthesis and then split on whitespace
+    split_parenthesis = parenthesis.replace("(", "").replace(")", "").split()
+
+    # Case when: NO equivelence quantity unit matches 
+    #           OR parenthesis contains a quantity per unit like string in the parenthesis (i.e. "(about 2 ounces each)" contains "each")
+    # Then return early with NO UPDATES and keep the current quantity/unit as is
+    if not equivalent_quantity_unit or any([True if i in _constants.QUANTITY_PER_UNIT_STRINGS else False for i in split_parenthesis]):
+        # print(f"\n > Return early from EQUIVALENCE parenthesis") if self.debug else None
+        quantity_unit_data.parenthesis_notes.append("not a equivalence quantity unit parenthesis")
+        return quantity_unit_data
+    
+    # pull out the suffix word, parenthesis quantity and unit
+    parenthesis_suffix, parenthesis_quantity, parenthesis_unit = equivalent_quantity_unit[0]
+    
+    # Case when: NO quantity, NO unit:
+        # if no quantity AND no unit, then we can use the parenthesis quantity-unit as our quantity and unit
+    if not quantity_unit_data.quantity and not quantity_unit_data.unit:
+
+        quantity_unit_data.parenthesis_notes.append("used equivalence quantity unit as our quantity and unit")
+
+        # set quantity/unit to the parenthesis values
+        quantity_unit_data.quantity = parenthesis_quantity
+        quantity_unit_data.unit = parenthesis_unit
+
+        return quantity_unit_data
+    
+    # Case when: YES quantity, NO unit:
+        # we can assume the equivelent quantity units 
+        # in the parenthesis are actually a better fit for the quantities and units so 
+        # we can use those are our quantities/units and then stash the original quantity in the "description" field 
+        # with a "maybe quantity is " prefix in front of the original quantity for maybe use later on
+    if quantity_unit_data.quantity and not quantity_unit_data.unit:
+
+        # stash the old quantity with a trailing string before changing best_quantity
+        quantity_unit_data.parenthesis_notes.append(f"maybe quantity is: {' '.join(quantity_unit_data.quantity)}")
+
+
+        # make the secondary_quantity the starting quantity before converting the quantity to the value found in the parenthesis
+        quantity_unit_data.secondary_quantity = quantity_unit_data.quantity
+
+        # set the quantity/unit to the parenthesis values
+        quantity_unit_data.quantity = parenthesis_quantity
+        quantity_unit_data.unit = parenthesis_unit
+
+        return quantity_unit_data
+
+    # Case when: NO quantity, YES unit:
+        # if there is no quantity BUT there IS a unit, then the parenthesis units/quantities are probably "better" so use the
+        # parenthesis quantity/units and then stash the old unit in the description
+    if not quantity_unit_data.quantity and quantity_unit_data.unit:
+
+        # stash the old quantity with a trailing "maybe"
+        quantity_unit_data.parenthesis_notes.append(f"maybe unit is: {quantity_unit_data.unit}")
+
+        # make the secondary_unit the starting unit before converting the unit to the unit string found in the parenthesis
+        quantity_unit_data.secondary_unit = quantity_unit_data.unit
+
+        quantity_unit_data.quantity = parenthesis_quantity
+        quantity_unit_data.unit = parenthesis_unit
+
+        # return [parenthesis_quantity, parenthesis_unit, description]
+        return quantity_unit_data
+    
+    # Case when: YES quantity, YES unit:
+        # if we already have a quantity AND a unit, then we likely found an equivalent quantity/unit
+        # we will choose to use the quantity/unit pairing that is has a unit in the BASIC_UNITS_SET
+    if quantity_unit_data.quantity and quantity_unit_data.unit:
+        parenthesis_unit_is_basic = parenthesis_unit in _constants.BASIC_UNITS_SET
+        unit_is_basic = quantity_unit_data.unit in _constants.BASIC_UNITS_SET
+
+        # Case when BOTH are basic units:  (# TODO: Maybe we should use parenthesis quantity/unit instead...?)
+        #   use the original quantity/unit (stash the parenthesis in the description)
+        if parenthesis_unit_is_basic and unit_is_basic:
+            quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}")
+            # return [quantity_unit_data.quantity, quantity_unit_data.unit, description]
+
+            # set the secondary quantity/units to the values in the parenthesis
+            quantity_unit_data.secondary_quantity = parenthesis_quantity
+            quantity_unit_data.secondary_unit = parenthesis_unit
+
+            return quantity_unit_data
+        
+        # Case when NEITHER are basic units:    # TODO: this can be put into the above condition but thought separated was more readible.
+        #   use the original quantity/unit (stash the parenthesis in the description)
+        if not parenthesis_unit_is_basic and not unit_is_basic:
+            quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}")
+            # return [quantity_unit_data.quantity, quantity_unit_data.unit, description]
+            
+            # set the secondary quantity/units to the values in the parenthesis
+            quantity_unit_data.secondary_quantity = parenthesis_quantity
+            quantity_unit_data.secondary_unit = parenthesis_unit
+
+            return quantity_unit_data
+
+        # Case when: YES basic parenthesis unit, NO basic original unit: 
+        #   then use the parenthesis quantity/unit (stash the original in the description)
+        if parenthesis_unit_is_basic:
+            quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {quantity_unit_data.quantity}/{quantity_unit_data.unit}")
+            
+            # set the secondary quantity/units to the original quantity/units
+            quantity_unit_data.secondary_quantity = quantity_unit_data.quantity
+            quantity_unit_data.secondary_unit = quantity_unit_data.unit
+
+            # update the primary quantities/units to the parenthesis values
+            quantity_unit_data.quantity = parenthesis_quantity
+            quantity_unit_data.unit = parenthesis_unit
+            
+            # return [parenthesis_quantity, parenthesis_unit, description]
+            return quantity_unit_data
+
+        # Case when: NO basic parenthesis unit, YES basic original unit: 
+        #   then use the original quantity/unit (stash the parenthesis in the description)
+        if unit_is_basic:
+            quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}")
+
+            # set the secondary quantity/units to the original quantity/units
+            quantity_unit_data.secondary_quantity = parenthesis_quantity
+            quantity_unit_data.secondary_unit = parenthesis_unit
+
+            return quantity_unit_data
+
+
+    quantity_unit_data.parenthesis_notes.append(f"used quantity/units from parenthesis with equivalent quantity/units")
+
+    # set the secondary quantity/units to the original quantity/units
+    quantity_unit_data.secondary_quantity = quantity_unit_data.quantity
+    quantity_unit_data.secondary_unit = quantity_unit_data.unit
+
+    quantity_unit_data.quantity = parenthesis_quantity
+    quantity_unit_data.unit = parenthesis_unit
+
+    return quantity_unit_data
+
+class IngredientParser:
     """
     A class to parse recipe ingredients into a standard format.
 
@@ -58,18 +213,23 @@ class IngredientSlicer:
 
         self.debug = debug
 
+        self.ingredient_standardizer = self._get_ingredient_standardizer(self.ingredient)
         self._standardize() # standardize the ingredient string
 
         self._parse()
 
         self._parsed_ingredient = self.to_json()
     
-    def _standardize(self):
+
+    def _get_ingredient_standardizer(self, ingredient : str) -> IngredientStandardizer:
         # Create an instance of IngredientStandardizer
-        ingredient_standardizer = IngredientStandardizer(self.ingredient)
+        ingredient_standardizer = IngredientStandardizer(ingredient)    
+        return ingredient_standardizer
+
+    def _standardize(self):
 
         # Get the standardized ingredient data (which is a dictionary)
-        standardized_data = ingredient_standardizer.get_standardized_ingredient_data()
+        standardized_data = self.ingredient_standardizer.get_standardized_ingredient_data()
 
         # Iterate through the keys and set each key as the member variable
         # and the corresponding value as the member variable's value
@@ -78,95 +238,21 @@ class IngredientSlicer:
         
         return 
     
-
-    def extract_first_quantity_unit(self) -> None:
-
+    def _is_ingredient_required(self, standardizer : IngredientStandardizer) -> bool:
         """
-        Extract the first unit and quantity from an ingredient string.
-        Function will extract the first unit and quantity from the ingredient string and set the self._quantity and self._unit member variables.
-        Quantities and ingredients are extracted in this order and if any of the previous steps are successful, the function will return early.
-        1. Check for basic units (e.g. 1 cup, 2 tablespoons)
-        2. Check for nonbasic units (e.g. 1 fillet, 2 carrot sticks)
-        3. Check for quantity only, no units (e.g. 1, 2)
-
-        If none of the above steps are successful, then the self._quantity and self._unit member variables will be set to None.
-
-        Args:
-            ingredient (str): The ingredient string to parse.
-        Returns:
-            dict: A dictionary containing the first unit and quantity found in the ingredient string.
-        Examples:
-            >>> extract_first_unit_quantity('1 1/2 cups diced tomatoes, 2 tablespoons of sugar, 1 stick of butter')
-            {'quantity': '1 1/2', 'unit': 'cups'}
-            >>> extract_first_unit_quantity('2 1/2 cups of sugar')
-            {'quantity': '2 1/2', 'unit': 'cups'}
+        Check if the ingredient is required or optional
+        Returns a boolean indicating whether the ingredient is required or optional.
         """
-        
-        # ---- STEP 1: CHECK FOR QUANTITY - BASIC UNITS (e.g. 1 cup, 2 tablespoons) ----
-        # Example: "1.5 cup of sugar" -> quantity: "1.5", unit: "cup"
 
-        # get the first number followed by a basic unit in the ingredient string
-        basic_unit_matches = _regex_patterns.QUANTITY_BASIC_UNIT_GROUPS.findall(self._standardized_ingredient) # TODO: testing
+        # check if the ingredient string contains the word "optional" or "required"
+        # ingredient_is_required = self._check_if_required_string(self._reduced_ingredient)
+        ingredient_is_required = self._check_if_required_string(standardizer.get_standardized_ingredient()) # TODO: testing this out
 
-        # remove any empty matches
-        valid_basic_units = [i for i in basic_unit_matches if len(i) > 0]
+        # check the parenthesis content for the word "optional" or "required"
+        parenthesis_is_required = self._check_if_required_parenthesis(standardizer.get_parenthesis_content())
 
-        # debugging message
-        basic_units_message = f"Valid basic units: {valid_basic_units}" if valid_basic_units else f"No valid basic units found..."
-
-        # if we have valid single number quantities, then set the self._quantity and the self._unit member variables and exit the function
-        if basic_unit_matches and valid_basic_units:
-            self._quantity = valid_basic_units[0][0].strip()
-            self._unit = valid_basic_units[0][1].strip()
-            return 
-
-        # ---- STEP 2: CHECK FOR QUANTITY - NONBASIC UNITS (e.g. 1 fillet, 2 carrot sticks) ----
-        # Example: "1 fillet of salmon" -> quantity: "1", unit: "fillet"
-
-        # If no basic units are found, then check for anumber followed by a nonbasic units
-        nonbasic_unit_matches = _regex_patterns.QUANTITY_NON_BASIC_UNIT_GROUPS.findall(self._standardized_ingredient) # TODO: testing
-
-        # remove any empty matches
-        valid_nonbasic_units = [i for i in nonbasic_unit_matches if len(i) > 0]
-
-        # debugging message
-        nonbasic_units_message = f"Valid non basic units: {valid_nonbasic_units}" if valid_nonbasic_units else f"No valid non basic units found..."
-
-        # if we found a number followed by a non basic unit, then set the self._quantity and the self._unit member variables and exit the function
-        if nonbasic_unit_matches and valid_nonbasic_units:
-            self._quantity = valid_nonbasic_units[0][0].strip()
-            self._unit = valid_nonbasic_units[0][1].strip()
-            return
-        
-        # ---- STEP 3: CHECK FOR ANY QUANTITIES or ANY UNITS in the string, and use the first instances (if they exist) ----
-        # Example: "cups, 2 juice of lemon" -> quantity: "2", unit: "juice"
-
-        # if neither basic nor nonbasic units are found, then get all of the numbers and all of the units
-        quantity_matches = _regex_patterns.ALL_NUMBERS.findall(self._standardized_ingredient) # TODO: testing
-        unit_matches     = _regex_patterns.UNITS_PATTERN.findall(self._standardized_ingredient) # TODO: testing
-
-        # remove any empty matches
-        valid_quantities = [i for i in quantity_matches if len(i) > 0]
-        valid_units     = [i for i in unit_matches if len(i) > 0]
-
-        # debugging messages
-        all_quantities_message = f"Valid quantities: {valid_quantities}" if valid_quantities else f"No valid quantities found..."
-        all_units_message = f"Valid units: {valid_units}" if valid_units else f"No valid units found..."
-
-        # if either have valid quantities then set the best quantity and best unit to 
-        # the first valid quantity and units found, otherwise set as None
-        # TODO: Drop this "if valid_quantities or valid_units"...?
-        if valid_quantities or valid_units:
-            self._quantity = valid_quantities[0].strip() if valid_quantities else None
-            self._unit = valid_units[0].strip() if valid_units else None
-            return
-
-        # ---- STEP 4: NO MATCHES ----
-        # just print a message if no valid quantities or units are found and return None
-        # best_quantity and best_unit are set to None by default and will remain that way if no units or quantities were found.
-        no_matches_message = f"No valid quantities or units found..."
-
-        return 
+        # if BOTH of the above conditions are True then return True otherwise return False
+        return True if ingredient_is_required and parenthesis_is_required else False
     
     def _check_if_required_parenthesis(self, parenthesis_list: list) -> bool:
         """
@@ -216,22 +302,95 @@ class IngredientSlicer:
         is_required = (True if required_match_flag or required_str_flag else False) or (False if optional_match_flag or optional_str_flag else True)
 
         return is_required
-    
-    def _is_ingredient_required(self) -> bool:
+
+    def extract_first_quantity_unit(self, standardized_ingredient : str) -> QuantityUnitData:
+
         """
-        Check if the ingredient is required or optional
-        Returns a boolean indicating whether the ingredient is required or optional.
+        Extract the first unit and quantity from an ingredient string.
+        Function will extract the first unit and quantity from the ingredient string and set the self._quantity and self._unit member variables.
+        Quantities and ingredients are extracted in this order and if any of the previous steps are successful, the function will return early.
+        1. Check for basic units (e.g. 1 cup, 2 tablespoons)
+        2. Check for nonbasic units (e.g. 1 fillet, 2 carrot sticks)
+        3. Check for quantity only, no units (e.g. 1, 2)
+
+        If none of the above steps are successful, then the self._quantity and self._unit member variables will be set to None.
+
+        Args:
+            ingredient (str): The ingredient string to parse.
+        Returns:
+            dict: A dictionary containing the first unit and quantity found in the ingredient string.
+        Examples:
+            >>> extract_first_unit_quantity('1 1/2 cups diced tomatoes, 2 tablespoons of sugar, 1 stick of butter')
+            {'quantity': '1 1/2', 'unit': 'cups'}
+            >>> extract_first_unit_quantity('2 1/2 cups of sugar')
+            {'quantity': '2 1/2', 'unit': 'cups'}
         """
+        
+        # ---- STEP 1: CHECK FOR QUANTITY - BASIC UNITS (e.g. 1 cup, 2 tablespoons) ----
+        # Example: "1.5 cup of sugar" -> quantity: "1.5", unit: "cup"
 
-        # check if the ingredient string contains the word "optional" or "required"
-        # ingredient_is_required = self._check_if_required_string(self._reduced_ingredient)
-        ingredient_is_required = self._check_if_required_string(self._standardized_ingredient) # TODO: testing this out
+        # get the first number followed by a basic unit in the ingredient string
+        basic_unit_matches = _regex_patterns.QUANTITY_BASIC_UNIT_GROUPS.findall(standardized_ingredient) # TODO: testing
 
-        # check the parenthesis content for the word "optional" or "required"
-        parenthesis_is_required = self._check_if_required_parenthesis(self._parenthesis_content)
+        # remove any empty matches
+        valid_basic_units = [i for i in basic_unit_matches if len(i) > 0]
 
-        # if BOTH of the above conditions are True then return True otherwise return False
-        return True if ingredient_is_required and parenthesis_is_required else False
+        # if we have valid single number quantities, then set the self._quantity and the self._unit member variables and exit the function
+        if basic_unit_matches and valid_basic_units:
+            # self._quantity = valid_basic_units[0][0].strip()
+            # self._unit = valid_basic_units[0][1].strip()
+            return QuantityUnitData(
+                quantity=valid_basic_units[0][0].strip(),
+                unit=valid_basic_units[0][1].strip()
+                )
+
+        # ---- STEP 2: CHECK FOR QUANTITY - NONBASIC UNITS (e.g. 1 fillet, 2 carrot sticks) ----
+        # Example: "1 fillet of salmon" -> quantity: "1", unit: "fillet"
+
+        # If no basic units are found, then check for anumber followed by a nonbasic units
+        nonbasic_unit_matches = _regex_patterns.QUANTITY_NON_BASIC_UNIT_GROUPS.findall(standardized_ingredient) # TODO: testing
+
+        # remove any empty matches
+        valid_nonbasic_units = [i for i in nonbasic_unit_matches if len(i) > 0]
+
+        # if we found a number followed by a non basic unit, then set the self._quantity and the self._unit member variables and exit the function
+        if nonbasic_unit_matches and valid_nonbasic_units:
+            # self._quantity = valid_nonbasic_units[0][0].strip()
+            # self._unit = valid_nonbasic_units[0][1].strip()
+            return QuantityUnitData(
+                quantity=valid_nonbasic_units[0][0].strip(),
+                unit=valid_nonbasic_units[0][1].strip()
+            )
+        
+        # ---- STEP 3: CHECK FOR ANY QUANTITIES or ANY UNITS in the string, and use the first instances (if they exist) ----
+        # Example: "cups, 2 juice of lemon" -> quantity: "2", unit: "juice"
+
+        # if neither basic nor nonbasic units are found, then get all of the numbers and all of the units
+        quantity_matches = _regex_patterns.ALL_NUMBERS.findall(standardized_ingredient) # TODO: testing
+        unit_matches     = _regex_patterns.UNITS_PATTERN.findall(standardized_ingredient) # TODO: testing
+
+        # remove any empty matches
+        valid_quantities = [i for i in quantity_matches if len(i) > 0]
+        valid_units     = [i for i in unit_matches if len(i) > 0]
+
+        # if either have valid quantities then set the best quantity and best unit to 
+        # the first valid quantity and units found, otherwise set as None
+        # TODO: Drop this "if valid_quantities or valid_units"...?
+        if valid_quantities or valid_units:
+            # self._quantity = valid_quantities[0].strip() if valid_quantities else None
+            # self._unit = valid_units[0].strip() if valid_units else None
+            return QuantityUnitData(
+                quantity = valid_quantities[0].strip() if valid_quantities else None,
+                unit = valid_units[0].strip() if valid_units else None
+                ) 
+
+        # ---- STEP 4: NO MATCHES ----
+        # just print a message if no valid quantities or units are found and return None
+        # best_quantity and best_unit are set to None by default and will remain that way if no units or quantities were found.
+        return QuantityUnitData(
+            quantity = None,
+            unit = None
+            ) 
     
     def _address_quantity_only_parenthesis(self, parenthesis: str) -> None:
         """
@@ -344,6 +503,263 @@ class IngredientSlicer:
         self._quantity = parenthesis_quantity
 
         return
+    
+    def _address_quantity_only_parenthesis2(self, parenthesis: str, quantity_unit_data : QuantityUnitData) -> QuantityUnitData:
+        """
+        Address the case where the parenthesis content only contains a quantity.
+        Attempts to update self._quantity, self._unit, self._secondary_quantity, and self._secondary_unit given 
+        information from the parenthesis string and the current self._quantity and self._unit
+        (e.g. "(3)", "(2.5)", "(1/2)")
+        Args:
+            parenthesis (str): The content of the parenthesis in the ingredient string.
+        Returns:
+            None
+        """
+
+        # pull out the parenthesis quantity values
+        numbers_only = _utils._extract_quantities_only(parenthesis) # NOTE: testing this out
+
+        # if no numbers only parenthesis, then just return the original ingredient
+        if not numbers_only:
+            # print(f"\n > Return early from QUANTITY parenthesis") if self.debug else None
+            quantity_unit_data.parenthesis_notes.append("not a quantity only parenthesis")
+            return quantity_unit_data
+        
+        is_approximate_quantity = _utils._is_approximate_quantity_only_parenthesis(parenthesis)
+
+        # if the quantity is approximate, then add a note to the parenthesis notes and return early
+        if is_approximate_quantity:
+            quantity_unit_data.parenthesis_notes.append("approximate quantity only")
+            return quantity_unit_data 
+
+        # pull out the quantity_unit_data.quantity from the parenthesis
+        parenthesis_quantity = numbers_only[0]
+
+        # if there is not a unit or a quantity, then we can use the parenthesis number as the quantity and
+        #  return the ingredient with the new quantity
+        # TODO: OR the unit MIGHT be the food OR might be a "SOMETIMES_UNIT", maybe do that check here, not sure yet...
+        if not quantity_unit_data.quantity and not quantity_unit_data.unit:
+            quantity_unit_data.parenthesis_notes.append("maybe unit is: the 'food' or a 'sometimes unit'")
+            quantity_unit_data.quantity = parenthesis_quantity
+            return quantity_unit_data
+        
+        # if there is a quantity but no unit, we can try to merge (multiply) the current quantity and the parenthesis quantity 
+        # then the unit is also likely the food 
+        # TODO: OR the unit MIGHT be the food OR might be a "SOMETIMES_UNIT", maybe do that check here, not sure yet...
+        if quantity_unit_data.quantity and not quantity_unit_data.unit:
+            updated_quantity = str(float(quantity_unit_data.quantity) * float(parenthesis_quantity))
+
+            # update parenthesis notes 
+            quantity_unit_data.parenthesis_notes.append("maybe unit is: the 'food' or a 'sometimes unit'")
+
+            # set the secondary quantity to the ORIGINAL quantity/units
+            quantity_unit_data.secondary_quantity = quantity_unit_data.quantity 
+
+            # Update the quantity with the updated merged quantity
+            quantity_unit_data.quantity = _utils._make_int_or_float_str(updated_quantity)
+            # quantity_unit_data.quantity = updated_quantity
+
+            # return [updated_quantity, quantity_unit_data.unit, description]
+            return quantity_unit_data
+        
+        # if there is a unit but no quantity, then we can use the parenthesis number as the quantity and 
+        # return the ingredient with the new quantity
+        if not quantity_unit_data.quantity and quantity_unit_data.unit:
+            # updated_quantity = numbers_only[0]
+            quantity_unit_data.parenthesis_notes.append("used quantity from parenthesis")
+
+            # set the secondary quantity to the ORIGINAL quantity/units
+            quantity_unit_data.secondary_quantity = quantity_unit_data.quantity 
+
+            # set the quantity to the parenthesis quantity
+            quantity_unit_data.quantity = parenthesis_quantity
+
+            return quantity_unit_data
+
+        # if there is a quantity and a unit, then we can try
+        # to merge (multiply) the current quantity and the parenthesis quantity
+        # then return the ingredient with the new quantity
+        if quantity_unit_data.quantity and quantity_unit_data.unit:
+            # if there is a quantity and a unit, then we can try to merge (multiply) the current quantity and the parenthesis quantity
+            # then return the ingredient with the new quantity
+
+            quantity_unit_data.parenthesis_notes.append("multiplied starting quantity with parenthesis quantity")
+
+            updated_quantity = str(float(quantity_unit_data.quantity) * float(parenthesis_quantity))
+
+            # set the secondary quantity to the ORIGINAL quantity/units
+            quantity_unit_data.secondary_quantity = quantity_unit_data.quantity 
+
+            # Update the quantity with the updated merged quantity (original quantity * parenthesis quantity)
+            quantity_unit_data.quantity = _utils._make_int_or_float_str(updated_quantity)
+            # quantity_unit_data.quantity = updated_quantity
+
+            return quantity_unit_data
+    
+        # update parenthesis notes
+        quantity_unit_data.parenthesis_notes.append("used quantity from parenthesis with quantity only")
+        
+        # set the secondary quantity to the ORIGINAL quantity/units
+        quantity_unit_data.secondary_quantity = quantity_unit_data.quantity 
+
+        # update the quantity with the parenthesis quantity value
+        quantity_unit_data.quantity = parenthesis_quantity
+
+        return quantity_unit_data
+        
+    def _address_equivalence_parenthesis2(self, parenthesis: str, quantity_unit_data : QuantityUnitData) -> QuantityUnitData:
+        """
+        Address the case where the parenthesis content contains any equivalence strings like "about" or "approximately", followed by a quantity and then a unit later in the sting.
+        Attempts to update quantity_unit_data.quantity, quantity_unit_data.unit, quantity_unit_data.secondary_quantity, and quantity_unit_data.secondary_unit given 
+        information from the parenthesis string and the current quantity_unit_data.quantity and quantity_unit_data.unit
+        e.g. "(about 3 ounces)", "(about a 1/3 cup)", "(approximately 1 large tablespoon)"
+
+        Args:
+            parenthesis (str): A string containing parenthesis from the ingredients string
+        Returns:
+            None
+        """
+
+        # print(f"""Ingredient: '{self._reduced_ingredient}'\nParenthesis: '{parenthesis}'\nQuantity: '{quantity_unit_data.quantity}'\nUnit: '{quantity_unit_data.unit}'""") if self.debug else None
+
+        # check for the equivelency pattern (e.g. "<equivelent string> <quantity> <unit>" )
+        equivalent_quantity_unit = _utils._extract_equivalent_quantity_units(parenthesis)
+        # equivalent_quantity_unit = _regex_patterns.EQUIV_QUANTITY_UNIT_GROUPS.findall(parenthesis)
+        # equivalent_quantity_unit = [item for i in [regex.EQUIV_QUANTITY_UNIT_GROUPS.findall(i) for i in parenthesis] for item in i]
+
+        # remove parenthesis and then split on whitespace
+        split_parenthesis = parenthesis.replace("(", "").replace(")", "").split()
+
+        # Case when: NO equivelence quantity unit matches 
+        #           OR parenthesis contains a quantity per unit like string in the parenthesis (i.e. "(about 2 ounces each)" contains "each")
+        # Then return early with NO UPDATES and keep the current quantity/unit as is
+        if not equivalent_quantity_unit or any([True if i in _constants.QUANTITY_PER_UNIT_STRINGS else False for i in split_parenthesis]):
+            # print(f"\n > Return early from EQUIVALENCE parenthesis") if self.debug else None
+            quantity_unit_data.parenthesis_notes.append("not a equivalence quantity unit parenthesis")
+            return quantity_unit_data
+        
+        # pull out the suffix word, parenthesis quantity and unit
+        parenthesis_suffix, parenthesis_quantity, parenthesis_unit = equivalent_quantity_unit[0]
+        
+        # Case when: NO quantity, NO unit:
+            # if no quantity AND no unit, then we can use the parenthesis quantity-unit as our quantity and unit
+        if not quantity_unit_data.quantity and not quantity_unit_data.unit:
+
+            quantity_unit_data.parenthesis_notes.append("used equivalence quantity unit as our quantity and unit")
+
+            # set quantity/unit to the parenthesis values
+            quantity_unit_data.quantity = parenthesis_quantity
+            quantity_unit_data.unit = parenthesis_unit
+
+            return quantity_unit_data
+        
+        # Case when: YES quantity, NO unit:
+            # we can assume the equivelent quantity units 
+            # in the parenthesis are actually a better fit for the quantities and units so 
+            # we can use those are our quantities/units and then stash the original quantity in the "description" field 
+            # with a "maybe quantity is " prefix in front of the original quantity for maybe use later on
+        if quantity_unit_data.quantity and not quantity_unit_data.unit:
+
+            # stash the old quantity with a trailing string before changing best_quantity
+            quantity_unit_data.parenthesis_notes.append(f"maybe quantity is: {' '.join(quantity_unit_data.quantity)}")
+
+
+            # make the secondary_quantity the starting quantity before converting the quantity to the value found in the parenthesis
+            quantity_unit_data.secondary_quantity = quantity_unit_data.quantity
+
+            # set the quantity/unit to the parenthesis values
+            quantity_unit_data.quantity = parenthesis_quantity
+            quantity_unit_data.unit = parenthesis_unit
+
+            return quantity_unit_data
+
+        # Case when: NO quantity, YES unit:
+            # if there is no quantity BUT there IS a unit, then the parenthesis units/quantities are probably "better" so use the
+            # parenthesis quantity/units and then stash the old unit in the description
+        if not quantity_unit_data.quantity and quantity_unit_data.unit:
+
+            # stash the old quantity with a trailing "maybe"
+            quantity_unit_data.parenthesis_notes.append(f"maybe unit is: {quantity_unit_data.unit}")
+
+            # make the secondary_unit the starting unit before converting the unit to the unit string found in the parenthesis
+            quantity_unit_data.secondary_unit = quantity_unit_data.unit
+
+            quantity_unit_data.quantity = parenthesis_quantity
+            quantity_unit_data.unit = parenthesis_unit
+
+            # return [parenthesis_quantity, parenthesis_unit, description]
+            return quantity_unit_data
+        
+        # Case when: YES quantity, YES unit:
+            # if we already have a quantity AND a unit, then we likely found an equivalent quantity/unit
+            # we will choose to use the quantity/unit pairing that is has a unit in the BASIC_UNITS_SET
+        if quantity_unit_data.quantity and quantity_unit_data.unit:
+            parenthesis_unit_is_basic = parenthesis_unit in _constants.BASIC_UNITS_SET
+            unit_is_basic = quantity_unit_data.unit in _constants.BASIC_UNITS_SET
+
+            # Case when BOTH are basic units:  (# TODO: Maybe we should use parenthesis quantity/unit instead...?)
+            #   use the original quantity/unit (stash the parenthesis in the description)
+            if parenthesis_unit_is_basic and unit_is_basic:
+                quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}")
+                # return [quantity_unit_data.quantity, quantity_unit_data.unit, description]
+
+                # set the secondary quantity/units to the values in the parenthesis
+                quantity_unit_data.secondary_quantity = parenthesis_quantity
+                quantity_unit_data.secondary_unit = parenthesis_unit
+
+                return quantity_unit_data
+            
+            # Case when NEITHER are basic units:    # TODO: this can be put into the above condition but thought separated was more readible.
+            #   use the original quantity/unit (stash the parenthesis in the description)
+            if not parenthesis_unit_is_basic and not unit_is_basic:
+                quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}")
+                # return [quantity_unit_data.quantity, quantity_unit_data.unit, description]
+                
+                # set the secondary quantity/units to the values in the parenthesis
+                quantity_unit_data.secondary_quantity = parenthesis_quantity
+                quantity_unit_data.secondary_unit = parenthesis_unit
+
+                return quantity_unit_data
+
+            # Case when: YES basic parenthesis unit, NO basic original unit: 
+            #   then use the parenthesis quantity/unit (stash the original in the description)
+            if parenthesis_unit_is_basic:
+                quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {quantity_unit_data.quantity}/{quantity_unit_data.unit}")
+                
+                # set the secondary quantity/units to the original quantity/units
+                quantity_unit_data.secondary_quantity = quantity_unit_data.quantity
+                quantity_unit_data.secondary_unit = quantity_unit_data.unit
+
+                # update the primary quantities/units to the parenthesis values
+                quantity_unit_data.quantity = parenthesis_quantity
+                quantity_unit_data.unit = parenthesis_unit
+                
+                # return [parenthesis_quantity, parenthesis_unit, description]
+                return quantity_unit_data
+
+            # Case when: NO basic parenthesis unit, YES basic original unit: 
+            #   then use the original quantity/unit (stash the parenthesis in the description)
+            if unit_is_basic:
+                quantity_unit_data.parenthesis_notes.append(f"maybe quantity/unit is: {parenthesis_quantity}/{parenthesis_unit}")
+
+                # set the secondary quantity/units to the original quantity/units
+                quantity_unit_data.secondary_quantity = parenthesis_quantity
+                quantity_unit_data.secondary_unit = parenthesis_unit
+
+                return quantity_unit_data
+
+
+        quantity_unit_data.parenthesis_notes.append(f"used quantity/units from parenthesis with equivalent quantity/units")
+
+        # set the secondary quantity/units to the original quantity/units
+        quantity_unit_data.secondary_quantity = quantity_unit_data.quantity
+        quantity_unit_data.secondary_unit = quantity_unit_data.unit
+
+        quantity_unit_data.quantity = parenthesis_quantity
+        quantity_unit_data.unit = parenthesis_unit
+
+        return quantity_unit_data
+
     
     def _address_equivalence_parenthesis(self, parenthesis: str) -> None:
         """
@@ -706,6 +1122,24 @@ class IngredientSlicer:
 
         return
     
+    def _address_parenthesis(self, parenthesis_content : list) -> None:
+        """
+        Address any parenthesis that were in the ingredient.
+        """
+        # print(f"Addressing parenthesis: '{self._parenthesis_content}'") if self.debug else None
+
+        # loop through each of the parenthesis in the parenthesis content and apply address_parenthesis functions 
+        for parenthesis in parenthesis_content:
+
+            # address the case where the parenthesis content only contains a quantity
+            self._address_quantity_only_parenthesis(parenthesis)
+            
+            self._address_equivalence_parenthesis(parenthesis)
+
+            self._address_quantity_unit_only_parenthesis(parenthesis)
+
+        return 
+    
     def _add_standard_units(self) -> None:
         """
         Add standard units to the parsed ingredient if they are present in the
@@ -875,14 +1309,14 @@ class IngredientSlicer:
 
         return 
     
-    def _address_parenthesis(self) -> None:
+    def _address_parenthesis(self, parenthesis_content : list) -> None:
         """
         Address any parenthesis that were in the ingredient.
         """
         # print(f"Addressing parenthesis: '{self._parenthesis_content}'") if self.debug else None
 
         # loop through each of the parenthesis in the parenthesis content and apply address_parenthesis functions 
-        for parenthesis in self._parenthesis_content:
+        for parenthesis in parenthesis_content:
 
             # address the case where the parenthesis content only contains a quantity
             self._address_quantity_only_parenthesis(parenthesis)
@@ -911,7 +1345,7 @@ class IngredientSlicer:
         # -------------------------------------------------------------------------------------
 
         # run the is_required method to check if the ingredient is required or optional and set the "is_required" member variable to the result
-        self._is_required = self._is_ingredient_required()
+        self._is_required = self._is_ingredient_required(self.ingredient_standardizer)
 
         print(f"Is the ingredient required? {self._is_required}") if self.debug else None
         # ----------------------------------- STEP 3 ------------------------------------------
@@ -919,7 +1353,9 @@ class IngredientSlicer:
         # -------------------------------------------------------------------------------------
         print(f"Attempting to extract quantity and unit") if self.debug else None
         # run the extract_first_quantity_unit method to extract the first unit and quantity from the ingredient string
-        self.extract_first_quantity_unit()
+        quantity_unit_data = self.extract_first_quantity_unit(self.ingredient_standardizer.get_standardized_ingredient())
+        self._quantity = quantity_unit_data.quantity
+        self._unit     = quantity_unit_data.unit
 
         # ----------------------------------- STEP 4 ------------------------------------------
         # ---- Address any parenthesis that were in the ingredient  ----
@@ -931,7 +1367,7 @@ class IngredientSlicer:
                 > Parenthesis content: '{self._parenthesis_content}'
             """) if self.debug else None
 
-        self._address_parenthesis()
+        self._address_parenthesis(self.ingredient_standardizer.get_parenthesis_content())
 
         # ----------------------------------- STEP 5 ------------------------------------------
         # ---- Get the standard names of the units and secondary units ----
@@ -1005,199 +1441,3 @@ class IngredientSlicer:
         # -------------------------------------------------------------------------------------
         print(f"Checking for possible 'animal protein units' (i.e. '2 chicken breasts' has a unit of 'breast') and calculating a gram weight for any found units") if self.debug else None
         self._get_animal_protein_gram_weight() 
-       
-    def standardized_ingredient(self) -> str:
-        """
-        Return the standardized ingredient string.
-        Returns:
-            str: The standardized ingredient string.
-        """
-        return self._standardized_ingredient
-
-    def food(self) -> str:
-        """
-        Return the food string.
-        Returns:
-            str: The food string.
-        """
-        return self._food
-    
-    def quantity(self) -> str:
-        """
-        Return the quantity string.
-        Returns:
-            str: The quantity string.
-        """
-        return self._quantity
-    
-    def unit(self) -> str:
-        """
-        Return the unit string.
-        Returns:
-            str: The unit string.
-        """
-        return self._unit
-    
-    def standardized_unit(self) -> str:
-        """
-        Return the standardized unit string.
-        Returns:
-            str: The standardized unit string.
-        """
-        return self._standardized_unit
-    
-    def secondary_quantity(self) -> str:
-        """
-        Return the secondary quantity string.
-        Returns:
-            str: The secondary quantity string.
-        """
-        return self._secondary_quantity
-    
-    def secondary_unit(self) -> str:
-        """
-        Return the secondary unit string.
-        Returns:
-            str: The secondary unit string.
-        """
-        return self._secondary_unit
-    
-    def standardized_secondary_unit(self) -> str:
-        """
-        Return the standardized secondary unit string.
-        Returns:
-            str: The standardized secondary unit string.
-        """
-        return self._standardized_secondary_unit
-    
-    def density(self) -> Union[str, float, int, None]:
-        """
-        Return the density of the given ingredient.
-        Returns:
-            str: The density of the given ingredient. 
-        """
-
-        return self._densities.get("density") if self._densities else None
-    
-    def gram_weight(self) -> str:
-        """
-        Return the estimated gram weight of the given ingredient.
-        Returns:
-            str: The estimated gram weight of the given ingredient.
-        """
-        return self._gram_weight
-    
-    def min_gram_weight(self) -> str:
-        """
-        Return the estimated minimum gram weight of the given ingredient.
-        Returns:
-            str: The estimated minimum gram weight of the given ingredient.
-        """
-        return self._min_gram_weight
-    
-    def max_gram_weight(self) -> str:
-        """
-        Return the estimated maximum gram weight of the given ingredient.
-        Returns:
-            str: The estimated maximum gram weight of the given ingredient.
-        """
-        return self._max_gram_weight
-    
-    def prep(self) -> list:
-        """
-        Return the prep list.
-        Returns:
-            list: The prep list.
-        """
-        return self._prep
-    
-    def size_modifiers(self) -> list:
-        """
-        Return the size modifiers list.
-        Returns:
-            list: The size modifiers list.
-        """
-        return self._size_modifiers
-    
-    def dimensions(self) -> list:
-        """
-        Return the dimensions list.
-        Returns:
-            list: The dimensions list.
-        """
-        return self._dimensions
-    
-    def is_required(self) -> bool:
-        """
-        Check if the ingredient is required or optional.
-        Returns:
-            bool: True if the ingredient is required, False if the ingredient is optional.
-        """
-
-        return self._is_required
-    
-    def parsed_ingredient(self) -> dict:
-        """
-        Return the parsed ingredient dictionary.
-        Returns:
-            dict: The parsed ingredient dictionary (duplicate to to_json()) method
-        """
-
-        return self._parsed_ingredient
-    
-    def to_json(self) -> dict:
-        """
-        Convert the IngredientSlicer object to a dictionary.
-        Returns:
-            dict: A dictionary containing the IngredientSlicer object's member variables.
-        """
-        return {
-            "ingredient": self.ingredient,                                # "2 1/2 large cups of sugar lightly packed (about 40 tbsp of sugar)"
-            "standardized_ingredient": self._standardized_ingredient,          # "2.5 cups of sugar"
-        
-            "food" : self._food,                                           # "sugar"
-
-            "quantity": self._quantity,                                    # "2.5"
-            "unit": self._unit,                                            # "cups"
-            "standardized_unit": self._standardized_unit,                      # "cup"
-
-            "secondary_quantity": self._secondary_quantity,                # "40"
-            "secondary_unit": self._secondary_unit,                        # "tbsp"
-            "standardized_secondary_unit": self._standardized_secondary_unit,  # "tablespoon"
-            "density": self._densities.get("density"),                     # 0.95
-            # "density": self._densities.get("density") if self._densities else None,                     # 0.95
-            "gram_weight": self._gram_weight,                              # "113.4 grams
-
-            "prep": self._prep,                                            # ["lightly", "packed"]
-            "size_modifiers": self._size_modifiers,                        # ["large"]
-            "dimensions": self._dimensions,                                # ["2 inches"]
-            "is_required": self._is_required,                              # True
-
-            # NOTE: drop these at some point
-            "parenthesis_content": self._parenthesis_content               # ["(about 40 tbsp of sugar)"]
-            # "parenthesis_notes": self._parenthesis_notes,
-        }
-    
-    def __str__(self) -> str:
-        """
-        Return a string representation of the IngredientSlicer object.
-        Returns:
-            str: A string representation of the IngredientSlicer object.
-        """
-        return f"""IngredientSlicer Object:
-    \tIngredient: '{self.ingredient}'
-    \tStandardized Ingredient: '{self._standardized_ingredient}'
-    \tFood: '{self._food}'
-    \tQuantity: '{self._quantity}'
-    \tUnit: '{self._unit}'
-    \tStandardized Unit: '{self._standardized_unit}'
-    \tSecondary Quantity: '{self._secondary_quantity}'
-    \tSecondary Unit: '{self._secondary_unit}'
-    \tStandardized Secondary Unit: '{self._standardized_secondary_unit}'
-    \tDensity: '{self._densities.get("density")}'
-    \tGram Weight: '{self._gram_weight}'
-    \tPrep: '{self._prep}'
-    \tSize Modifiers: '{self._size_modifiers}'
-    \tDimensions: '{self._dimensions}'
-    \tIs Required: '{self._is_required}'
-    \tParenthesis Content: '{self._parenthesis_content}'"""
