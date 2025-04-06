@@ -27,8 +27,6 @@ class IngredientSlicer:
         debug (bool): Whether to print debug statements (default is False)
     """
 
-    # regex = IngredientTools()
-
     def __init__(self, ingredient: str, debug = False):
         self.ingredient          = ingredient
         self.debug               = debug
