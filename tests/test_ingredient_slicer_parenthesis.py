@@ -12,7 +12,7 @@ from ingredient_slicer import IngredientSlicer
 def test_parenthesis_no_content():
     ing = IngredientSlicer("flour ()")
 
-    assert ing._parenthesis_content == ['']
+    assert ing.parenthesis_content() == ['']
 
 def test_ingredient_with_quanitity_unit_then_parenthesis_with_about_quantity_only():
     slicer = IngredientSlicer('2 pounds Golden Delicious apples (about 4), peeled, cored, and each cut into 8 wedges')

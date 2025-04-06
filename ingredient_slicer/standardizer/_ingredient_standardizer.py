@@ -52,7 +52,19 @@ class IngredientStandardizer:
             ._average_ranges() 
             ._separate_parenthesis() 
         )
+        self._standardized_data = self._builder.get_standardized_ingredient_data()
 
-    def get_standardized_ingredient(self) -> Dict[str, Any]:
-        """Returns the standardized ingredient dictionary."""
-        return self._builder.get_standardized_ingredient()
+    def get_standardized_ingredient_data(self) -> Dict[str, Any]:
+        return self._standardized_data
+
+    def get_standardized_ingredient(self) -> str:
+        return self._standardized_data.get("_standardized_ingredient")
+
+    def get_staged_ingredient(self) -> str:
+        return self._standardized_data.get("_staged_ingredient")
+
+    def get_parenthesis_content(self) -> list:
+        return self._standardized_data.get("_parenthesis_content")
+
+    def get_dimensions(self) -> list:
+        return self._standardized_data.get("_dimensions")
