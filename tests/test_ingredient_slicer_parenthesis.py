@@ -37,4 +37,3 @@ def test_ingredient_with_quanitity_unit_then_parenthesis_with_about_quantity_onl
         }
     
     assert slicer.parsed_ingredient() == expected_output
-
