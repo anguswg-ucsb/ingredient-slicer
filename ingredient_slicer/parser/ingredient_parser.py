@@ -561,6 +561,6 @@ class IngredientParser:
         # ----------------------------------- STEP 15 ------------------------------------------
         # ------ Merge values from QuantityUnitData class into ParsedIngredientData class ------
         # --------------------------------------------------------------------------------------
-        parsed_data.merge_quantity_unit_data(quantity_unit_data=quantity_unit_data)
+        parsed_data.merge_quantity_unit_data(data=quantity_unit_data)
 
         return parsed_data
