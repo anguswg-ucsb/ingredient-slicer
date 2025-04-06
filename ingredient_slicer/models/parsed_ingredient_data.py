@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Union, Dict, Any
 
-# from .models.quantity_unit_data import QuantityUnitData
 from ingredient_slicer.models.quantity_unit_data import QuantityUnitData
 
 @dataclass

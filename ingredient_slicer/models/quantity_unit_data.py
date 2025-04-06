@@ -1,9 +1,6 @@
 from typing import Union
 from dataclasses import dataclass, field
 
-# from . import _constants
-# from . import _utils
-
 from ingredient_slicer import _constants
 from ingredient_slicer import _utils
 

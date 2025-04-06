@@ -1,5 +1,3 @@
-# Authors: Angus Watters, Melissa Terry 
-
 import re
 from typing import List, Dict, Any, Union, Tuple
 from fractions import Fraction
@@ -7,13 +5,6 @@ from html import unescape
 import warnings
 
 # package imports
-# from . import _utils
-# from . import _regex_patterns
-# from . import _constants
-# from .standardizer._ingredient_standardizer import IngredientStandardizer 
-# from .models.quantity_unit_data import QuantityUnitData
-# from .models.parsed_ingredient_data import ParsedIngredientData
-
 from ingredient_slicer import _utils
 from ingredient_slicer import _regex_patterns
 from ingredient_slicer import _constants
