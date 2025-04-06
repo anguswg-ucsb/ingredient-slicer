@@ -29,14 +29,14 @@ class ParsedIngredientData:
     is_required: bool = True
     parenthesis_content: list[str] = field(default_factory=list)
 
-    def merge_quantity_unit_data(self, quantity_unit_data: QuantityUnitData):
-        self.quantity = quantity_unit_data.quantity
-        self.unit = quantity_unit_data.unit
-        self.standardized_unit = quantity_unit_data.standardized_unit
+    def merge_quantity_unit_data(self, data: QuantityUnitData):
+        self.quantity = data.quantity
+        self.unit = data.unit
+        self.standardized_unit = data.standardized_unit
 
-        self.secondary_quantity = quantity_unit_data.secondary_quantity
-        self.secondary_unit = quantity_unit_data.secondary_unit
-        self.standardized_secondary_unit = quantity_unit_data.standardized_secondary_unit
+        self.secondary_quantity = data.secondary_quantity
+        self.secondary_unit = data.secondary_unit
+        self.standardized_secondary_unit = data.standardized_secondary_unit
 
     def to_json(self) -> Dict[str, Any]:
             return {

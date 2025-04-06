@@ -11,7 +11,7 @@ from . import _utils
 from . import _regex_patterns
 from . import _constants
 from .standardizer._ingredient_standardizer import IngredientStandardizer 
-from .parser._ingredient_parser import IngredientParser 
+from .parser.ingredient_parser import IngredientParser 
 
 # # local dev import statements
 # from ingredient_slicer import _utils

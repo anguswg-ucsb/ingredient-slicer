@@ -3,7 +3,7 @@
 # from .models.quantity_unit_data import QuantityUnitData
 
 from ingredient_slicer import _utils
-from ingredient_slicer.parser._parenthesis_handler import ParenthesisHandler
+from ingredient_slicer.parenthesis.parenthesis_handler import ParenthesisHandler
 from ingredient_slicer.models.quantity_unit_data import QuantityUnitData
 
 class QuantityOnlyParenthesisHandler(ParenthesisHandler):
