@@ -1,6 +1,6 @@
 # __init__.py
 
-version = "1.2.2"
+version = "1.2.21"
 
 from ._ingredient_slicer import IngredientSlicer
 
