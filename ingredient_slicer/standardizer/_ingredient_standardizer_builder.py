@@ -170,6 +170,16 @@ class IngredientStandardizerBuilder:
 
         return self
     
+    def _remove_words_with_irrelevant_numbers(self):
+        """
+        Remove certain words that can cause inaccurate parsing of units/quantities due to the words containing numbers (i.e. Whole30)
+        Ref: https://github.com/anguswg-ucsb/ingredient-slicer/issues/7
+        """
+
+        # remove commonly used words that have irrelevant numbers associated with them (i.e. Whole30) 
+        self._standardized_ingredient = _utils._remove_words_with_irrelevant_numbers(self._standardized_ingredient)
+
+        return self 
 
     def _remove_x_separators(self):
         """

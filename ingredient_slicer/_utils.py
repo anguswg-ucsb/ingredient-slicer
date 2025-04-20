@@ -1506,7 +1506,7 @@ def _split_single_unit_dimension_ranges(ingredient: str) -> list[str]:
 
     return [ingredient, dimension_units]
 
-def _separate_dimensions(ingredient: str) -> str:
+def _separate_dimensions(ingredient: str) -> list[str, str]:
     """
     Split dimension unit ranges in the ingredient string.
     Examples:
@@ -1522,6 +1522,20 @@ def _separate_dimensions(ingredient: str) -> str:
     ingredient = _remove_extra_whitespaces(ingredient)
 
     return [ingredient, dimensions]
+
+def _remove_words_with_irrelevant_numbers(ingredient: str) -> str:
+    """
+    Remove certain words that can cause inaccurate parsing of units/quantities due to the words containing numbers (i.e. Whole30)
+    Ref: https://github.com/anguswg-ucsb/ingredient-slicer/issues/7
+
+    Examples:
+    "1 lb pork sausage (casings removed if necessary, sugar-free for whole30)" -> "1 lb pork sausage (casings removed if necessary, sugar-free for )" 
+    """
+
+    pattern = re.compile(r'whole30', re.IGNORECASE)
+    ingredient = _find_and_remove(ingredient, pattern)
+
+    return ingredient
 
 def _remove_x_separators(ingredient: str) -> str:
     """

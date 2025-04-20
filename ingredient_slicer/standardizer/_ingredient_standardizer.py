@@ -40,6 +40,7 @@ class IngredientStandardizer:
             ._replace_unicode_fraction_slashes() 
             ._replace_emojis() 
             ._convert_fractions_to_decimals() 
+            ._remove_words_with_irrelevant_numbers()
             ._force_ws_between_numbers_and_chars() 
             ._remove_repeat_units_in_ranges() 
             ._separate_dimensions() 

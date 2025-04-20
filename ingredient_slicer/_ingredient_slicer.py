@@ -184,8 +184,6 @@ class IngredientSlicer:
 
         return self.parser.parsed_data.parenthesis_content
     
-
-    
     def parsed_ingredient(self) -> dict:
         """
         Return the parsed ingredient dictionary.
@@ -211,7 +209,7 @@ class IngredientSlicer:
     \tSecondary Quantity: '{self.secondary_quantity()}'
     \tSecondary Unit: '{self.secondary_unit()}'
     \tStandardized Secondary Unit: '{self.standardized_secondary_unit()}'
-    \tDensity: '{self.densities.get("density")}'
+    \tDensity: '{self.density()}'
     \tGram Weight: '{self.gram_weight()}'
     \tPrep: '{self.prep()}'
     \tSize Modifiers: '{self.size_modifiers()}'
